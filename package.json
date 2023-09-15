@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dev:db:setup": "podman run -d -p 5432:5432 --name tasket -e POSTGRES_PASSWORD=postgres postgres:15",
+    "dev:db:run": "podman start tasket"
   },
   "dependencies": {
     "@types/node": "20.6.1",
