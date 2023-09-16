@@ -15,12 +15,13 @@ Development dpendencies:
 # One time setup
 npm install
 npm run dev:db:setup
+npm run dev:db:migrate
 
 # Launch the app in dev
 npm run dev:db:run
 npm run dev
 
-# migrate db and regenerate prisma client (run after schema updates)
-npx prisma migrate dev
-npx prisma generate
+# run after schema updates
+npm run dev:db:migrate
+npm run dev:db:gen
 ```
