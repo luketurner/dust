@@ -2,13 +2,10 @@ import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 
 import type { NextAuthOptions as NextAuthConfig } from "next-auth"
 import { getServerSession } from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 
 import GitHub from "next-auth/providers/github";
 
-const prisma = new PrismaClient();
-
-
+import { prisma } from "@/db/client";
 
 // Read more at: https://next-auth.js.org/getting-started/typescript#module-augmentation
 declare module "next-auth/jwt" {
