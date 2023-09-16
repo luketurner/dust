@@ -1,4 +1,3 @@
-import Header from "@/components/header"
 import Layout from "../components/layout"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { auth } from "auth"
