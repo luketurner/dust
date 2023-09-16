@@ -1,7 +1,6 @@
-import './globals.css'
-import type { Metadata } from 'next'
+import "./globals.css"
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'Dust',
   description: 'Task management app',
 }
@@ -12,8 +11,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="container">
-      {children}
-    </div>
+    <html lang="en">
+      <body>
+        {children}
+      </body>
+    </html>
   )
 }
