@@ -1,4 +1,4 @@
-import { config } from "auth"
+import { config } from "@/auth"
 import { prisma } from "@/db/client";
 import { getServerSession } from "next-auth/next";
 import LoginButton from "@/components/LoginButton";
