@@ -3,6 +3,10 @@ import { prisma } from "@/db/client";
 import SimpleTaskList from "@/components/SimpleTaskList";
 import { DateTime } from 'luxon';
 import { notFound, redirect } from "next/navigation";
+import { Agenda } from "@prisma/client";
+import { findAgenda, upsertAgenda } from "@/agenda";
+import { upsertAgendaAction } from "@/actions/agenda";
+import GenerateAgendaButton from "@/components/GenerateAgendaButton";
 
 interface AgendaPageProps {
   params: { date: string }
@@ -21,8 +25,31 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
   }
 
   if (!parsedDate.isValid) { return notFound(); }
-  if (parsedDate.toISODate() === today.toISODate() && date !== 'today') { return redirect('/today'); }
 
+  const canonicalDate = parsedDate.toISODate();
+
+  if (!canonicalDate) { return notFound(); }
+
+  const isToday = canonicalDate === today.toISODate();
+  if (isToday && date !== 'today') { return redirect('/today'); }
+
+  let agenda: Agenda | null;
+  if (isToday) {
+    agenda = await upsertAgenda(user.id, canonicalDate);
+  } else {
+    // don't eagerly generate agendas for other days
+    agenda = await findAgenda(user.id, canonicalDate);
+  }
+
+  if (!agenda) {
+    return (
+      <div className="text-center">
+        <h1 className="text-4xl mt-4 mb-8">{date}</h1>
+        <p>There is no agenda for this date. Create one?</p>
+        <GenerateAgendaButton date={date} />
+      </div>
+    );
+  }
 
   const tasks = await prisma.task.findMany({
     where: {
@@ -35,9 +62,9 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
   });
 
   return (
-    <main className="text-center">
+    <div className="text-center">
       <h1 className="text-4xl mt-4 mb-8">{date}</h1>
       <SimpleTaskList tasks={tasks} />
-    </main>
-  )
+    </div>
+  );
 }

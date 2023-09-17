@@ -57,13 +57,33 @@ model VerificationToken {
 }
 
 model Task {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name         String
   completed    Boolean @default(false)
   archived     Boolean @default(false)
   displayOrder Int
+  agendaTasks  AgendaTask[]
 
   @@unique([userId, displayOrder])
+}
+
+model Agenda {
+  id           String @id @default(cuid())
+  userId       String
+  date         DateTime @db.Date
+  agendaTasks  AgendaTask[]
+
+  @@unique([userId, date])
+}
+
+model AgendaTask {
+  agendaId  String
+  taskId    String
+  agenda    Agenda @relation(fields: [agendaId], references: [id], onDelete: Cascade)
+  task      Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  archived  Boolean
+
+  @@id([agendaId, taskId])
 }
