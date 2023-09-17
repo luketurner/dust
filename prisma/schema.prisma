@@ -61,5 +61,9 @@ model Task {
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name         String
-  completedAt  DateTime?
+  completed    Boolean
+  archived     Boolean
+  displayOrder Int
+
+  @@unique([userId, displayOrder])
 }
