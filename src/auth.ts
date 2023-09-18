@@ -2,12 +2,8 @@ import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 
 import type { NextAuthOptions as NextAuthConfig } from "next-auth"
 import { getServerSession } from "next-auth/next"
 import { PrismaAdapter } from "@auth/prisma-adapter";
-
 import GitHub from "next-auth/providers/github";
-
 import { prisma } from "@/db/client";
-
-import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation"
 
 // Read more at: https://next-auth.js.org/getting-started/typescript#module-augmentation
@@ -41,13 +37,13 @@ export function auth(...args: [GetServerSidePropsContext["req"], GetServerSidePr
 export async function getServerUser() {
   const session = await auth();
 
-  if (!session?.user?.email) {
+  if (!(session as any)?.user?.email) {
     return { session };
   }
 
   const user = await prisma.user.findUnique({
     where: {
-      email: session.user.email
+      email: (session as any).user.email
     },
   });
 
