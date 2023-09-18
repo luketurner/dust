@@ -1,4 +1,5 @@
 import { getServerUser } from "@/auth"
+import Footer from "@/components/Footer";
 import LoginButton from "@/components/LoginButton";
 import LogoutButton from "@/components/LogoutButton";
 import Link from "next/link";
@@ -11,15 +12,15 @@ export default async function RootTemplate({
   const { user } = await getServerUser();
 
   return (
-    <div className="container max-w-4xl">
-      <nav className="flex flex-row flex-wrap">
-        <a href="/" className="text-lg">DUST</a>
+    <div className="container max-w-4xl m-auto">
+      <nav className="flex flex-row flex-wrap mb-2">
+        <a href="/" className="text-lg p-2 rounded hover:bg-slate-300">DUST</a>
         <div className="flex-1"></div>
         {user ? <>
-          <Link href="/today" className="p-2 rounded bg-slate-300 mr-2">
+          <Link href="/today" className="p-2 rounded hover:bg-slate-300 mr-2">
             Today
           </Link>
-          <Link href="/manage" className="p-2 rounded bg-slate-300 mr-2">
+          <Link href="/manage" className="p-2 rounded hover:bg-slate-300 mr-2">
             Manage tasks
           </Link>
           <LogoutButton />
@@ -30,9 +31,7 @@ export default async function RootTemplate({
       <main>
         {children}
       </main>
-      <footer>
-        Copyright Luke Turner 2023 -- <a href="https://github.com/luketurner/dust">github</a>
-      </footer>
+      <Footer />
     </div>
   )
 }

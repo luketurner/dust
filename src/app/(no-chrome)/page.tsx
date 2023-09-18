@@ -8,14 +8,14 @@ export default async function IndexPage() {
   if (user) { redirect('/today'); }
 
   return (
-    <main className="text-center">
-      <h1 className="text-4xl mt-4 mb-8">DUST</h1>
-      <p className="mb-8">
+    <div className="text-center">
+      <h1 className="text-8xl mt-12 mb-8 font-thin text-orange-300">DUST</h1>
+      <p className="mb-12">
         Task management for people that don't like tasks.
       </p>
       <div>
         <LoginButton />
       </div>
-    </main>
+    </div>
   );
 }

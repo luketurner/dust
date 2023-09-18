@@ -60,7 +60,7 @@ export async function createTask(): Promise<void> {
 /**
  * (Server Action) Accepts a string containing 0+ task declarations, and creates tasks for each of them.
  */
-export async function addTasksFromText(text: string): Promise<void> {
+export async function addTasksFromText(text: string): Promise<Task[]> {
   const { user } = await getServerUserOrThrow();
 
   const parsedTasks = parseTaskInput(text);
@@ -73,8 +73,10 @@ export async function addTasksFromText(text: string): Promise<void> {
     displayOrder: highestDisplayOrder + 1 + index
   }));
 
+  const tasks = [];
   // Can't use createMany because it doesn't return the created rows
   for (const data of tasksToInsert) {
-    await prisma.task.create({ data });
+    tasks.push(await prisma.task.create({ data }));
   }
+  return tasks;
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { addTasksFromText } from '@/actions/task';
 import { useState } from 'react';
 import {TextField, Label, TextArea, Text, Button} from 'react-aria-components';
 
@@ -8,14 +7,38 @@ export interface TaskEntryProps {
   onSubmit?: (v: string) => void;
 }
 
-export default function TaskEntry({ onSubmit = addTasksFromText }: TaskEntryProps) {
+export default function TaskEntry({ onSubmit = () => {} }: TaskEntryProps) {
   const [taskInput, setTaskInput] = useState('');
   return (
-    <TextField>
-      <Label>Enter tasks</Label>
-      <TextArea value={taskInput} placeholder={'Buy socks\n#shopping\nGet six pairs'} onChange={(e) => setTaskInput(e.target.value)} />
-      <Text slot="description">Add a thingy</Text>
-      <Button onPress={() => onSubmit(taskInput)}>Add tasks</Button>
+    <TextField className="flex flex-col flex-nowrap items-start w-full my-2">
+      <Label>Write new tasks into the box:</Label>
+      <div className="flex flex-row flex-nowrap w-full">
+        <TextArea
+          className="flex-grow h-24 border border-slate-500 p-1"
+          value={taskInput}
+          placeholder={'Buy socks\n#shopping\nGet six pairs'}
+          onChange={(e) => setTaskInput(e.target.value)}
+        />
+        <Button className="border border-slate-500 text-slate-700 rounded rounded-l-none border-l-0 hover:bg-slate-200 w-12" onPress={() => onSubmit(taskInput)}>Send 'em!</Button>
+      </div>
+      <div className="m-2 text-slate-500 text-sm text-left" slot="description">
+        <p>Input examples:</p>
+        <p className="m-2">
+          This is my task title
+          <br />
+          #tag !important
+          <br />
+          You can include a multiline description.
+          <br />
+          End the description with a blank line.
+          <br />
+          <br />
+          This is a task with no description
+          <br />
+          #tag1 #tag2
+          
+        </p>
+      </div>
     </TextField>
   );
 }

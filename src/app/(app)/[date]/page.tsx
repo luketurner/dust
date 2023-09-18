@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { findAgendaServer, upsertAgendaServer } from "@/agenda";
 import GenerateAgendaButton from "@/components/GenerateAgendaButton";
 import TaskEntry from "@/components/TaskEntry";
+import { addTasksFromText } from "@/actions/task";
 
 interface AgendaPageProps {
   params: { date: string }
@@ -55,7 +56,7 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
     <div className="text-center">
       <h1 className="text-4xl mt-4 mb-8">{date}</h1>
       <SimpleTaskList tasks={tasks} />
-      <TaskEntry />
+      <TaskEntry onSubmit={addTasksFromText} />
     </div>
   );
 }
