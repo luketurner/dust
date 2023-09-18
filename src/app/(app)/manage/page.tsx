@@ -1,8 +1,6 @@
-import { getServerUserOrRedirect, getServerUserOrThrow } from "@/auth"
-import TaskList from "@/components/TaskList";
+import { getServerUserOrRedirect } from "@/auth"
+import TaskManager from "@/components/TaskManager";
 import { prisma } from "@/db/client";
-import Link from "next/link";
-import { NextRequest } from "next/server";
 
 export default async function ManagePage() {
   const { user } = await getServerUserOrRedirect();
@@ -17,9 +15,6 @@ export default async function ManagePage() {
   });
 
   return (
-    <main className="text-center">
-      <h1 className="text-4xl mt-4 mb-8">Manage tasks</h1>
-      <TaskList tasks={tasks} />
-    </main>
+    <TaskManager tasks={tasks} />
   )
 }

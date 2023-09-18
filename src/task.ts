@@ -24,8 +24,6 @@ export function parseTaskInput(text: string): ParsedTaskInput[] {
       })
     }
   }
-  console.log("blocks", blocks);
-  console.log("parsed tasks", tasks);
   return tasks;
 }
 
