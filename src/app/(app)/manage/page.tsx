@@ -20,9 +20,6 @@ export default async function ManagePage() {
     <main className="text-center">
       <h1 className="text-4xl mt-4 mb-8">Manage tasks</h1>
       <TaskList tasks={tasks} />
-      <Link href="/" className="p-2 rounded bg-green-200">
-        Home
-      </Link>
     </main>
   )
 }

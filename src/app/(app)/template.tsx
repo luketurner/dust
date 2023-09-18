@@ -16,7 +16,10 @@ export default async function RootTemplate({
         <a href="/" className="text-lg">DUST</a>
         <div className="flex-1"></div>
         {user ? <>
-          <Link href="/manage" className="p-2 rounded bg-red-200 mr-2">
+          <Link href="/today" className="p-2 rounded bg-slate-300 mr-2">
+            Today
+          </Link>
+          <Link href="/manage" className="p-2 rounded bg-slate-300 mr-2">
             Manage tasks
           </Link>
           <LogoutButton />
