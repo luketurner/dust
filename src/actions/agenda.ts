@@ -5,5 +5,5 @@ import { upsertAgenda } from "@/agenda";
 
 export async function upsertAgendaAction(date: string) {
   const { user } = await getServerUserOrThrow();
-  return await upsertAgenda(user.id, date);
+  await upsertAgenda(user.id, date);
 }
