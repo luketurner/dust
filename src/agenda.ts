@@ -1,8 +1,7 @@
-import { Agenda } from "@prisma/client";
 import { prisma } from "./db/client";
 import { DateTime } from "luxon";
 
-export async function upsertAgenda(userId: string, date: string): Promise<Agenda> {
+export async function upsertAgenda(userId: string, date: string) {
   // try finding agenda first to avoid task lookup if it's not needed
   const existingAgenda = await findAgenda(userId, date);
   if (existingAgenda) { return existingAgenda; }
@@ -50,13 +49,20 @@ export async function upsertAgenda(userId: string, date: string): Promise<Agenda
   });
 }
 
-export async function findAgenda(userId: string, date: string): Promise<Agenda | null> {
+export async function findAgenda(userId: string, date: string) {
   const dbDate = DateTime.fromFormat(date, 'yyyy-MM-dd').toISO();
   return await prisma.agenda.findUnique({
     where: {
       userId_date: {
         userId,
         date: dbDate!
+      }
+    },
+    include: {
+      agendaTasks: {
+        include: {
+          task: true
+        }
       }
     }
   });
