@@ -2,7 +2,7 @@ import { getServerUserOrRedirect } from "@/auth"
 import SimpleTaskList from "@/components/SimpleTaskList";
 import { DateTime } from 'luxon';
 import { notFound, redirect } from "next/navigation";
-import { findAgenda, upsertAgenda } from "@/agenda";
+import { findAgendaServer, upsertAgendaServer } from "@/agenda";
 import GenerateAgendaButton from "@/components/GenerateAgendaButton";
 import TaskEntry from "@/components/TaskEntry";
 
@@ -33,10 +33,10 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
 
   let agenda;
   if (isToday) {
-    agenda = await upsertAgenda(user.id, canonicalDate);
+    agenda = await upsertAgendaServer(user.id, canonicalDate);
   } else {
     // don't eagerly generate agendas for other days
-    agenda = await findAgenda(user.id, canonicalDate);
+    agenda = await findAgendaServer(user.id, canonicalDate);
   }
 
   if (!agenda) {

@@ -1,9 +1,12 @@
 'use server';
 
 import { getServerUserOrThrow } from "@/auth";
-import { upsertAgenda } from "@/agenda";
+import { upsertAgendaServer } from "@/agenda";
 
-export async function upsertAgendaAction(date: string) {
+/**
+ * (Server Action) Creates an agenda for the day if it doesn't already exist.
+ */
+export async function upsertAgenda(date: string) {
   const { user } = await getServerUserOrThrow();
-  await upsertAgenda(user.id, date);
+  await upsertAgendaServer(user.id, date);
 }

@@ -3,20 +3,34 @@
 import { prisma } from "@/db/client";
 import { Task, Prisma } from "@prisma/client";
 import { getServerUserOrThrow } from "@/auth"
-import { getHighestDisplayOrder, parseTaskInput } from "@/task";
+import { getHighestDisplayOrderServer, parseTaskInput } from "@/task";
 
 /**
- * (Server Action) Accepts an existing Task model and a set of properties to update. Performs the update and returns the updated task.
- * Throws error if the currently logged-in user does not own the task.
+ * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
+ * Does nothing if currently logged-in user doesn't own the task, or the task ID doesn't exist.
  */
-export async function updateTask(task: Task, data: Prisma.TaskUpdateInput): Promise<Task> {
+export async function deleteTask(taskId: string): Promise<void> {
   const { user } = await getServerUserOrThrow();
-  if (task.userId !== user.id) {
-    throw new Error('Cannot update task.')
-  }
-  return await prisma.task.update({
+  await prisma.task.delete({
     where: {
-      id: task.id
+      userId: user.id,
+      id: taskId
+    }
+  });
+}
+
+/**
+ * (Server Action) Accepts an existing Task model and a set of properties to update. Performs the update.
+ * Does nothing if currently logged-in user doesn't own the task, or the task ID doesn't exist.
+ */
+export async function updateTask(taskId: string, data: {
+  name?: string
+}): Promise<void> {
+  const { user } = await getServerUserOrThrow();
+  await prisma.task.update({
+    where: {
+      id: taskId,
+      userId: user.id
     },
     data: {
       name: data.name
@@ -25,14 +39,14 @@ export async function updateTask(task: Task, data: Prisma.TaskUpdateInput): Prom
 }
 
 /**
- * (Server Action) Creates a new Task for the currently logged-in user with reasonable defaults. Returns the new task.
+ * (Server Action) Creates a new Task for the currently logged-in user with reasonable defaults.
  */
-export async function createTask(): Promise<Task> {
+export async function createTask(): Promise<void> {
   const { user } = await getServerUserOrThrow();
 
-  const highestDisplayOrder = await getHighestDisplayOrder(user.id);
+  const highestDisplayOrder = await getHighestDisplayOrderServer(user.id);
   
-  return await prisma.task.create({
+  await prisma.task.create({
     data: {
       userId: user.id,
       name: 'New task',
@@ -41,14 +55,15 @@ export async function createTask(): Promise<Task> {
   });
 }
 
-export async function addTasksFromText(text: string): Promise<Task[]> {
+/**
+ * (Server Action) Accepts a string containing 0+ task declarations, and creates tasks for each of them.
+ */
+export async function addTasksFromText(text: string): Promise<void> {
   const { user } = await getServerUserOrThrow();
 
   const parsedTasks = parseTaskInput(text);
 
-  const highestDisplayOrder = await getHighestDisplayOrder(user.id);
-
-  const tasks: Task[] = [];
+  const highestDisplayOrder = await getHighestDisplayOrderServer(user.id);
 
   const tasksToInsert = parsedTasks.map(({ name, tags, flags, description }, index) => ({
     name,
@@ -58,8 +73,6 @@ export async function addTasksFromText(text: string): Promise<Task[]> {
 
   // Can't use createMany because it doesn't return the created rows
   for (const data of tasksToInsert) {
-    tasks.push(await prisma.task.create({ data }));
+    await prisma.task.create({ data });
   }
-
-  return tasks;
 }

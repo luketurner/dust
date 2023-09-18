@@ -49,7 +49,7 @@ export function parseTagLine(line?: string): { tags: string[], flags: string[] }
   return { tags, flags }
 }
 
-export async function getHighestDisplayOrder(userId: string) {
+export async function getHighestDisplayOrderServer(userId: string) {
   return (await prisma.task.findFirst({
     where: {
       userId
