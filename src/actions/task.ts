@@ -1,9 +1,9 @@
 'use server';
 
 import { prisma } from "@/db/client";
-import { Task, Prisma, User } from "@prisma/client";
-import { config, getServerUserOrThrow } from "@/auth"
-import { getServerSession } from "next-auth/next";
+import { Task, Prisma } from "@prisma/client";
+import { getServerUserOrThrow } from "@/auth"
+import { getHighestDisplayOrder, parseTaskInput } from "@/task";
 
 /**
  * (Server Action) Accepts an existing Task model and a set of properties to update. Performs the update and returns the updated task.
@@ -30,17 +30,7 @@ export async function updateTask(task: Task, data: Prisma.TaskUpdateInput): Prom
 export async function createTask(): Promise<Task> {
   const { user } = await getServerUserOrThrow();
 
-  const highestDisplayOrder = (await prisma.task.findFirst({
-    where: {
-      userId: user.id
-    },
-    orderBy: {
-      displayOrder: 'desc'
-    },
-    select: {
-      displayOrder: true
-    }
-  }))?.displayOrder ?? 0;
+  const highestDisplayOrder = await getHighestDisplayOrder(user.id);
   
   return await prisma.task.create({
     data: {
@@ -49,4 +39,27 @@ export async function createTask(): Promise<Task> {
       displayOrder: highestDisplayOrder + 1,
     }
   });
+}
+
+export async function addTasksFromText(text: string): Promise<Task[]> {
+  const { user } = await getServerUserOrThrow();
+
+  const parsedTasks = parseTaskInput(text);
+
+  const highestDisplayOrder = await getHighestDisplayOrder(user.id);
+
+  const tasks: Task[] = [];
+
+  const tasksToInsert = parsedTasks.map(({ name, tags, flags, description }, index) => ({
+    name,
+    userId: user.id,
+    displayOrder: highestDisplayOrder + 1 + index
+  }));
+
+  // Can't use createMany because it doesn't return the created rows
+  for (const data of tasksToInsert) {
+    tasks.push(await prisma.task.create({ data }));
+  }
+
+  return tasks;
 }

@@ -1,12 +1,10 @@
 import { getServerUserOrRedirect } from "@/auth"
-import { prisma } from "@/db/client";
 import SimpleTaskList from "@/components/SimpleTaskList";
 import { DateTime } from 'luxon';
 import { notFound, redirect } from "next/navigation";
-import { Agenda } from "@prisma/client";
 import { findAgenda, upsertAgenda } from "@/agenda";
-import { upsertAgendaAction } from "@/actions/agenda";
 import GenerateAgendaButton from "@/components/GenerateAgendaButton";
+import TaskEntry from "@/components/TaskEntry";
 
 interface AgendaPageProps {
   params: { date: string }
@@ -33,7 +31,7 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
   const isToday = canonicalDate === today.toISODate();
   if (isToday && date !== 'today') { return redirect('/today'); }
 
-  let agenda: Agenda | null;
+  let agenda;
   if (isToday) {
     agenda = await upsertAgenda(user.id, canonicalDate);
   } else {
@@ -51,20 +49,13 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
     );
   }
 
-  const tasks = await prisma.task.findMany({
-    where: {
-      userId: user.id
-    },
-    take: 3,
-    orderBy: {
-      displayOrder: 'asc'
-    }
-  });
+  const tasks = agenda.agendaTasks.map(at => at.task);
 
   return (
     <div className="text-center">
       <h1 className="text-4xl mt-4 mb-8">{date}</h1>
       <SimpleTaskList tasks={tasks} />
+      <TaskEntry />
     </div>
   );
 }
