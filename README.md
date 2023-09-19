@@ -23,5 +23,4 @@ npm run dev
 
 # run after schema updates
 npm run dev:db:migrate
-npm run dev:db:gen
 ```
