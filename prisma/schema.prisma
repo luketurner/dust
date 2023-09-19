@@ -65,6 +65,9 @@ model Task {
   archived     Boolean @default(false)
   displayOrder Int
   agendaTasks  AgendaTask[]
+  tags         Tag[]
+  subjectRelations TaskRelation[] @relation("Subject")
+  objectRelations  TaskRelation[] @relation("Object")
 
   @@unique([userId, displayOrder])
 }
@@ -81,9 +84,25 @@ model Agenda {
 model AgendaTask {
   agendaId  String
   taskId    String
-  agenda    Agenda @relation(fields: [agendaId], references: [id], onDelete: Cascade)
-  task      Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  archived  Boolean
+  agenda    Agenda  @relation(fields: [agendaId], references: [id], onDelete: Cascade)
+  task      Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  archived  Boolean @default(false)
 
   @@id([agendaId, taskId])
+}
+
+model Tag {
+  id           String @id @default(cuid())
+  userId       String
+  name         String
+  tasks        Task[]
+}
+
+model TaskRelation {
+  id        String @id @default(cuid())
+  subject   Task @relation("Subject", fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId String
+  object    Task @relation("Object", fields: [objectId], references: [id], onDelete: Cascade)
+  objectId  String
+  type      String
 }
