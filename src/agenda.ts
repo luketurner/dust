@@ -1,20 +1,26 @@
+import { Agenda } from "@prisma/client";
 import { prisma } from "./db/client";
 import { DateTime } from "luxon";
+import { defaultAgendaRules, pickTasks } from "./agendaRules";
 
 export async function upsertAgendaServer(userId: string, date: string) {
   // try finding agenda first to avoid task lookup if it's not needed
   const existingAgenda = await findAgendaServer(userId, date);
   if (existingAgenda) { return existingAgenda; }
 
-  const tasksForAgenda = await prisma.task.findMany({
+  const allTasks = await prisma.task.findMany({
     where: {
       userId
     },
-    take: 3,
     orderBy: {
       displayOrder: 'asc'
+    },
+    include: {
+      tags: true
     }
   });
+
+  const pickedTasks = pickTasks(defaultAgendaRules(), allTasks);
 
   const dbDate = DateTime.fromFormat(date, 'yyyy-MM-dd').toISO();
 
@@ -25,7 +31,7 @@ export async function upsertAgendaServer(userId: string, date: string) {
       date: dbDate!,
       agendaTasks: {
         createMany: {
-          data: tasksForAgenda.map(task => ({
+          data: pickedTasks.map(task => ({
             taskId: task.id,
             archived: false,
           }))
