@@ -92,7 +92,7 @@ model AgendaTask {
 }
 
 model Tag {
-  id           String @id @default(cuid())
+  id           String @id
   userId       String
   name         String
   tasks        Task[]
