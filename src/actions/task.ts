@@ -1,9 +1,10 @@
 'use server';
 
 import { prisma } from "@/db/client";
-import { Task, Prisma } from "@prisma/client";
+import { Task, Prisma, Tag } from "@prisma/client";
 import { getServerUserOrThrow } from "@/auth"
 import { getHighestDisplayOrderServer, parseTaskInput } from "@/task";
+import { NotFoundError, PrismaClientUnknownRequestError } from "@prisma/client/runtime/library";
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
@@ -60,23 +61,76 @@ export async function createTask(): Promise<void> {
 /**
  * (Server Action) Accepts a string containing 0+ task declarations, and creates tasks for each of them.
  */
-export async function addTasksFromText(text: string): Promise<Task[]> {
+export async function addTasksFromText(text: string): Promise<(Task & { tags: Tag[] })[]> {
   const { user } = await getServerUserOrThrow();
 
   const parsedTasks = parseTaskInput(text);
 
   const highestDisplayOrder = await getHighestDisplayOrderServer(user.id);
 
-  const tasksToInsert = parsedTasks.map(({ name, tags, flags, description }, index) => ({
+  const tasksToInsert = parsedTasks.map(({ name, tags, description }, index) => ({
     name,
     userId: user.id,
-    displayOrder: highestDisplayOrder + 1 + index
+    displayOrder: highestDisplayOrder + 1 + index,
+    description,
+    tags: {
+      connectOrCreate: (tags ?? []).map(tag => ({
+        create: {
+          userId: user.id,
+          name: tag
+        },
+        where: {
+          userId_name: {
+            userId: user.id,
+            name: tag
+          }
+        }
+      }))
+    }
   }));
 
   const tasks = [];
   // Can't use createMany because it doesn't return the created rows
   for (const data of tasksToInsert) {
-    tasks.push(await prisma.task.create({ data }));
+    tasks.push(await prisma.task.create({ data, include: { tags: true } }));
   }
   return tasks;
+}
+
+export async function removeTags(taskId: string, tagIds: string[]) {
+  const { user } = await getServerUserOrThrow();
+  
+  // Disconnect tags from task
+  await prisma.task.update({
+    where: {
+      userId: user.id,
+      id: taskId
+    },
+    data: {
+      tags: {
+        disconnect: tagIds.map((id) => ({ id }))
+      }
+    }
+  });
+
+  // Delete tags if not attached to any other tasks
+  // not using deleteMany because then we couldn't tell which specifically were deleted.
+  const deletedTagIds = [];
+  for (const tagId of tagIds) {
+    try {
+      const { id } = await prisma.tag.delete({
+        select: { id: true },
+        where: {
+          userId: user.id,
+          id: tagId,
+          tasks: { none: {} }
+        }
+      });
+      deletedTagIds.push(id);
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+
+  return { deletedTagIds };
 }

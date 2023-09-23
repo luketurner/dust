@@ -64,6 +64,7 @@ model Task {
   completed    Boolean @default(false)
   archived     Boolean @default(false)
   displayOrder Int
+  description  String @default("")
   agendaTasks  AgendaTask[]
   tags         Tag[]
   subjectRelations TaskRelation[] @relation("Subject")
@@ -92,10 +93,12 @@ model AgendaTask {
 }
 
 model Tag {
-  id           String @id
+  id           String @id @default(cuid())
   userId       String
   name         String
   tasks        Task[]
+
+  @@unique([userId, name])
 }
 
 model TaskRelation {
@@ -105,4 +108,6 @@ model TaskRelation {
   object    Task @relation("Object", fields: [objectId], references: [id], onDelete: Cascade)
   objectId  String
   type      String
+
+  @@unique([subjectId, type, objectId])
 }

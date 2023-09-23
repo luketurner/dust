@@ -11,10 +11,19 @@ export default async function ManagePage() {
     },
     orderBy: {
       displayOrder: 'asc'
+    },
+    include: {
+      tags: true
+    }
+  });
+
+  const tags = await prisma.tag.findMany({
+    where: {
+      userId: user.id
     }
   });
 
   return (
-    <TaskManager tasks={tasks} />
+    <TaskManager tasks={tasks} tags={tags} />
   )
 }
