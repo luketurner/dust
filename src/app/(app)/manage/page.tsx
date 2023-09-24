@@ -1,6 +1,7 @@
 import { getServerUserOrRedirect } from "@/auth"
 import TaskManager from "@/components/TaskManager";
 import { prisma } from "@/db/client";
+import ManagePageClient from "./client";
 
 export default async function ManagePage() {
   const { user } = await getServerUserOrRedirect();
@@ -24,6 +25,6 @@ export default async function ManagePage() {
   });
 
   return (
-    <TaskManager tasks={tasks} tags={tags} />
+    <ManagePageClient tasks={tasks} tags={tags} />
   )
 }

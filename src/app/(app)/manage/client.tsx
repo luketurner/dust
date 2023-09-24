@@ -3,10 +3,10 @@
 import { Tag as TagType, Task as TaskType } from "@prisma/client";
 import { Key, useCallback, useMemo, useState } from "react";
 import { Button, Checkbox, GridList, Item, TagGroup, TagList } from "react-aria-components";
-import TaskEntry from "./TaskEntry";
-import Task from "./Task";
+import TaskEntry from "@/components/TaskEntry";
+import Task from "@/components/Task";
 import { addTasksFromText, removeTags } from "@/actions/task";
-import Tag from "./Tag";
+import Tag from "@/components/Tag";
 
 type TaskWithTags = TaskType & { tags: TagType[] };
 
@@ -21,7 +21,7 @@ interface Filters {
   tags: TagType[];
 }
 
-export default function TaskManager({ tasks: initialTasks, tags: initialTags }: TaskManagerProps) {
+export default function ManagePageClient({ tasks: initialTasks, tags: initialTags }: TaskManagerProps) {
   const [tasks, setTasks] = useState(initialTasks);
   const [allTags, setAllTags] = useState(initialTags);
   const [filters, setFilters] = useState<Filters>({ active: true, archived: false, tags: [] });
