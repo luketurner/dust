@@ -145,32 +145,5 @@ export default function AgendaPageClient({ date, agenda }: AgendaPageClientProps
         </Footer>
       </Grid>
     </Provider>
-  //   <div className="flex flex-col flex-nowrap items-center">
-  //   <div className="mt-4 flex flex-row flex-nowrap items-center justify-center">
-  //     <Link className="mx-2 text-xl" href={`/${dayBefore}`}>&lt;&lt;</Link>
-  //     <h1 className="text-4xl">{date}</h1>
-  //     <Link className="mx-2 text-xl" href={`/${dayAfter}`}>&gt;&gt;</Link>
-  //   </div>
-  //   {!isToday && (
-  //     <Link className="m-2 text-xl p-2 rounded bg-slate-200 w-64 mt-4 block text-center" href={`/today`}>Back to Today</Link>
-  //   )}
-  //   <div className="mt-8">
-  //     {agenda ? (
-  //       (tasks && tasks.length !== 0) ? (
-  //         <SimpleTaskList tasks={tasks} />
-  //       ) : (
-  //         <p>No tasks for {date}!</p>
-  //       )
-  //     ) : (
-  //       <>
-  //         <p>There is no agenda for this date. Create one?</p>
-  //         <Button onPress={async () => { await upsertAgenda(date); router.refresh(); }}>
-  //           Generate Agenda
-  //         </Button>
-  //       </>
-  //     )}
-  //   </div>
-  //   <TaskEntry onSubmit={addTasksFromText} />
-  // </div>
   );
 }
