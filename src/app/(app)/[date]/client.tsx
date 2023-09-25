@@ -58,22 +58,32 @@ export default function AgendaPageClient({ date, agenda }: AgendaPageClientProps
   return (
     <Provider theme={defaultTheme} >
       <Grid
-       areas={[
-        'header header',
-        'title tasks',
-        'quote tasks',
-        'footer footer'
-       ]}
-       columns={['2fr', '3fr']}
-       rows={['max-content', '1fr', '4fr', 'max-content']}
+       areas={{
+        'base': [
+          'header',
+          'title',
+          'quote',
+          'tasks',
+          'footer'
+        ],
+        'M': [
+          'header header',
+          'title tasks',
+          'quote tasks',
+          'footer footer'
+        ]
+      }}
+       columns={{base: ['1fr'], 'M': ['2fr', '3fr']}}
+       rows={{base: ['max-content', 'max-content', 'max-content', '1fr', 'max-content'], 'M': ['max-content', '1fr', '4fr', 'max-content']}}
        maxWidth="900px"
        marginX="auto"
        marginY="5px"
        gap='single-line-height'
+       UNSAFE_className="p-2"
       >
         <Header gridArea="header" width="100%">
           <Grid areas={['left right']} justifyContent='space-between' columns={["1fr", "max-content"]}>
-            <Breadcrumbs gridArea="left" size="M" margin="space-25" showRoot onAction={handleBreadcrumbAction}>
+            <Breadcrumbs gridArea="left" size="M" showRoot onAction={handleBreadcrumbAction}>
               <Item key="asdf">DUST</Item>
               <Item key="today">Agenda</Item>
             </Breadcrumbs>
@@ -90,15 +100,15 @@ export default function AgendaPageClient({ date, agenda }: AgendaPageClientProps
             </View>
           </Grid>
         </Header>
-        <Heading UNSAFE_className="text-3xl" level={1} gridArea="title" justifySelf="end">
+        <Heading UNSAFE_className="text-3xl" level={1} gridArea="title" justifySelf={{base: 'center', 'M': 'end'}}>
           {date}
         </Heading>
-        <View gridArea="quote" justifySelf="end">
+        <View gridArea="quote" justifySelf={{base: 'center', 'M': 'end'}}>
           Lorem ipsum afoo abar<br />
           asdfasdf asdfasdf<br />
           fdsafdasf
         </View>
-        <Flex gridArea="tasks" direction="column" gap="size-100" marginEnd="size-100">
+        <Flex gridArea="tasks" direction="column" width="100%" gap="size-100" maxWidth="size-5000" margin="auto">
           {tasks?.map(task => (
             <Grid areas={["toggle name actions",
                           "toggle tags actions"]}
@@ -125,7 +135,7 @@ export default function AgendaPageClient({ date, agenda }: AgendaPageClientProps
             </Grid>
           ))}
         </Flex>
-        <Footer gridArea="footer">
+        <Footer gridArea="footer" width="100%">
           <Flex direction="row" wrap justifyContent="center">
             <a className="underline" href="https://github.com/luketurner/dust">Github</a>
           </Flex>
