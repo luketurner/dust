@@ -1,5 +1,4 @@
 import { getServerUserOrRedirect } from "@/auth"
-import TaskManager from "@/components/TaskManager";
 import { prisma } from "@/db/client";
 import ManagePageClient from "./client";
 
