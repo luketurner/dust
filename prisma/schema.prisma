@@ -123,3 +123,19 @@ model Project {
 
   @@unique([userId, name])
 }
+
+model Day {
+  date      DateTime @id @db.Date
+  quoteId   String
+  quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Restrict)
+}
+
+model Quote {
+  id            String @id @default(cuid())
+  userId        String?
+  content       String
+  author        String
+  source        String?
+  lastQuotedOn  DateTime? @db.Date
+  days          Day[]
+}
