@@ -8,6 +8,8 @@ import { useCallback } from "react";
 import ShowMenu from "@spectrum-icons/workflow/ShowMenu";
 import { useImmerReducer } from "use-immer";
 import AgendaTaskRow, { AgendaTaskRowAction } from "@/components/AgendaTaskRow";
+import { updateTask } from "@/actions/task";
+import { updateAgendaTask } from "@/actions/agendaTask";
 
 export interface AgendaPageClientProps {
   date: string;
@@ -34,7 +36,7 @@ export default function AgendaPageClient({ date, agenda }: AgendaPageClientProps
     return state;
   }, {
     agenda,
-    tasks: (agenda?.agendaTasks ?? []).map(at => at.task)
+    tasks: (agenda?.agendaTasks ?? []).filter(at => !at.deferred).map(at => at.task)
   });
 
   const handleMenuAction = useCallback((key: string) => {
@@ -60,6 +62,20 @@ export default function AgendaPageClient({ date, agenda }: AgendaPageClientProps
   }, []);
 
   const handleTaskAction = useCallback((action: AgendaPageClientAction) => {
+    switch (action.type) {
+      case 'toggle':
+        updateTask(action.task.id, {
+          completed: !action.task.completed
+        });
+        break;
+      case 'defer':
+        if (agenda) {
+          updateAgendaTask(agenda.id, action.task.id, {
+            deferred: true
+          });
+        }
+        break;
+    }
     dispatchAction(action);
   }, [dispatchAction])
 

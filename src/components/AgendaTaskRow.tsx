@@ -1,14 +1,12 @@
 'use client';
 
-import { updateTask, deleteTask as deleteTaskAction } from "@/actions/task";
 import { ActionMenu, Grid, Item, ToggleButton, View } from "@adobe/react-spectrum";
 import { Task } from "@prisma/client";
-import { ChangeEvent, useCallback, useState } from "react";
-import { Button } from "react-aria-components";
+import { useCallback } from "react";
 import CheckmarkCircleOutline from "@spectrum-icons/workflow/CheckmarkCircleOutline";
 
 export interface AgendaTaskRowAction {
-  type: 'toggle'
+  type: 'toggle' | 'defer'
   task: Task
 }
 
@@ -20,24 +18,15 @@ export interface TaskProps {
 export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) {
 
   const toggleTask = useCallback(() => {
-    updateTask(task.id, {
-      completed: !task.completed
-    });
-    onAction({
-      type: 'toggle',
-      task
-    });
+    onAction({ type: 'toggle', task });
   }, [task, onAction]);
 
   const handleMenuAction = useCallback((key: string) => {
-    // switch (key) {
-    //   case 'logout':
-    //     signOut();
-    //     break;
-    //   case 'manage':
-    //     router.push('/manage');
-    //     break;
-    // }
+    switch (key) {
+      case 'defer':
+        onAction({ type: 'defer', task });
+        break;
+    }
   }, []);
 
   return (
@@ -57,9 +46,7 @@ export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) 
       <View gridArea="tags">#foo #bar</View>
       <View gridArea="actions">
         <ActionMenu isQuiet onAction={handleMenuAction}>
-          <Item key="edit">Edit</Item>
           <Item key="defer">Defer</Item>
-          <Item key="archive">Archive</Item>
         </ActionMenu>
       </View>
     </Grid>
