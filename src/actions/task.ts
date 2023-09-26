@@ -27,6 +27,7 @@ export async function deleteTask(taskId: string): Promise<void> {
 export async function updateTask(taskId: string, data: {
   name?: string
   archived?: boolean
+  completed?: boolean
 }): Promise<void> {
   const { user } = await getServerUserOrThrow();
   await prisma.task.update({
@@ -36,7 +37,8 @@ export async function updateTask(taskId: string, data: {
     },
     data: {
       name: data.name,
-      archived: data.archived
+      archived: data.archived,
+      completed: data.completed
     }
   });
 }
