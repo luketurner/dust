@@ -138,4 +138,6 @@ model Quote {
   source        String?
   lastQuotedOn  DateTime? @db.Date
   days          Day[]
+
+  @@index(lastQuotedOn)
 }

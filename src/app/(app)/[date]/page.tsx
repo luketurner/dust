@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { notFound, redirect } from "next/navigation";
 import { findAgendaServer, upsertAgendaServer } from "@/agenda";
 import AgendaPageClient from "./client";
+import { getDailyQuote } from "@/quote";
 
 interface AgendaPageProps {
   params: { date: string }
@@ -29,6 +30,8 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
   const isToday = canonicalDate === today.toISODate();
   if (isToday && date !== 'today') { return redirect('/today'); }
 
+  const quote = await getDailyQuote(canonicalDate);
+
   let agenda;
   if (isToday) {
     agenda = await upsertAgendaServer(user.id, canonicalDate);
@@ -38,6 +41,6 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
   }
 
   return (
-    <AgendaPageClient date={canonicalDate} agenda={agenda} />
+    <AgendaPageClient date={canonicalDate} agenda={agenda} quote={quote} />
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { ActionButton, Flex, Footer, Grid, Header, Heading, Item, Menu, MenuTrigger, Provider, View, defaultTheme, Breadcrumbs } from "@adobe/react-spectrum";
-import { Agenda, AgendaTask, Task } from "@prisma/client";
+import { Agenda, AgendaTask, Quote, Task } from "@prisma/client";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
@@ -14,6 +14,7 @@ import { updateAgendaTask } from "@/actions/agendaTask";
 export interface AgendaPageClientProps {
   date: string;
   agenda: (Agenda & { agendaTasks: (AgendaTask & { task: Task })[] }) | null;
+  quote: Quote;
 }
 
 interface AgendaPageClientState {
@@ -23,7 +24,7 @@ interface AgendaPageClientState {
 
 type AgendaPageClientAction = AgendaTaskRowAction;
 
-export default function AgendaPageClient({ date, agenda }: AgendaPageClientProps) {
+export default function AgendaPageClient({ date, agenda, quote }: AgendaPageClientProps) {
   const router = useRouter();
 
   const [state, dispatchAction] = useImmerReducer<AgendaPageClientState, AgendaPageClientAction>((state, action) => {
@@ -126,9 +127,12 @@ export default function AgendaPageClient({ date, agenda }: AgendaPageClientProps
           {date}
         </Heading>
         <View gridArea="quote" justifySelf={{base: 'center', 'M': 'end'}}>
-          Lorem ipsum afoo abar<br />
-          asdfasdf asdfasdf<br />
-          fdsafdasf
+          <pre style={{ font: 'inherit' }}>
+            {quote.content}
+          </pre>
+          <p className="text-right">
+            {quote.author}
+          </p>
         </View>
         <Flex gridArea="tasks" direction="column" width="100%" gap="size-100" maxWidth="size-5000" marginX={{ base: 'auto', 'M': 0 }}>
           {state.tasks.map(task => (
