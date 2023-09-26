@@ -63,10 +63,13 @@ model Task {
   name         String
   completed    Boolean @default(false)
   archived     Boolean @default(false)
+  important    Boolean @default(false)
+  urgent       Boolean @default(false)
   displayOrder Int
   description  String @default("")
   agendaTasks  AgendaTask[]
   tags         Tag[]
+  projects     Project[]
   subjectRelations TaskRelation[] @relation("Subject")
   objectRelations  TaskRelation[] @relation("Object")
 
@@ -87,7 +90,7 @@ model AgendaTask {
   taskId    String
   agenda    Agenda  @relation(fields: [agendaId], references: [id], onDelete: Cascade)
   task      Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  archived  Boolean @default(false)
+  deferred  Boolean @default(false)
 
   @@id([agendaId, taskId])
 }
@@ -110,4 +113,13 @@ model TaskRelation {
   type      String
 
   @@unique([subjectId, type, objectId])
+}
+
+model Project {
+  id        String @id @default(cuid())
+  userId    String
+  name      String
+  tasks     Task[]
+
+  @@unique([userId, name])
 }
