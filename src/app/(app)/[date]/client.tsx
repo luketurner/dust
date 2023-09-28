@@ -13,6 +13,7 @@ import AppHeader from "@/components/AppHeader";
 import AppFooter from "@/components/AppFooter";
 import AppLayout from "@/components/AppLayout";
 import QuoteBlock from "@/components/QuoteBlock";
+import ThreeSpotLayout from "@/components/ThreeSpotLayout";
 
 export interface AgendaPageClientProps {
   date: string;
@@ -104,42 +105,21 @@ export default function AgendaPageClient({ date, agenda, quote }: AgendaPageClie
        onClose={() => handleAction({ type: 'close-dialog' })}
        onSave={(task, data) => handleAction({ type: 'save-task', task, data })}
        />
-      <Grid
-       areas={{
-        'base': ['header', 'title', 'quote', 'tasks', 'footer'],
-        'M': [
-          'header header',
-          'title tasks',
-          'quote tasks',
-          'footer footer'
-        ]
-       }}
-       columns={{base: ['1fr'], 'M': ['2fr', '3fr']}}
-       rows={{
-        base: ['max-content', 'max-content', 'max-content', '1fr', 'max-content'],
-        'M': ['max-content', '1fr', '4fr', 'max-content']
-       }}
-       maxWidth="900px"
-       marginX="auto"
-       marginY="5px"
-       gap='single-line-height'
-       UNSAFE_className="p-2"
-       justifyItems="start"
-      >
-        <AppHeader breadcrumbs={[{ label: 'Agenda', url: '/today', key: 'agenda' }]} />
-          <Heading UNSAFE_className="text-4xl" level={1} gridArea="title" justifySelf={{base: 'center', 'M': 'end'}}>
-            {displayDate}
-          </Heading>
-        <View gridArea="quote" justifySelf={{base: 'center', 'M': 'end'}}>
+      <ThreeSpotLayout>
+        <AppHeader user={true} breadcrumbs={[{ label: 'Agenda', url: '/today', key: 'agenda' }]} />
+        <Heading gridArea="a" UNSAFE_className="text-4xl" level={1}  justifySelf={{base: 'center', 'M': 'end'}}>
+          {displayDate}
+        </Heading>
+        <View gridArea="b" justifySelf={{base: 'center', 'M': 'end'}}>
           <QuoteBlock quote={quote} />
         </View>
-        <Flex gridArea="tasks" direction="column" width="100%" gap="size-100" maxWidth="size-5000" marginX={{ base: 'auto', 'M': 0 }}>
+        <Flex gridArea="c" direction="column" width="100%" gap="size-100" maxWidth="size-5000" marginX={{ base: 'auto', 'M': 0 }}>
           {tasks.map(task => (
             <AgendaTaskRow key={task.id} task={task} onAction={handleAction} />
           ))}
         </Flex>
         <AppFooter />
-      </Grid>
+      </ThreeSpotLayout>
     </AppLayout>
   );
 }

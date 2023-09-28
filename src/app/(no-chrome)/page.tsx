@@ -1,21 +1,17 @@
 import { getServerUser } from "@/auth"
-import LoginButton from "@/components/LoginButton";
+import { getDailyQuote } from "@/quote";
+import { DateTime } from "luxon";
 import { redirect } from "next/navigation";
+import IndexPageClient from "./client";
 
 export default async function IndexPage() {
   const { user } = await getServerUser();
 
   if (user) { redirect('/today'); }
 
+  const quote = await getDailyQuote(DateTime.now().toISODate()!);
+
   return (
-    <div className="text-center">
-      <h1 className="text-8xl mt-12 mb-8 font-thin text-orange-300">DUST</h1>
-      <p className="mb-12">
-        Task management for people that don't like tasks.
-      </p>
-      <div>
-        <LoginButton />
-      </div>
-    </div>
+    <IndexPageClient quote={quote} />
   );
 }
