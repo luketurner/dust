@@ -51,12 +51,17 @@ export async function getDailyQuote(date: string): Promise<Quote> {
     }
   });
 
-  await prisma.quote.update({
-    where: { id: newDay.quoteId, lastQuotedOn: { not: date } },
+  const { lastQuotedOn } = await prisma.quote.update({
+    where: { id: quote.id },
     data: {
       lastQuotedOn: date
+    },
+    select: {
+      lastQuotedOn: true
     }
   });
+
+  newDay.quote.lastQuotedOn = lastQuotedOn;
 
   return newDay.quote;
 }
