@@ -1,5 +1,5 @@
 import { getServerUser } from "@/auth"
-import Footer from "@/components/Footer";
+import Footer from "@/components/AppFooter";
 import LoginButton from "@/components/LoginButton";
 import LogoutButton from "@/components/LogoutButton";
 
