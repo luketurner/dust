@@ -11,6 +11,7 @@ import AgendaTaskRow, { AgendaTaskRowAction } from "@/components/AgendaTaskRow";
 import { updateTask } from "@/actions/task";
 import { updateAgendaTask } from "@/actions/agendaTask";
 import EditTaskDialog from "@/components/EditTaskDialog";
+import { DateTime } from "luxon";
 
 export interface AgendaPageClientProps {
   date: string;
@@ -117,6 +118,8 @@ export default function AgendaPageClient({ date, agenda, quote }: AgendaPageClie
     dispatchAction(action);
   }, [dispatchAction]);
 
+  const displayDate = DateTime.fromISO(date).toLocaleString({ month: 'short', day: 'numeric' });
+
   return (
     <Provider theme={defaultTheme}>
       <EditTaskDialog
@@ -165,8 +168,8 @@ export default function AgendaPageClient({ date, agenda, quote }: AgendaPageClie
             </View>
           </Grid>
         </Header>
-        <Heading UNSAFE_className="text-3xl" level={1} gridArea="title" justifySelf={{base: 'center', 'M': 'end'}}>
-          {date}
+        <Heading UNSAFE_className="text-4xl" level={1} gridArea="title" justifySelf={{base: 'center', 'M': 'end'}}>
+          {displayDate}
         </Heading>
         <View gridArea="quote" justifySelf={{base: 'center', 'M': 'end'}}>
           <pre style={{ font: 'inherit' }}>
