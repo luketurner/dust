@@ -33,7 +33,6 @@ export async function upsertAgendaServer(userId: string, date: string) {
         createMany: {
           data: pickedTasks.map(task => ({
             taskId: task.id,
-            archived: false,
           }))
         }
       }

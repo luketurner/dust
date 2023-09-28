@@ -1,13 +1,14 @@
 'use client';
 
 import { ActionMenu, Grid, Item, ToggleButton, View } from "@adobe/react-spectrum";
-import { Task } from "@prisma/client";
+import { Agenda, Task } from "@prisma/client";
 import { useCallback } from "react";
 import CheckmarkCircleOutline from "@spectrum-icons/workflow/CheckmarkCircleOutline";
 
 export interface AgendaTaskRowAction {
-  type: 'toggle' | 'defer'
+  type: 'toggle' | 'defer' | 'edit'
   task: Task
+  agenda?: Agenda
 }
 
 export interface TaskProps {
@@ -22,11 +23,7 @@ export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) 
   }, [task, onAction]);
 
   const handleMenuAction = useCallback((key: string) => {
-    switch (key) {
-      case 'defer':
-        onAction({ type: 'defer', task });
-        break;
-    }
+    onAction({ type: key, task });
   }, []);
 
   return (
@@ -47,6 +44,7 @@ export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) 
       <View gridArea="actions">
         <ActionMenu isQuiet onAction={handleMenuAction}>
           <Item key="defer">Defer</Item>
+          <Item key="edit">Edit</Item>
         </ActionMenu>
       </View>
     </Grid>
