@@ -10,7 +10,8 @@
     "db:setup": "podman run -d -p 5432:5432 --name dust -e POSTGRES_PASSWORD=postgres postgres:15",
     "db:start": "podman start dust",
     "db:migrate": "prisma migrate dev",
-    "db:gen": "prisma generate"
+    "db:gen": "prisma generate",
+    "db:loadquotes": "node scripts/load_quotes.mjs"
   },
   "dependencies": {
     "@adobe/react-spectrum": "^3.30.0",
@@ -39,6 +40,7 @@
     "use-immer": "^0.9.0"
   },
   "devDependencies": {
-    "prisma": "^5.3.1"
+    "prisma": "^5.3.1",
+    "yaml": "^2.3.2"
   }
 }
