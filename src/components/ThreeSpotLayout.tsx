@@ -11,7 +11,7 @@ export default function ThreeSpotLayout({ children }: ThreeSpotLayoutProps) {
   return (
     <Grid
       areas={{
-      'base': ['header', 'a', 'b', 'c', 'footer'],
+      'base': ['header', 'a', 'c', 'b', 'footer'],
       'M': [
         'header header',
         'a c',
@@ -21,12 +21,11 @@ export default function ThreeSpotLayout({ children }: ThreeSpotLayoutProps) {
       }}
       columns={{base: ['1fr'], 'M': ['2fr', '3fr']}}
       rows={{
-      base: ['max-content', 'max-content', 'max-content', '1fr', 'max-content'],
+      base: ['max-content', 'max-content', '1fr', 'max-content', 'max-content'],
       'M': ['max-content', '1fr', '4fr', 'max-content']
       }}
       maxWidth="900px"
       marginX="auto"
-      marginY="5px"
       gap='single-line-height'
       UNSAFE_className="p-2"
       justifyItems="start"

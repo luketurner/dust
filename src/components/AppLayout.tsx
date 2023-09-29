@@ -8,7 +8,7 @@ export interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
-    <Provider theme={defaultTheme}>
+    <Provider minHeight="100vh" theme={defaultTheme}>
       {children}
     </Provider>
   )
