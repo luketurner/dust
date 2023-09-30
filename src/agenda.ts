@@ -10,7 +10,9 @@ export async function upsertAgendaServer(userId: string, date: string) {
 
   const allTasks = await prisma.task.findMany({
     where: {
-      userId
+      userId,
+      completed: false,
+      archived: false,
     },
     orderBy: {
       displayOrder: 'asc'
