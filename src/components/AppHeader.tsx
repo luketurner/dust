@@ -48,14 +48,14 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
         }
         <View gridArea="right">
           <MenuTrigger>
-            <ActionButton isQuiet>
+            <ActionButton isQuiet isDisabled={isEmbedded}>
               <ShowMenu />
             </ActionButton>
-            {isEmbedded ? undefined : <Menu onAction={handleMenuAction}>
+            <Menu onAction={handleMenuAction}>
               {user && <Item key="manage">Manage tasks</Item>}
               {user && <Item key="logout">Log out</Item>}
               {!user && <Item key="login">Log in</Item>}
-            </Menu>}
+            </Menu>
           </MenuTrigger>
         </View>
       </Grid>
