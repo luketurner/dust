@@ -14,6 +14,7 @@ import AppFooter from "@/components/AppFooter";
 import AppLayout from "@/components/AppLayout";
 import QuoteBlock from "@/components/QuoteBlock";
 import ThreeSpotLayout from "@/components/ThreeSpotLayout";
+import { useIsEmbedded } from "@/hooks/isEmbedded";
 
 export interface AgendaPageClientProps {
   date: string;
@@ -89,12 +90,15 @@ export default function AgendaPageClient({ date, agenda, quote }: AgendaPageClie
     agenda,
   });
 
+  const isEmbedded = useIsEmbedded();
+
   const tasks = (state.agenda?.agendaTasks ?? []).filter(at => !at.deferred).map(at => at.task)
 
   const handleAction = useCallback((action: AgendaPageClientAction) => {
+    if (isEmbedded) return;
     serverActionHandler(action);
     dispatchAction(action);
-  }, [dispatchAction]);
+  }, [dispatchAction, isEmbedded]);
 
   const displayDate = DateTime.fromISO(date).toLocaleString({ month: 'short', day: 'numeric' });
 

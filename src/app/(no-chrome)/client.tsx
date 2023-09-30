@@ -8,6 +8,8 @@ import ThreeSpotLayout from "@/components/ThreeSpotLayout";
 import { Button, Flex, Heading, View } from "@adobe/react-spectrum";
 import { Quote } from "@prisma/client";
 import { signIn } from "next-auth/react";
+import TinyAgendaPage from "@/components/TinyAgendaPage";
+import { DateTime } from "luxon";
 
 export interface IndexPageClientProps {
   quote: Quote;
@@ -25,8 +27,9 @@ export default function IndexPageClient({ quote }: IndexPageClientProps) {
         <View gridArea="b" justifySelf={{base: 'center', 'M': 'end'}}>
           <QuoteBlock quote={quote} />
         </View>
-        <Flex gridArea="c" direction="column" marginTop="single-line-height" marginX={{ base: 'auto', 'M': 0 }} gap="single-line-height">
-          <p className="text-lg">Task management for people who don't like tasks.</p>
+        <Flex gridArea="c" direction="column" marginTop={{base: '0', 'M': "single-line-height"}} marginX={{ base: 'auto', 'M': 0 }} gap="single-line-height">
+          <p className="text-lg text-center">Task management for people who don't like tasks.</p>
+          <TinyAgendaPage date={DateTime.now().toISODate()} quote={quote} />
           <Button alignSelf="center" variant="accent" onPress={(e) => signIn('github')}>
             Log in with Github
           </Button>

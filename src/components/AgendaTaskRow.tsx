@@ -4,6 +4,7 @@ import { ActionMenu, Grid, Item, ToggleButton, View } from "@adobe/react-spectru
 import { Agenda, Task } from "@prisma/client";
 import { useCallback } from "react";
 import CheckmarkCircleOutline from "@spectrum-icons/workflow/CheckmarkCircleOutline";
+import { useIsEmbedded } from "@/hooks/isEmbedded";
 
 export interface AgendaTaskRowAction {
   type: 'toggle' | 'defer' | 'edit'
@@ -26,6 +27,8 @@ export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) 
     onAction({ type: key, task });
   }, []);
 
+  const isEmbedded = useIsEmbedded();
+
   return (
     <Grid areas={["toggle name actions",
                   "toggle tags actions"]}
@@ -42,7 +45,7 @@ export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) 
       <View alignSelf="start" gridArea="name">{task.name}</View>
       <View gridArea="tags">#foo #bar</View>
       <View gridArea="actions">
-        <ActionMenu isQuiet onAction={handleMenuAction}>
+        <ActionMenu isQuiet onAction={handleMenuAction} isDisabled={isEmbedded}>
           <Item key="defer">Defer</Item>
           <Item key="edit">Edit</Item>
         </ActionMenu>

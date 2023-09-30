@@ -5,6 +5,7 @@ import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import ShowMenu from "@spectrum-icons/workflow/ShowMenu";
+import { useIsEmbedded } from "@/hooks/isEmbedded";
 
 export interface AppHeaderProps {
   breadcrumbs?: { key: string, url: string, label: string }[];
@@ -13,8 +14,10 @@ export interface AppHeaderProps {
 
 export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
   const router = useRouter();
+  const isEmbedded = useIsEmbedded();
 
   const handleMenuAction = useCallback((key: string) => {
+    if (isEmbedded) return;
     switch (key) {
       case 'login':
         signIn('github');
@@ -26,12 +29,13 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
         router.push('/manage');
         break;
     }
-  }, []);
+  }, [router, isEmbedded]);
 
   const handleBreadcrumbAction = useCallback((key: string) => {
+    if (isEmbedded) return;
     const { url } = breadcrumbs.find(b => b.key === key) ?? {};
     if (url) router.push(url);
-  }, []);
+  }, [router, isEmbedded]);
 
   return (
     <Header gridArea="header" width="100%">
@@ -47,11 +51,11 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
             <ActionButton isQuiet>
               <ShowMenu />
             </ActionButton>
-            <Menu onAction={handleMenuAction}>
+            {isEmbedded ? undefined : <Menu onAction={handleMenuAction}>
               {user && <Item key="manage">Manage tasks</Item>}
               {user && <Item key="logout">Log out</Item>}
               {!user && <Item key="login">Log in</Item>}
-            </Menu>
+            </Menu>}
           </MenuTrigger>
         </View>
       </Grid>
