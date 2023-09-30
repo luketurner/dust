@@ -108,7 +108,7 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
   const displayDate = DateTime.fromISO(date).toLocaleString({ month: 'short', day: 'numeric' });
 
   return (
-    <AppLayout>
+    <AppLayout user={true} breadcrumbs={[{ label: 'Agenda', url: '/today', key: 'agenda' }]}>
       <EditTaskDialog
        task={state.dialog?.task}
        onClose={() => handleAction({ type: 'close-dialog' })}
@@ -116,7 +116,6 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
        allTags={state.allTags}
        />
       <ThreeSpotLayout>
-        <AppHeader user={true} breadcrumbs={[{ label: 'Agenda', url: '/today', key: 'agenda' }]} />
         <Heading gridArea="a" UNSAFE_className="text-4xl" level={1}  justifySelf={{base: 'center', 'M': 'end'}}>
           {displayDate}
         </Heading>
@@ -128,7 +127,6 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
             <AgendaTaskRow key={task.id} task={task} onAction={handleAction} />
           ))}
         </Flex>
-        <AppFooter />
       </ThreeSpotLayout>
     </AppLayout>
   );
