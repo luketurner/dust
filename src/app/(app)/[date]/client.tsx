@@ -1,7 +1,7 @@
 'use client';
 
 import { Flex, Grid, Heading, View } from "@adobe/react-spectrum";
-import { Agenda, AgendaTask, Quote, Task } from "@prisma/client";
+import { Agenda, AgendaTask, Quote, Tag, Task } from "@prisma/client";
 import { useCallback } from "react";
 import { useImmerReducer } from "use-immer";
 import AgendaTaskRow, { AgendaTaskRowAction } from "@/components/AgendaTaskRow";
@@ -20,6 +20,7 @@ export interface AgendaPageClientProps {
   date: string;
   agenda: (Agenda & { agendaTasks: (AgendaTask & { task: Task })[] }) | null;
   quote: Quote;
+  allTags: Tag[];
 }
 
 interface EditingTaskDialogState {
@@ -29,6 +30,7 @@ interface EditingTaskDialogState {
 interface AgendaPageClientState {
   agenda: (Agenda & { agendaTasks: (AgendaTask & { task: Task })[] }) | null;
   dialog?: EditingTaskDialogState;
+  allTags: Tag[];
 }
 
 interface EditingTaskDialogAction {
@@ -61,7 +63,9 @@ function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAct
       delete state.dialog;
       break;
     case 'save-task':
-      (state?.agenda?.agendaTasks ?? []).find(v => v.taskId === action.task.id)!.task.name = action.data!.name;
+      const taskToUpdate = (state?.agenda?.agendaTasks ?? []).find(v => v.taskId === action.task.id)!.task;
+      taskToUpdate.name = action.data!.name;
+      taskToUpdate.tags = action.data!.tags.map(id => state.allTags.find((tag) => tag.id === id));
       delete state.dialog;
       break;
   }
@@ -85,9 +89,10 @@ function serverActionHandler(action: AgendaPageClientAction) {
   }
 }
 
-export default function AgendaPageClient({ date, agenda, quote }: AgendaPageClientProps) {
+export default function AgendaPageClient({ date, agenda, quote, allTags }: AgendaPageClientProps) {
   const [state, dispatchAction] = useImmerReducer<AgendaPageClientState, AgendaPageClientAction>(clientReducer, {
     agenda,
+    allTags
   });
 
   const isEmbedded = useIsEmbedded();
@@ -108,6 +113,7 @@ export default function AgendaPageClient({ date, agenda, quote }: AgendaPageClie
        task={state.dialog?.task}
        onClose={() => handleAction({ type: 'close-dialog' })}
        onSave={(task, data) => handleAction({ type: 'save-task', task, data })}
+       allTags={state.allTags}
        />
       <ThreeSpotLayout>
         <AppHeader user={true} breadcrumbs={[{ label: 'Agenda', url: '/today', key: 'agenda' }]} />

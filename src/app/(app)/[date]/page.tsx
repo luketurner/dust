@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { findAgendaServer, upsertAgendaServer } from "@/agenda";
 import AgendaPageClient from "./client";
 import { getDailyQuote } from "@/quote";
+import { prisma } from "@/db/client";
 
 interface AgendaPageProps {
   params: { date: string }
@@ -40,7 +41,13 @@ export default async function AgendaPage({ params: { date } }: AgendaPageProps) 
     agenda = await findAgendaServer(user.id, canonicalDate);
   }
 
+  const allTags = await prisma.tag.findMany({
+    where: {
+      userId: user.id,
+    }
+  });
+
   return (
-    <AgendaPageClient date={canonicalDate} agenda={agenda} quote={quote} />
+    <AgendaPageClient allTags={allTags} date={canonicalDate} agenda={agenda} quote={quote} />
   );
 }
