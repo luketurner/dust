@@ -52,6 +52,8 @@ export interface SaveTaskAction {
     name?: string;
     description?: string;
     tags?: string[];
+    important?: boolean;
+    urgent?: boolean;
   }
 }
 
@@ -77,13 +79,15 @@ function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAct
       const taskToUpdate = (state?.agenda?.agendaTasks ?? []).find(v => v.taskId === action.taskId)!.task;
       if (typeof action.data.name === 'string') taskToUpdate.name = action.data.name;
       if (typeof action.data.description === 'string') taskToUpdate.description = action.data.description;
+      taskToUpdate.urgent = action.data.urgent ?? false;
+      taskToUpdate.important = action.data.important ?? false;
       if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.allTags.find((tag) => tag.id === id));
       delete state.dialog;
       break;
   }
 }
 
-async function serverActionHandler(action: AgendaPageClientAction) {
+async function serverReducer(action: AgendaPageClientAction) {
   switch (action.type) {
     case 'toggle':
       updateTask(action.task.id, {
@@ -102,7 +106,7 @@ async function serverActionHandler(action: AgendaPageClientAction) {
 }
 
 export default function AgendaPageClient({ date, agenda, quote, allTags }: AgendaPageClientProps) {
-  const [state, dispatchAction] = useClientServerReducer<AgendaPageClientState, AgendaPageClientAction>(clientReducer, serverActionHandler, {
+  const [state, dispatchAction] = useClientServerReducer<AgendaPageClientState, AgendaPageClientAction>(clientReducer, serverReducer, {
     agenda,
     allTags
   });

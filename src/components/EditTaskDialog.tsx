@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, ComboBox, Item, Picker, TagGroup, TextArea } from "@adobe/react-spectrum";
+import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, ComboBox, Item, Picker, TagGroup, TextArea, Checkbox } from "@adobe/react-spectrum";
 import { Tag, Task } from "@prisma/client";
 import { useCallback, useMemo } from "react";
 import { useImmer } from "use-immer";
@@ -9,6 +9,8 @@ export interface EditTaskDialogData {
   name: string;
   tags: string[];
   description: string;
+  important: boolean;
+  urgent: boolean;
 }
 
 export interface EditTaskDialogProps {
@@ -31,7 +33,9 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
   const [data, setData] = useImmer<EditTaskDialogData>({
     name: task?.name ?? "",
     tags: (task?.tags ?? []).map(({ id }) => id),
-    description: task?.description ?? ""
+    description: task?.description ?? "",
+    important: task?.important ?? false,
+    urgent: task?.urgent ?? false,
   });
 
   const handleNameChange = useCallback((value: string) => {
@@ -43,6 +47,18 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
   const handleDescriptionChange = useCallback((value: string) => {
     setData(draft => {
       draft.description = value;
+    })
+  }, []);
+
+  const handleImportantChange = useCallback((value: boolean) => {
+    setData(draft => {
+      draft.important = value;
+    })
+  }, []);
+
+  const handleUrgentChange = useCallback((value: boolean) => {
+    setData(draft => {
+      draft.urgent = value;
     })
   }, []);
 
@@ -75,6 +91,9 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
       <Content>
       <Form maxWidth="size-3600">
         <TextField label="Name" value={data.name} onChange={handleNameChange} />
+        <Checkbox isSelected={data.important} onChange={handleImportantChange}>Important</Checkbox>
+        <Checkbox isSelected={data.urgent} onChange={handleUrgentChange}>Urgent</Checkbox>
+        
         <TagGroup
           items={data.tags}
           onRemove={handleRemoveTag}
