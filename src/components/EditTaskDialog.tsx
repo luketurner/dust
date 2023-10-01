@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, ComboBox, Item, Picker, TagGroup } from "@adobe/react-spectrum";
+import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, ComboBox, Item, Picker, TagGroup, TextArea } from "@adobe/react-spectrum";
 import { Tag, Task } from "@prisma/client";
 import { useCallback, useMemo } from "react";
 import { useImmer } from "use-immer";
@@ -8,13 +8,14 @@ import { useImmer } from "use-immer";
 export interface EditTaskDialogData {
   name: string;
   tags: string[];
+  description: string;
 }
 
 export interface EditTaskDialogProps {
   task: (Task & { tags: Tag[] }) | null | undefined
   allTags: Tag[]
   onClose(): void
-  onSave(task: Task, data: EditTaskDialogData): void
+  onSave(taskId: string, data: EditTaskDialogData): void
 }
 
 export default function EditTaskDialog({ task, onClose, onSave, allTags }: EditTaskDialogProps) {
@@ -29,7 +30,8 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
 
   const [data, setData] = useImmer<EditTaskDialogData>({
     name: task?.name ?? "",
-    tags: (task?.tags ?? []).map(({ id }) => id)
+    tags: (task?.tags ?? []).map(({ id }) => id),
+    description: task?.description ?? ""
   });
 
   const handleNameChange = useCallback((value: string) => {
@@ -38,8 +40,14 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
     })
   }, []);
 
+  const handleDescriptionChange = useCallback((value: string) => {
+    setData(draft => {
+      draft.description = value;
+    })
+  }, []);
+
   const handleSave = useCallback(() => {
-    onSave(task, data)
+    onSave(task?.id, data)
   }, [onSave, task, data]);
 
   const handleAddTag = useCallback((key: string) => {
@@ -77,6 +85,7 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
         <Picker label="Add tag" onSelectionChange={handleAddTag}>
           {allTags.map(tag => <Item key={tag.id}>{tag.name}</Item>)}
         </Picker>
+        <TextArea label="Description" value={data.description} onChange={handleDescriptionChange} />
       </Form>
       </Content>
       <ButtonGroup>

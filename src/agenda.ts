@@ -49,7 +49,11 @@ export async function upsertAgendaServer(userId: string, date: string) {
     include: {
       agendaTasks: {
         include: {
-          task: true
+          task: {
+            include: {
+              tags: true
+            }
+          }
         }
       }
     }
@@ -68,7 +72,11 @@ export async function findAgendaServer(userId: string, date: string) {
     include: {
       agendaTasks: {
         include: {
-          task: true
+          task: {
+            include: {
+              tags: true
+            }
+          }
         }
       }
     }

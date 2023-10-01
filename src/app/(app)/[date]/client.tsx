@@ -1,6 +1,6 @@
 'use client';
 
-import { Flex, Grid, Heading, View } from "@adobe/react-spectrum";
+import { Flex, Heading, View } from "@adobe/react-spectrum";
 import { Agenda, AgendaTask, Quote, Tag, Task } from "@prisma/client";
 import { useCallback } from "react";
 import { useImmerReducer } from "use-immer";
@@ -9,34 +9,34 @@ import { updateTask } from "@/actions/task";
 import { updateAgendaTask } from "@/actions/agendaTask";
 import EditTaskDialog from "@/components/EditTaskDialog";
 import { DateTime } from "luxon";
-import AppHeader from "@/components/AppHeader";
-import AppFooter from "@/components/AppFooter";
 import AppLayout from "@/components/AppLayout";
 import QuoteBlock from "@/components/QuoteBlock";
 import ThreeSpotLayout from "@/components/ThreeSpotLayout";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
 
+export type AgendaWithIncludes = (Agenda & {
+  agendaTasks: (AgendaTask & {
+    task: (Task & {
+      tags: Tag[] 
+    }) 
+  })[] 
+})
+
 export interface AgendaPageClientProps {
   date: string;
-  agenda: (Agenda & { agendaTasks: (AgendaTask & { task: Task })[] }) | null;
+  agenda: AgendaWithIncludes | null;
   quote: Quote;
   allTags: Tag[];
 }
 
 interface EditingTaskDialogState {
-  task: Task
+  taskId: string;
 }
 
 interface AgendaPageClientState {
-  agenda: (Agenda & { agendaTasks: (AgendaTask & { task: Task })[] }) | null;
+  agenda: AgendaWithIncludes | null;
   dialog?: EditingTaskDialogState;
   allTags: Tag[];
-}
-
-interface EditingTaskDialogAction {
-  type: 'save-task';
-  task: Task;
-  data?: object;
 }
 
 interface DialogAction {
@@ -44,7 +44,17 @@ interface DialogAction {
   data?: object;
 }
 
-type AgendaPageClientAction = AgendaTaskRowAction | EditingTaskDialogAction | DialogAction;
+export interface SaveTaskAction {
+  type: 'save-task'
+  taskId: string
+  data: {
+    name?: string;
+    description?: string;
+    tags?: string[];
+  }
+}
+
+type AgendaPageClientAction = AgendaTaskRowAction | SaveTaskAction | DialogAction;
 
 function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAction) {
   switch (action.type) {
@@ -56,16 +66,17 @@ function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAct
       break;
     case 'edit':
       state.dialog = {
-        task: action.task,
+        taskId: action.task.id,
       };
       break;
     case 'close-dialog':
       delete state.dialog;
       break;
     case 'save-task':
-      const taskToUpdate = (state?.agenda?.agendaTasks ?? []).find(v => v.taskId === action.task.id)!.task;
-      taskToUpdate.name = action.data!.name;
-      taskToUpdate.tags = action.data!.tags.map(id => state.allTags.find((tag) => tag.id === id));
+      const taskToUpdate = (state?.agenda?.agendaTasks ?? []).find(v => v.taskId === action.taskId)!.task;
+      if (typeof action.data.name === 'string') taskToUpdate.name = action.data.name;
+      if (typeof action.data.description === 'string') taskToUpdate.description = action.data.description;
+      if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.allTags.find((tag) => tag.id === id));
       delete state.dialog;
       break;
   }
@@ -84,7 +95,7 @@ function serverActionHandler(action: AgendaPageClientAction) {
       });
       break;
     case 'save-task':
-      updateTask(action.task.id, action.data ?? {});
+      updateTask(action.taskId, action.data ?? {});
       break;
   }
 }
@@ -110,9 +121,9 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
   return (
     <AppLayout user={true} breadcrumbs={[{ label: 'Agenda', url: '/today', key: 'agenda' }]}>
       <EditTaskDialog
-       task={state.dialog?.task}
+       task={tasks.find(t => t.id === state.dialog?.taskId)}
        onClose={() => handleAction({ type: 'close-dialog' })}
-       onSave={(task, data) => handleAction({ type: 'save-task', task, data })}
+       onSave={(taskId, data) => handleAction({ type: 'save-task', taskId, data })}
        allTags={state.allTags}
        />
       <ThreeSpotLayout>

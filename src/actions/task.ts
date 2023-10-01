@@ -29,6 +29,7 @@ export async function updateTask(taskId: string, data: {
   archived?: boolean
   completed?: boolean
   tags?: string[]
+  description?: string
 }): Promise<void> {
   const { user } = await getServerUserOrThrow();
   await prisma.task.update({
@@ -40,6 +41,7 @@ export async function updateTask(taskId: string, data: {
       name: data.name,
       archived: data.archived,
       completed: data.completed,
+      description: data.description,
       tags: (data.tags ? { connect: data.tags.map(id => ({ id, userId: user.id })) } : undefined)
     }
   });
