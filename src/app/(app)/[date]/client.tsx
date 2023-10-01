@@ -13,6 +13,7 @@ import AppLayout from "@/components/AppLayout";
 import QuoteBlock from "@/components/QuoteBlock";
 import ThreeSpotLayout from "@/components/ThreeSpotLayout";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
+import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 
 export type AgendaWithIncludes = (Agenda & {
   agendaTasks: (AgendaTask & {
@@ -54,7 +55,7 @@ export interface SaveTaskAction {
   }
 }
 
-type AgendaPageClientAction = AgendaTaskRowAction | SaveTaskAction | DialogAction;
+type AgendaPageClientAction = AgendaTaskRowAction | SaveTaskAction | DialogAction | ServerErrorAction;
 
 function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAction) {
   switch (action.type) {
@@ -82,7 +83,7 @@ function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAct
   }
 }
 
-function serverActionHandler(action: AgendaPageClientAction) {
+async function serverActionHandler(action: AgendaPageClientAction) {
   switch (action.type) {
     case 'toggle':
       updateTask(action.task.id, {
@@ -101,20 +102,12 @@ function serverActionHandler(action: AgendaPageClientAction) {
 }
 
 export default function AgendaPageClient({ date, agenda, quote, allTags }: AgendaPageClientProps) {
-  const [state, dispatchAction] = useImmerReducer<AgendaPageClientState, AgendaPageClientAction>(clientReducer, {
+  const [state, dispatchAction] = useClientServerReducer<AgendaPageClientState, AgendaPageClientAction>(clientReducer, serverActionHandler, {
     agenda,
     allTags
   });
 
-  const isEmbedded = useIsEmbedded();
-
   const tasks = (state.agenda?.agendaTasks ?? []).filter(at => !at.deferred).map(at => at.task)
-
-  const handleAction = useCallback((action: AgendaPageClientAction) => {
-    if (isEmbedded) return;
-    serverActionHandler(action);
-    dispatchAction(action);
-  }, [dispatchAction, isEmbedded]);
 
   const displayDate = DateTime.fromISO(date).toLocaleString({ month: 'short', day: 'numeric' });
 
@@ -122,8 +115,8 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
     <AppLayout user={true} breadcrumbs={[{ label: 'Agenda', url: '/today', key: 'agenda' }]}>
       <EditTaskDialog
        task={tasks.find(t => t.id === state.dialog?.taskId)}
-       onClose={() => handleAction({ type: 'close-dialog' })}
-       onSave={(taskId, data) => handleAction({ type: 'save-task', taskId, data })}
+       onClose={() => dispatchAction({ type: 'close-dialog' })}
+       onSave={(taskId, data) => dispatchAction({ type: 'save-task', taskId, data })}
        allTags={state.allTags}
        />
       <ThreeSpotLayout>
@@ -135,7 +128,7 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
         </View>
         <Flex gridArea="c" direction="column" width="100%" gap="size-100" maxWidth="size-5000" marginX={{ base: 'auto', 'M': 0 }}>
           {tasks.map(task => (
-            <AgendaTaskRow key={task.id} task={task} onAction={handleAction} />
+            <AgendaTaskRow key={task.id} task={task} onAction={dispatchAction} />
           ))}
         </Flex>
       </ThreeSpotLayout>
