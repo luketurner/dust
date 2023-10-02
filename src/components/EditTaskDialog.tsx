@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, ComboBox, Item, Picker, TagGroup, TextArea, Checkbox } from "@adobe/react-spectrum";
+import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, Item, Picker, TagGroup, TextArea, Checkbox } from "@adobe/react-spectrum";
 import { Tag, Task } from "@prisma/client";
 import { useCallback, useMemo } from "react";
 import { useImmer } from "use-immer";
@@ -93,7 +93,7 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
         <TextField label="Name" value={data.name} onChange={handleNameChange} />
         <Checkbox isSelected={data.important} onChange={handleImportantChange}>Important</Checkbox>
         <Checkbox isSelected={data.urgent} onChange={handleUrgentChange}>Urgent</Checkbox>
-        
+
         <TagGroup
           items={data.tags}
           onRemove={handleRemoveTag}

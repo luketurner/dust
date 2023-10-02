@@ -2,8 +2,6 @@
 
 import { Flex, Heading, View } from "@adobe/react-spectrum";
 import { Agenda, AgendaTask, Quote, Tag, Task } from "@prisma/client";
-import { useCallback } from "react";
-import { useImmerReducer } from "use-immer";
 import AgendaTaskRow, { AgendaTaskRowAction } from "@/components/AgendaTaskRow";
 import { updateTask } from "@/actions/task";
 import { updateAgendaTask } from "@/actions/agendaTask";
@@ -12,7 +10,6 @@ import { DateTime } from "luxon";
 import AppLayout from "@/components/AppLayout";
 import QuoteBlock from "@/components/QuoteBlock";
 import ThreeSpotLayout from "@/components/ThreeSpotLayout";
-import { useIsEmbedded } from "@/hooks/isEmbedded";
 import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ToastQueue } from "@react-spectrum/toast";
 
