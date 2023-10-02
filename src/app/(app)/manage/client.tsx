@@ -81,6 +81,7 @@ function clientReducer(state: ManagePageClientState, action: ManagePageClientAct
     case 'delete-tag':
       state.tags = state.tags.filter((tag) => tag.id !== action.tagId);
       state.selectedTags = state.selectedTags.filter((id) => id !== action.tagId);
+      for (const task of state.tasks) task.tags = task.tags.filter(({ id }) => id !== action.tagId);
       break;
     case 'open-add-task':
       state.dialog = { type: 'add-task' }
