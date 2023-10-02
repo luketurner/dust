@@ -14,6 +14,7 @@ import QuoteBlock from "@/components/QuoteBlock";
 import ThreeSpotLayout from "@/components/ThreeSpotLayout";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
 import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
+import { ToastQueue } from "@react-spectrum/toast";
 
 export type AgendaWithIncludes = (Agenda & {
   agendaTasks: (AgendaTask & {
@@ -83,6 +84,9 @@ function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAct
       taskToUpdate.important = action.data.important ?? false;
       if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.allTags.find((tag) => tag.id === id));
       delete state.dialog;
+      break;
+    case 'server-error':
+      ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
       break;
   }
 }
