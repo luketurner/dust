@@ -4,13 +4,14 @@ import { Tag, Tag as TagType, Task, Task as TaskType } from "@prisma/client";
 import { Key, useCallback } from "react";
 import AppLayout from "@/components/AppLayout";
 import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
-import { ActionButton, ActionMenu, Checkbox, CheckboxGroup, Item, ListView, Selection, Text, View } from "@adobe/react-spectrum";
+import { ActionButton, ActionMenu, Checkbox, CheckboxGroup, Flex, Heading, Item, ListView, Selection, Text, View } from "@adobe/react-spectrum";
 import EditTagDialog from "@/components/EditTagDialog";
 import { createTag, deleteTag, updateTag } from "@/actions/tag";
 import { ToastQueue } from "@react-spectrum/toast";
 import SidebarLayout from "@/components/SidebarLayout";
 import EditTaskDialog from "@/components/EditTaskDialog";
 import { createTask, deleteTask, updateTask } from "@/actions/task";
+import Add from '@spectrum-icons/workflow/Add';
 
 type TaskWithTags = TaskType & { tags: TagType[] };
 
@@ -30,6 +31,8 @@ interface ManagePageClientState {
   }
   showActive: boolean;
   showArchived: boolean;
+  showNonUrgent: boolean;
+  showNonImportant: boolean;
 }
 
 interface SelectTagsAction { type: 'select-tags'; tags: Set<Key> | 'all'; }
@@ -41,6 +44,7 @@ interface EditTagAction { type: 'edit-tag'; tagId: string, data: Partial<Tag>; }
 interface DeleteTagAction { type: 'delete-tag'; tagId: string; }
 interface CloseDialogAction { type: 'close-dialog'; }
 interface ChangeDisplayFiltersAction { type: 'change-display-filters'; data: string[]; }
+interface ChangeSignficanceFiltersAction { type: 'change-significance-filters'; data: string[]; }
 
 interface OpenAddTaskAction { type: 'open-add-task'; }
 interface OpenEditTaskAction { type: 'open-edit-task'; taskId: string; }
@@ -52,7 +56,7 @@ interface ArchiveTaskAction { type: 'archive-task'; taskId: string; }
 interface UnarchiveTaskAction { type: 'unarchive-task'; taskId: string; }
 
 
-type ManagePageClientAction = ServerErrorAction | SelectTagsAction | OpenAddTagAction | OpenEditTagAction | AddTagAction | EditTagAction | DeleteTagAction | AddTagFinishedAction | CloseDialogAction | ChangeDisplayFiltersAction | OpenAddTaskAction | OpenEditTaskAction | AddTaskAction | AddTaskFinishedAction | EditTaskAction | DeleteTaskAction | ArchiveTaskAction | UnarchiveTaskAction;
+type ManagePageClientAction = ChangeSignficanceFiltersAction | ServerErrorAction | SelectTagsAction | OpenAddTagAction | OpenEditTagAction | AddTagAction | EditTagAction | DeleteTagAction | AddTagFinishedAction | CloseDialogAction | ChangeDisplayFiltersAction | OpenAddTaskAction | OpenEditTaskAction | AddTaskAction | AddTaskFinishedAction | EditTaskAction | DeleteTaskAction | ArchiveTaskAction | UnarchiveTaskAction;
 
 function clientReducer(state: ManagePageClientState, action: ManagePageClientAction) {
   switch (action.type) {
@@ -117,6 +121,10 @@ function clientReducer(state: ManagePageClientState, action: ManagePageClientAct
       state.showActive = action.data.includes('active');
       state.showArchived = action.data.includes('archived');
       break;
+    case 'change-significance-filters':
+      state.showNonImportant = !action.data.includes('important');
+      state.showNonUrgent = !action.data.includes('urgent');
+      break;
     case 'server-error':
       ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
       break;
@@ -160,12 +168,15 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     selectedTags: [],
     showActive: true,
     showArchived: false,
+    showNonImportant: true,
+    showNonUrgent: true,
   });
 
   const handleTagSelectionChange = useCallback((keys: Selection) => { dispatch({ type: 'select-tags', tags: keys }) }, []);
   const handleAddTag = useCallback(() => { dispatch({ type: 'open-add-tag' }) }, []);
 
   const handleDisplayFilterChange = useCallback((data: string[]) => { dispatch({ type: 'change-display-filters', data }) }, []);
+  const handleSignificanceFilterChange = useCallback((data: string[]) => { dispatch({ type: 'change-significance-filters', data }) }, []);
 
   const handleTagMenuAction = useCallback((tagId: string, key: Key) => {
     switch (key) {
@@ -199,6 +210,8 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     if (!state.showActive && !task.archived) return false;
     if (!state.showArchived && task.archived) return false;
     if (state.selectedTags.length > 0 && !task.tags.some((tag) => state.selectedTags.includes(tag.id))) return false;
+    if (!state.showNonImportant && !task.important) return false;
+    if (!state.showNonUrgent && !task.urgent) return false;
     return true;
   });
 
@@ -225,7 +238,15 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
             <Checkbox value="active">Active</Checkbox>
             <Checkbox value="archived">Archived</Checkbox>
           </CheckboxGroup>
-          <ListView items={state.tags} selectionMode="multiple" aria-label="List of selected tags" onSelectionChange={handleTagSelectionChange} width="single-line-width">
+          <CheckboxGroup label="Significance filters" value={[...state.showNonImportant ? [] : ['important'], ...state.showNonUrgent ? [] : ['urgent'] ]} onChange={handleSignificanceFilterChange}>
+            <Checkbox value="important">Important</Checkbox>
+            <Checkbox value="urgent">Urgent</Checkbox>
+          </CheckboxGroup>
+          <Flex direction="row" alignItems="center" justifyContent="space-between" marginTop="single-line-height">
+            <Heading UNSAFE_className="text-lg" level={2}>Tags</Heading>
+            <ActionButton onPress={handleAddTag} isQuiet><Add /><Text>New tag...</Text></ActionButton>
+          </Flex>
+          <ListView isQuiet items={state.tags} selectionMode="multiple" aria-label="List of selected tags" onSelectionChange={handleTagSelectionChange} width="single-line-width">
             {(tag) => (
               <Item key={tag.id} textValue={tag.name}>
                 <Text>{tag.name}</Text>
@@ -236,7 +257,6 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
               </Item>
             )}
           </ListView>
-          <ActionButton onPress={handleAddTag}>Add tag...</ActionButton>
         </View>
         <View gridArea="content" width="100%">
           <ListView items={filteredTasks} aria-label="List of tasks" width="100%">
