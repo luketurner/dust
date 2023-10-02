@@ -2,7 +2,7 @@
 
 import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, Item, Picker, TagGroup, TextArea, Checkbox } from "@adobe/react-spectrum";
 import { Tag, Task } from "@prisma/client";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, Key } from "react";
 import { useImmer } from "use-immer";
 
 export interface EditTaskDialogData {
@@ -17,13 +17,15 @@ export interface EditTaskDialogProps {
   task: (Task & { tags: Tag[] }) | null | undefined
   allTags: Tag[]
   onClose(): void
-  onSave(taskId: string, data: EditTaskDialogData): void
+  onSave(taskId: string | null, data: EditTaskDialogData): void
+  isOpen?: boolean;
+  isCreate?: boolean;
 }
 
-export default function EditTaskDialog({ task, onClose, onSave, allTags }: EditTaskDialogProps) {
+export default function EditTaskDialog({ task, onClose, onSave, allTags, isCreate, isOpen }: EditTaskDialogProps) {
   return (
     <DialogContainer onDismiss={onClose}>
-      {task && <EditTaskDialogInner allTags={allTags} key={task.id} task={task} onClose={onClose} onSave={onSave} />}
+      {isOpen && <EditTaskDialogInner allTags={allTags} key={isCreate ? 'create' : task!.id} task={task} onClose={onClose} onSave={onSave} isCreate={isCreate} />}
     </DialogContainer>
   )
 }
@@ -63,16 +65,16 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
   }, []);
 
   const handleSave = useCallback(() => {
-    onSave(task?.id, data)
+    onSave(task ? task.id : null, data)
   }, [onSave, task, data]);
 
-  const handleAddTag = useCallback((key: string) => {
+  const handleAddTag = useCallback((key: Key) => {
     setData(data => {
-      data.tags.push(key)
+      data.tags.push(key as string)
     })
   }, []);
 
-  const handleRemoveTag = useCallback((key: string) => {
+  const handleRemoveTag = useCallback((key: Key) => {
     setData(data => {
       data.tags = data.tags.filter(id => id !== key);
     })
@@ -94,7 +96,7 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
         <Checkbox isSelected={data.important} onChange={handleImportantChange}>Important</Checkbox>
         <Checkbox isSelected={data.urgent} onChange={handleUrgentChange}>Urgent</Checkbox>
 
-        <TagGroup
+        {/* <TagGroup
           items={data.tags}
           onRemove={handleRemoveTag}
           aria-label="Tags for task"
@@ -103,7 +105,7 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
         </TagGroup>
         <Picker label="Add tag" onSelectionChange={handleAddTag}>
           {allTags.map(tag => <Item key={tag.id}>{tag.name}</Item>)}
-        </Picker>
+        </Picker> */}
         <TextArea label="Description" value={data.description} onChange={handleDescriptionChange} />
       </Form>
       </Content>

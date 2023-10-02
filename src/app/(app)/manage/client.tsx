@@ -1,13 +1,16 @@
 'use client';
 
-import { Tag, Tag as TagType, Task as TaskType } from "@prisma/client";
+import { Tag, Tag as TagType, Task, Task as TaskType } from "@prisma/client";
 import { Key, useCallback } from "react";
 import AppLayout from "@/components/AppLayout";
 import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
-import { ActionButton, ActionMenu, Item, ListView, Selection, Text } from "@adobe/react-spectrum";
+import { ActionButton, ActionMenu, Checkbox, CheckboxGroup, Item, ListView, Selection, Text, View } from "@adobe/react-spectrum";
 import EditTagDialog from "@/components/EditTagDialog";
 import { createTag, deleteTag, updateTag } from "@/actions/tag";
 import { ToastQueue } from "@react-spectrum/toast";
+import SidebarLayout from "@/components/SidebarLayout";
+import EditTaskDialog from "@/components/EditTaskDialog";
+import { createTask, deleteTask, updateTask } from "@/actions/task";
 
 type TaskWithTags = TaskType & { tags: TagType[] };
 
@@ -21,9 +24,12 @@ interface ManagePageClientState {
   tags: TagType[]
   selectedTags: string[]
   dialog?: {
-    type: 'add-tag' | 'edit-tag'
+    type: 'add-tag' | 'edit-tag' | 'add-task' | 'edit-task'
     tagId?: string
+    taskId?: string
   }
+  showActive: boolean;
+  showArchived: boolean;
 }
 
 interface SelectTagsAction { type: 'select-tags'; tags: Set<Key> | 'all'; }
@@ -34,8 +40,19 @@ interface AddTagFinishedAction { type: 'add-tag-finished'; tag: Tag; }
 interface EditTagAction { type: 'edit-tag'; tagId: string, data: Partial<Tag>; }
 interface DeleteTagAction { type: 'delete-tag'; tagId: string; }
 interface CloseDialogAction { type: 'close-dialog'; }
+interface ChangeDisplayFiltersAction { type: 'change-display-filters'; data: string[]; }
 
-type ManagePageClientAction = ServerErrorAction | SelectTagsAction | OpenAddTagAction | OpenEditTagAction | AddTagAction | EditTagAction | DeleteTagAction | AddTagFinishedAction | CloseDialogAction;
+interface OpenAddTaskAction { type: 'open-add-task'; }
+interface OpenEditTaskAction { type: 'open-edit-task'; taskId: string; }
+interface AddTaskAction { type: 'add-task'; data: Partial<Task>; }
+interface AddTaskFinishedAction { type: 'add-task-finished'; task: TaskWithTags; }
+interface EditTaskAction { type: 'edit-task'; taskId: string, data: Partial<Task> & { tags?: string[] }; }
+interface DeleteTaskAction { type: 'delete-task'; taskId: string; }
+interface ArchiveTaskAction { type: 'archive-task'; taskId: string; }
+interface UnarchiveTaskAction { type: 'unarchive-task'; taskId: string; }
+
+
+type ManagePageClientAction = ServerErrorAction | SelectTagsAction | OpenAddTagAction | OpenEditTagAction | AddTagAction | EditTagAction | DeleteTagAction | AddTagFinishedAction | CloseDialogAction | ChangeDisplayFiltersAction | OpenAddTaskAction | OpenEditTaskAction | AddTaskAction | AddTaskFinishedAction | EditTaskAction | DeleteTaskAction | ArchiveTaskAction | UnarchiveTaskAction;
 
 function clientReducer(state: ManagePageClientState, action: ManagePageClientAction) {
   switch (action.type) {
@@ -61,8 +78,44 @@ function clientReducer(state: ManagePageClientState, action: ManagePageClientAct
       state.tags = state.tags.filter((tag) => tag.id !== action.tagId);
       state.selectedTags = state.selectedTags.filter((id) => id !== action.tagId);
       break;
+    case 'open-add-task':
+      state.dialog = { type: 'add-task' }
+      break;
+    case 'open-edit-task':
+      state.dialog = { type: 'edit-task', taskId: action.taskId }
+      break;
+    case 'add-task-finished':
+      state.tasks.push(action.task);
+      delete state.dialog;
+      break;
+    case 'edit-task':
+      const taskToUpdate = state.tasks.find(({ id }) => id === action.taskId)
+      if (taskToUpdate && typeof action.data.name === 'string') {
+        if (typeof action.data.name === 'string') taskToUpdate.name = action.data.name;
+        if (typeof action.data.description === 'string') taskToUpdate.description = action.data.description;
+        taskToUpdate.urgent = action.data.urgent ?? false;
+        taskToUpdate.important = action.data.important ?? false;
+        if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.tags.find((tag) => tag.id === id)).filter(v => !!v) as Tag[];
+      }
+      delete state.dialog;
+      break;
+    case 'archive-task':
+      const taskToArchive = state.tasks.find(({ id }) => id === action.taskId)
+      if (taskToArchive) taskToArchive.archived = true;
+      break;
+    case 'unarchive-task':
+      const taskToRestore = state.tasks.find(({ id }) => id === action.taskId)
+      if (taskToRestore) taskToRestore.archived = false;
+      break;
+    case 'delete-task':
+      state.tasks = state.tasks.filter((task) => task.id !== action.taskId);
+      break;
     case 'close-dialog':
       delete state.dialog;
+      break;
+    case 'change-display-filters':
+      state.showActive = action.data.includes('active');
+      state.showArchived = action.data.includes('archived');
       break;
     case 'server-error':
       ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
@@ -74,12 +127,27 @@ async function serverReducer(action: ManagePageClientAction) {
   switch (action.type) {
     case 'add-tag':
       const tag = await createTag(action.data);
-      return { type: 'add-tag-finished', tag };
+      return { type: 'add-tag-finished', tag } as ManagePageClientAction;
     case 'edit-tag':
       await updateTag(action.tagId, action.data)
       break;
     case 'delete-tag':
       await deleteTag(action.tagId);
+      break;
+    case 'add-task':
+      const task = await createTask(action.data);
+      return { type: 'add-task-finished', task } as ManagePageClientAction;
+    case 'archive-task':
+      await updateTask(action.taskId, { archived: true });
+      break;
+    case 'unarchive-task':
+      await updateTask(action.taskId, { archived: false });
+      break;
+    case 'edit-task':
+      await updateTask(action.taskId, action.data)
+      break;
+    case 'delete-task':
+      await deleteTask(action.taskId);
       break;
   }
 }
@@ -90,15 +158,14 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     tasks: initialTasks,
     tags: initialTags,
     selectedTags: [],
+    showActive: true,
+    showArchived: false,
   });
 
-  const handleTagSelectionChange = useCallback((keys: Selection) => {
-    dispatch({ type: 'select-tags', tags: keys })
-  }, []);
+  const handleTagSelectionChange = useCallback((keys: Selection) => { dispatch({ type: 'select-tags', tags: keys }) }, []);
+  const handleAddTag = useCallback(() => { dispatch({ type: 'open-add-tag' }) }, []);
 
-  const handleAddTag = useCallback(() => {
-    dispatch({ type: 'open-add-tag' })
-  }, []);
+  const handleDisplayFilterChange = useCallback((data: string[]) => { dispatch({ type: 'change-display-filters', data }) }, []);
 
   const handleTagMenuAction = useCallback((tagId: string, key: Key) => {
     switch (key) {
@@ -111,6 +178,30 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     }
   }, []);
 
+  const handleTaskMenuAction = useCallback((taskId: string, key: Key) => {
+    switch (key) {
+      case 'edit':
+        dispatch({ type: 'open-edit-task', taskId })
+        break;
+      case 'archive':
+        dispatch({ type: 'archive-task', taskId });
+        break;
+      case 'unarchive':
+        dispatch({ type: 'unarchive-task', taskId });
+        break;
+      case 'delete':
+        dispatch({ type: 'delete-task', taskId })
+        break;
+    }
+  }, []);
+
+  const filteredTasks = state.tasks.filter((task) => {
+    if (!state.showActive && !task.archived) return false;
+    if (!state.showArchived && task.archived) return false;
+    if (state.selectedTags.length > 0 && !task.tags.some((tag) => state.selectedTags.includes(tag.id))) return false;
+    return true;
+  });
+
   return (
     <AppLayout user={true} breadcrumbs={[{ label: 'Manage', url: '/manage', key: 'manage' }]}>
       <EditTagDialog
@@ -120,18 +211,48 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
        isOpen={state.dialog?.type === 'add-tag' || state.dialog?.type === 'edit-tag'}
        isCreate={state.dialog?.type === 'add-tag'}
        />
-      <ListView items={state.tags} selectionMode="multiple" aria-label="List of selected tags" onSelectionChange={handleTagSelectionChange}>
-        {(tag) => (
-          <Item key={tag.id} textValue={tag.name}>
-            <Text>{tag.name}</Text>
-            <ActionMenu onAction={(key) => handleTagMenuAction(tag.id, key)}>
-              <Item key="edit">Edit...</Item>
-              <Item key="delete">Delete</Item>
-            </ActionMenu>
-          </Item>
-        )}
-      </ListView>
-      <ActionButton onPress={handleAddTag}>Add tag...</ActionButton>
+      <EditTaskDialog
+       onSave={(taskId, data) => dispatch(taskId ? { type: 'edit-task', taskId, data } : { type: 'add-task', data })}
+       onClose={() => dispatch({ type: 'close-dialog' })}
+       task={state.tasks.find(({id}) => id === state.dialog?.taskId)}
+       isOpen={state.dialog?.type === 'add-task' || state.dialog?.type === 'edit-task'}
+       isCreate={state.dialog?.type === 'add-task'}
+       allTags={state.tags}
+      />
+      <SidebarLayout>
+        <View gridArea="sidebar">
+          <CheckboxGroup label="Display filters" value={[...state.showActive ? ['active'] : [], ...state.showArchived ? ['archived'] : [] ]} onChange={handleDisplayFilterChange}>
+            <Checkbox value="active">Active</Checkbox>
+            <Checkbox value="archived">Archived</Checkbox>
+          </CheckboxGroup>
+          <ListView items={state.tags} selectionMode="multiple" aria-label="List of selected tags" onSelectionChange={handleTagSelectionChange} width="single-line-width">
+            {(tag) => (
+              <Item key={tag.id} textValue={tag.name}>
+                <Text>{tag.name}</Text>
+                <ActionMenu onAction={(key) => handleTagMenuAction(tag.id, key)}>
+                  <Item key="edit">Edit...</Item>
+                  <Item key="delete">Delete</Item>
+                </ActionMenu>
+              </Item>
+            )}
+          </ListView>
+          <ActionButton onPress={handleAddTag}>Add tag...</ActionButton>
+        </View>
+        <View gridArea="content" width="100%">
+          <ListView items={filteredTasks} aria-label="List of tasks" width="100%">
+            {(task) => (
+              <Item key={task.id} textValue={task.name}>
+                <Text>{task.name}</Text>
+                <ActionMenu onAction={(key) => handleTaskMenuAction(task.id, key)}>
+                  <Item key="edit">Edit...</Item>
+                  {task.archived ? <Item key="unarchive">Restore</Item> : <Item key="archive">Archive</Item>}                  
+                  <Item key="delete">Delete</Item>
+                </ActionMenu>
+              </Item>
+            )}
+          </ListView>
+        </View>
+      </SidebarLayout>
     </AppLayout>
   );
 }

@@ -54,16 +54,33 @@ export async function updateTask(taskId: string, data: {
 /**
  * (Server Action) Creates a new Task for the currently logged-in user with reasonable defaults.
  */
-export async function createTask(): Promise<void> {
+export async function createTask(data: {
+  name?: string
+  archived?: boolean
+  completed?: boolean
+  tags?: string[]
+  description?: string
+  important?: boolean
+  urgent?: boolean
+}): Promise<Task & { tags: Tag[] }> {
   const { user } = await getServerUserOrThrow();
 
   const highestDisplayOrder = await getHighestDisplayOrderServer(user.id);
   
-  await prisma.task.create({
+  return await prisma.task.create({
     data: {
       userId: user.id,
-      name: 'New task',
+      name: data.name ?? 'Unnamed task',
       displayOrder: highestDisplayOrder + 1,
+      archived: data.archived,
+      completed: data.completed,
+      description: data.description,
+      important: data.important,
+      urgent: data.urgent,
+      tags: (data.tags ? { connect: data.tags.map(id => ({ id, userId: user.id })) } : undefined)
+    },
+    include: {
+      tags: true
     }
   });
 }

@@ -123,6 +123,7 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
        onClose={() => dispatchAction({ type: 'close-dialog' })}
        onSave={(taskId, data) => dispatchAction({ type: 'save-task', taskId, data })}
        allTags={state.allTags}
+       isOpen={!!state.dialog?.taskId}
        />
       <ThreeSpotLayout>
         <Heading gridArea="a" UNSAFE_className="text-4xl" level={1}  justifySelf={{base: 'center', 'M': 'end'}}>
