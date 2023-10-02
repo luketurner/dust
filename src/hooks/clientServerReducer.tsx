@@ -26,9 +26,11 @@ export function useClientServerReducer<S, A extends Action>(
     try {
       const result = await serverReducer(action);
       if (result) {
+        console.debug("[clientServerReducer] Server reducer dispatched", result);
         clientDispatch(result);
       }
     } catch (e) {
+      console.debug("[clientServerReducer] Server error", action);
       clientDispatch({ type: 'server-error', failedAction: action, error: e })
     }
 
@@ -36,6 +38,7 @@ export function useClientServerReducer<S, A extends Action>(
 
   const dispatch = useCallback((action: A | ServerErrorAction) => {
     if (isEmbedded) return;
+    console.debug("[clientServerReducer] Action dispatched", action);
     clientDispatch(action);
     if (action.type !== 'server-error') serverDispatch(action as A);
   }, [clientDispatch, serverDispatch, isEmbedded]);
