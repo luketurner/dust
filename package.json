@@ -17,6 +17,7 @@
     "@adobe/react-spectrum": "^3.30.0",
     "@auth/prisma-adapter": "^1.0.2",
     "@prisma/client": "^5.3.1",
+    "@react-spectrum/toast": "^3.0.0-beta.4",
     "@types/luxon": "^3.3.2",
     "@types/node": "20.6.1",
     "@types/react": "18.2.21",
