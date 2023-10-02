@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, Item, Picker, TagGroup, TextArea, Checkbox } from "@adobe/react-spectrum";
+import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, TagGroup, TextArea, Checkbox, Item, ListBox, CheckboxGroup, ToggleButton, Flex } from "@adobe/react-spectrum";
 import { Tag, Task } from "@prisma/client";
 import { useCallback, useMemo, Key } from "react";
 import { useImmer } from "use-immer";
@@ -80,6 +80,16 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
     })
   }, []);
 
+  const handleToggleTag = useCallback((tagId: string, value: boolean) => {
+    setData(data => {
+      if (value && !data.tags.includes(tagId)) {
+        data.tags.push(tagId);
+      } else {
+        data.tags = data.tags.filter(t => t !== tagId)
+      }
+    })
+  }, []);
+
   const allTagsById = useMemo(() => {
     return (allTags ?? []).reduce((allTagsById, tag) => {
       allTagsById[tag.id] = tag;
@@ -91,23 +101,17 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
     <Dialog>
       <Heading>Edit task</Heading>
       <Content>
-      <Form maxWidth="size-3600">
-        <TextField label="Name" value={data.name} onChange={handleNameChange} />
-        <Checkbox isSelected={data.important} onChange={handleImportantChange}>Important</Checkbox>
-        <Checkbox isSelected={data.urgent} onChange={handleUrgentChange}>Urgent</Checkbox>
-
-        {/* <TagGroup
-          items={data.tags}
-          onRemove={handleRemoveTag}
-          aria-label="Tags for task"
-          label="Tags">
-          {tagId => <Item key={tagId}>{allTagsById[tagId].name}</Item>}
-        </TagGroup>
-        <Picker label="Add tag" onSelectionChange={handleAddTag}>
-          {allTags.map(tag => <Item key={tag.id}>{tag.name}</Item>)}
-        </Picker> */}
-        <TextArea label="Description" value={data.description} onChange={handleDescriptionChange} />
-      </Form>
+        <Form maxWidth="size-3600">
+          <TextField label="Name" value={data.name} onChange={handleNameChange} />
+          <Checkbox isSelected={data.important} onChange={handleImportantChange}>Important</Checkbox>
+          <Checkbox isSelected={data.urgent} onChange={handleUrgentChange}>Urgent</Checkbox>
+          <Flex direction="row" wrap gap="size-100">
+            {allTags.map((tag) => (
+              <ToggleButton key={tag.id} isSelected={data.tags.includes(tag.id)} onChange={(v: boolean) => handleToggleTag(tag.id, v)}>{tag.name}</ToggleButton>
+            ))}
+          </Flex>
+          <TextArea label="Description" value={data.description} onChange={handleDescriptionChange} />
+        </Form>
       </Content>
       <ButtonGroup>
         <Button variant="secondary" onPress={onClose}>Cancel</Button>
