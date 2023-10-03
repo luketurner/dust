@@ -19,15 +19,11 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
   const handleMenuAction = useCallback((key: string) => {
     if (isEmbedded) return;
     switch (key) {
-      case 'login':
-        signIn('github');
-        break;
-      case 'logout':
-        signOut();
-        break;
-      case 'manage':
-        router.push('/manage');
-        break;
+      case 'login': return signIn('github');
+      case 'logout': return signOut();
+      case 'manage': return router.push('/manage');
+      case 'today': return router.push('/today');
+      case 'settings': return router.push('/settings');
     }
   }, [router, isEmbedded]);
 
@@ -52,7 +48,9 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
               <ShowMenu />
             </ActionButton>
             <Menu onAction={handleMenuAction}>
+              {user && <Item key="today">Daily agenda</Item>}
               {user && <Item key="manage">Manage tasks</Item>}
+              {user && <Item key="settings">Settings</Item>}
               {user && <Item key="logout">Log out</Item>}
               {!user && <Item key="login">Log in</Item>}
             </Menu>
