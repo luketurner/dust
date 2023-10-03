@@ -1,8 +1,8 @@
 'use client';
 
-import AgendaPageClient from "@/app/(app)/[date]/client";
+import AgendaPageClient from "@/app/(app)/today/client";
 import TinyDemoPage from "@/components/TinyDemoPage";
-import { Agenda, AgendaTask, Quote, Task } from "@prisma/client";
+import { Quote, Task } from "@prisma/client";
 
 export interface TinyAgendaPageProps {
   quote: Quote;
