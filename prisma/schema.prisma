@@ -46,6 +46,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
   tasks         Task[]
+  agendas       Agenda[]
+  projects      Project[]
+  gitExportConfigs GitExportConfig[]
 }
 
 model VerificationToken {
@@ -79,6 +82,7 @@ model Task {
 model Agenda {
   id           String @id @default(cuid())
   userId       String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   date         DateTime @db.Date
   agendaTasks  AgendaTask[]
 
@@ -118,6 +122,7 @@ model TaskRelation {
 model Project {
   id        String @id @default(cuid())
   userId    String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name      String
   tasks     Task[]
 
@@ -140,4 +145,17 @@ model Quote {
   days          Day[]
 
   @@index(lastQuotedOn)
+}
+
+model GitExportConfig {
+  id            String @id @default(cuid())
+  userId        String
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  sshPrivateKey String?
+  sshPublicKey  String?
+  remoteUrl     String?
+  branchName    String @default("main")
+
+  @@index(userId)
 }
