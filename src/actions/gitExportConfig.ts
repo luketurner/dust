@@ -4,31 +4,39 @@ import { getServerUserOrThrow } from "@/auth";
 import { prisma } from "@/db/client";
 import { GitExportConfig } from "@prisma/client";
 
-export async function upsertSingleGitExportConfig(id: string | null, data: Partial<Pick<GitExportConfig, 'branchName' | 'remoteUrl' | 'name'>>): Promise<void> {
+export async function createGitExportConfig(): Promise<GitExportConfig> {
   const { user } = await getServerUserOrThrow();
-  if (id) {
-    await prisma.gitExportConfig.update({
-      where: {
-        id,
-        userId: user.id
-      },
-      data: {
-        name: data.name,
-        remoteUrl: data.remoteUrl,
-        branchName: data.branchName
-      }
-    });
-  } else {
-    await prisma.gitExportConfig.create({
-      data: {
-        userId: user.id,
-        name: data.name ?? "",
-        remoteUrl: data.remoteUrl,
-        branchName: data.branchName
-      }
-    });
-  }
+  return await prisma.gitExportConfig.create({
+    data: {
+      userId: user.id,
+      name: "Unnamed export config"
+    }
+  });
+}
 
+export async function updateGitExportConfig(configId: string, data: Partial<GitExportConfig>): Promise<void> {
+  const { user } = await getServerUserOrThrow();
+  await prisma.gitExportConfig.update({
+    where: {
+      id: configId,
+      userId: user.id
+    },
+    data: {
+      name: data.name,
+      branchName: data.branchName,
+      remoteUrl: data.remoteUrl,
+    }
+  });
+}
+
+export async function removeGitExportConfig(configId: string): Promise<void> {
+  const { user } = await getServerUserOrThrow();
+  await prisma.gitExportConfig.delete({
+    where: {
+      id: configId,
+      userId: user.id
+    }
+  });
 }
 
 export async function generateSSHKeys(configId: string): Promise<{ sshPublicKey: string }> {
