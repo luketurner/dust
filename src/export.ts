@@ -1,6 +1,6 @@
 import { GitExportConfig, User } from "@prisma/client";
 import { prisma } from "./db/client";
-import { mkdtemp, writeFile } from "fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "fs/promises";
 import { exec as execCb } from "child_process";
 import { promisify } from "node:util";
 import { join } from "path";
@@ -10,29 +10,30 @@ import { tmpdir } from "os";
 const exec = promisify(execCb)
 
 export async function exportUserDataToGitRemote(user: User, config: GitExportConfig) {
-  // TODO -- make this configurable
-  const branch = 'main';
-
   // TODO -- support manually specifying authorized keys?
 
   const tmpDir = await mkdtemp(join(tmpdir(), `git-export-${config.id}-`));
   const privateKeyFilename = join(tmpDir, 'ssh_key');
   const gitRepoDir = join(tmpDir, 'repo');
-  // await mkdir(gitRepoDir);
-  await exec(`git init --quiet '${gitRepoDir}'`);
-  await exec(`git remote add origin '${config.remoteUrl}'`, { cwd: gitRepoDir });
-  await exec(`git fetch --depth 1 origin ${branch}`, {
+  await writeFile(privateKeyFilename, Buffer.from(config.sshPrivateKey!, 'base64'))
+  await mkdir(gitRepoDir);
+  await exec(`git init --quiet "${gitRepoDir}"`);
+  await exec(`git remote add origin "${config.remoteUrl}"`, { cwd: gitRepoDir });
+  await exec(`git fetch --depth 1 origin "${config.branchName}"`, {
     cwd: gitRepoDir,
     env: {
-      GIT_SSH_COMMAND: `ssh -i ${privateKeyFilename} -o IdentitiesOnly=yes`
+      GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes`
     } as any
   });
-  await exportUserDataToFile(user, join(gitRepoDir, `${user.id}_${config.id}.json`));
-  await exec (`git commit -am "${DateTime.now().toISOTime()} dust export"`, { cwd: gitRepoDir });
-  await exec(`git push origin ${branch}`, {
+  await exec(`git checkout "${config.branchName}"`, { cwd: gitRepoDir });
+  const userDataFilename = `${user.id}_${config.id}.json`;
+  await exportUserDataToFile(user, join(gitRepoDir, userDataFilename));
+  await exec(`git add "${userDataFilename}"`, { cwd: gitRepoDir });
+  await exec(`git commit --allow-empty -m "${DateTime.now().toISOTime()} dust export"`, { cwd: gitRepoDir });
+  await exec(`git push origin "${config.branchName}"`, {
     cwd: gitRepoDir,
     env: {
-      GIT_SSH_COMMAND: `ssh -i ${privateKeyFilename} -o IdentitiesOnly=yes`
+      GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes`
     } as any
   });
 

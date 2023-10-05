@@ -1,6 +1,6 @@
 'use client';
 
-import { createGitExportConfig, generateSSHKeys, removeGitExportConfig, updateGitExportConfig } from "@/actions/gitExportConfig";
+import { createGitExportConfig, generateSSHKeys, removeGitExportConfig, testGitExportConfig, updateGitExportConfig } from "@/actions/gitExportConfig";
 import AppLayout from "@/components/AppLayout";
 import GitConfigEditor from "@/components/GitConfigEditor";
 import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
@@ -35,13 +35,13 @@ interface AddGitConfigAction {
 
 interface AddGitConfigFinishedAction {
   type: 'add-git-config-finished';
-  config: GitExportConfig;
+  config: ClientGitExportConfig;
 }
 
 interface UpdateGitConfigAction {
   type: 'update-git-config';
   configId: string;
-  data: Partial<GitExportConfig>
+  data: Partial<ClientGitExportConfig>
 }
 
 interface RemoveGitConfigAction {
@@ -49,18 +49,17 @@ interface RemoveGitConfigAction {
   configId: string;
 }
 
-interface GenerateSSHKeysAction {
-  type: 'generate-ssh-keys';
+interface TestGitConfigAction {
+  type: 'test-git-config';
   configId: string;
 }
 
-interface GenerateSSHKeysFinishedAction {
-  type: 'generate-ssh-keys-finished';
+interface TestGitConfigFinishedAction {
+  type: 'test-git-config-finished';
   configId: string;
-  publicKey: string;
 }
 
-export type SettingsPageAction = ServerErrorAction | AddGitConfigAction | AddGitConfigFinishedAction | UpdateGitConfigAction | RemoveGitConfigAction | GenerateSSHKeysAction | GenerateSSHKeysFinishedAction;
+export type SettingsPageAction = ServerErrorAction | AddGitConfigAction | AddGitConfigFinishedAction | UpdateGitConfigAction | RemoveGitConfigAction | TestGitConfigAction | TestGitConfigFinishedAction;
 
 function clientReducer(state: SettingsPageState, action: SettingsPageAction) {
   switch (action.type) {
@@ -75,14 +74,11 @@ function clientReducer(state: SettingsPageState, action: SettingsPageAction) {
     case 'remove-git-config':
       state.gitExportConfigs = state.gitExportConfigs.filter(({ id }) => id !== action.configId);
       break;
-    case 'generate-ssh-keys-finished':
-      Object.assign(state.gitExportConfigs.find(({ id }) => id === action.configId)!, {
-        sshPublicKey: action.publicKey,
-        hasPrivateKey: true,
-      })
-      break;
     case 'server-error':
       ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
+      break;
+    case 'test-git-config-finished':
+      ToastQueue.positive('Git export succeeded!');
       break;
   }
 }
@@ -97,8 +93,9 @@ async function serverReducer(action: SettingsPageAction): Promise<SettingsPageAc
     case 'remove-git-config':
       await removeGitExportConfig(action.configId);
       break;
-    case 'generate-ssh-keys':
-      return { type: 'generate-ssh-keys-finished', config: await generateSSHKeys(action.configId) };
+    case 'test-git-config':
+      await testGitExportConfig(action.configId);
+      return { type: 'test-git-config-finished', configId: action.configId };
   }
 }
 
@@ -117,12 +114,12 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
     dispatch({ type: 'remove-git-config', configId })
   }, [dispatch]);
 
-  const handleGitConfigKeyGeneration = useCallback(async (configId: string) => { 
-    dispatch({ type: 'generate-ssh-keys', configId })
-  }, [dispatch]);
-
   const handleGitConfigAdd = useCallback(async () => { 
     dispatch({ type: 'add-git-config' })
+  }, [dispatch]);
+
+  const handleGitConfigTest = useCallback(async (configId: string) => { 
+    dispatch({ type: 'test-git-config', configId })
   }, [dispatch]);
 
   return (
@@ -136,7 +133,7 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
           <TabPanels>
             {(config: ClientGitExportConfig) => (
               <Item key={config.id}>
-                <GitConfigEditor config={config} onSave={handleGitConfigSave} onGenerateKeys={handleGitConfigKeyGeneration} onDelete={handleGitConfigRemove} />
+                <GitConfigEditor config={config} onTest={handleGitConfigTest} onSave={handleGitConfigSave} onDelete={handleGitConfigRemove} />
               </Item>
             )}
           </TabPanels>

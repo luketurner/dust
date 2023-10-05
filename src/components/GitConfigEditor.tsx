@@ -9,19 +9,19 @@ export type GitConfigEditorState = ClientGitExportConfig
 
 export interface GitConfigEditorProps {
   onSave(configId: string, data: GitConfigEditorState): void
-  onGenerateKeys(configId: string): void
   onDelete(configId: string): void
+  onTest(configId: string): void
   config: ClientGitExportConfig
 }
 
-export default function GitConfigEditor({ config, onSave, onGenerateKeys, onDelete }: GitConfigEditorProps) {
+export default function GitConfigEditor({ config, onSave, onDelete, onTest }: GitConfigEditorProps) {
   const [state, setState] = useImmer(config)
   const handleNameChange = useCallback((value: string) => { setState(draft => { draft.name = value; }) }, []);
   const handleRemoteUrlChange = useCallback((value: string) => { setState(draft => { draft.remoteUrl = value; }) }, []);
   const handleBranchNameChange = useCallback((value: string) => { setState(draft => { draft.branchName = value; }) }, []);
 
   const handleDelete = useCallback(() => { onDelete(config.id) }, [onDelete, config.id]);
-  const handleGenerateKeys = useCallback(() => { onGenerateKeys(config.id) }, [onGenerateKeys, config.id]);
+  const handleTest = useCallback(() => { onTest(config.id) }, [onTest, config.id]);
 
   const handleSave = useCallback(() => {
     onSave(config.id, state)
@@ -33,12 +33,11 @@ export default function GitConfigEditor({ config, onSave, onGenerateKeys, onDele
       <TextField label="Remote URL" value={state.remoteUrl ?? ""} onChange={handleRemoteUrlChange} />
       <TextField label="Branch name" value={state.branchName ?? ""} onChange={handleBranchNameChange} />
       <LabeledValue label="SSH Public Key" value={state.sshPublicKey ?? 'Not set'} />
-      <LabeledValue label="SSH Private Key" value={state.hasPrivateKey ? 'Set' : 'Not set'} />
       
       <ButtonGroup>
         <Button variant="negative" onPress={handleDelete}>Delete</Button>
-        <Button variant="secondary" onPress={handleGenerateKeys}>Gen keys</Button>
-        <Button variant="accent" onPress={handleSave}>Save</Button>
+        <Button variant="secondary" onPress={handleTest}>Test</Button>
+        <Button variant="accent" onPress={handleSave}>Update</Button>
       </ButtonGroup>
     </Form>
   )
