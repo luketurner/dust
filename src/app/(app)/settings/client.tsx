@@ -1,19 +1,23 @@
 'use client';
 
-import { createGitExportConfig, generateSSHKeys, removeGitExportConfig, testGitExportConfig, updateGitExportConfig } from "@/actions/gitExportConfig";
+import { createGitExportConfig, removeGitExportConfig, testGitExportConfig, updateGitExportConfig } from "@/actions/gitExportConfig";
 import AppLayout from "@/components/AppLayout";
 import GitConfigEditor from "@/components/GitConfigEditor";
+import GitExportAttemptsTable from "@/components/GitExportAttemptsTable";
 import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ActionButton, Item, TabList, TabPanels, Tabs } from "@adobe/react-spectrum";
-import { GitExportConfig, User } from "@prisma/client";
+import { GitExportAttempt, GitExportConfig, User } from "@prisma/client";
 import { ToastQueue } from "@react-spectrum/toast";
+import { randomUUID } from "crypto";
 import { useCallback } from "react";
+import { v4 as uuid } from "uuid";
 
 export type ClientGitExportConfig = Omit<GitExportConfig, 'sshPrivateKey'> & { hasPrivateKey?: boolean };
+export type ClientGitExportConfigWithAttempts = ClientGitExportConfig & { exportAttempts?: GitExportAttempt[] };
 
 export interface SettingsPageClientProps {
   user: User;
-  gitExportConfigs: ClientGitExportConfig[];
+  gitExportConfigs: ClientGitExportConfigWithAttempts[];
 }
 
 export interface GitExportConfigData {
@@ -26,7 +30,7 @@ export interface GitExportConfigData {
 
 export interface SettingsPageState {
   user: User;
-  gitExportConfigs: ClientGitExportConfig[]
+  gitExportConfigs: ClientGitExportConfigWithAttempts[]
 }
 
 interface AddGitConfigAction {
@@ -52,11 +56,14 @@ interface RemoveGitConfigAction {
 interface TestGitConfigAction {
   type: 'test-git-config';
   configId: string;
+  pendingExportId: string;
 }
 
 interface TestGitConfigFinishedAction {
   type: 'test-git-config-finished';
   configId: string;
+  exportAttempt: GitExportAttempt;
+  pendingExportId: string;
 }
 
 export type SettingsPageAction = ServerErrorAction | AddGitConfigAction | AddGitConfigFinishedAction | UpdateGitConfigAction | RemoveGitConfigAction | TestGitConfigAction | TestGitConfigFinishedAction;
@@ -76,9 +83,34 @@ function clientReducer(state: SettingsPageState, action: SettingsPageAction) {
       break;
     case 'server-error':
       ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
+      if ((action.error as Error)?.message.includes('Rate-limiting Git export.')) {
+        const failedAction = (action.failedAction as TestGitConfigAction);
+        Object.assign(
+          state.gitExportConfigs.find(({ id }) => id === failedAction.configId)!.exportAttempts?.find(({ id }) => id === failedAction.pendingExportId)!,
+          {
+            status: 'failed',
+            result: 'Rate-limited'
+          }
+        );
+      }
+      break;
+    case 'test-git-config':
+      state.gitExportConfigs.find(({ id }) => id === action.configId)!.exportAttempts?.unshift({
+        id: action.pendingExportId,
+        userId: state.user.id,
+        configId: action.configId,
+        startedAt: null,
+        finishedAt: null,
+        status: 'running',
+        result: ''
+      });
       break;
     case 'test-git-config-finished':
       ToastQueue.positive('Git export succeeded!');
+      Object.assign(
+        state.gitExportConfigs.find(({ id }) => id === action.configId)!.exportAttempts?.find(({ id }) => id === action.pendingExportId)!,
+        action.exportAttempt
+      );
       break;
   }
 }
@@ -94,8 +126,8 @@ async function serverReducer(action: SettingsPageAction): Promise<SettingsPageAc
       await removeGitExportConfig(action.configId);
       break;
     case 'test-git-config':
-      await testGitExportConfig(action.configId);
-      return { type: 'test-git-config-finished', configId: action.configId };
+      const exportAttempt = await testGitExportConfig(action.configId);
+      return { type: 'test-git-config-finished', configId: action.configId, exportAttempt, pendingExportId: action.pendingExportId };
   }
 }
 
@@ -119,7 +151,7 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
   }, [dispatch]);
 
   const handleGitConfigTest = useCallback(async (configId: string) => { 
-    dispatch({ type: 'test-git-config', configId })
+    dispatch({ type: 'test-git-config', configId, pendingExportId: uuid() })
   }, [dispatch]);
 
   return (
@@ -134,6 +166,7 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
             {(config: ClientGitExportConfig) => (
               <Item key={config.id}>
                 <GitConfigEditor config={config} onTest={handleGitConfigTest} onSave={handleGitConfigSave} onDelete={handleGitConfigRemove} />
+                <GitExportAttemptsTable config={config} />
               </Item>
             )}
           </TabPanels>

@@ -6,7 +6,13 @@ export default async function SettingsPage() {
   const { user } = await getServerUserOrRedirect();
 
   const gitExportConfigs = await prisma.gitExportConfig.findMany({
-    where: { userId: user.id }
+    where: { userId: user.id },
+    include: {
+      exportAttempts: {
+        orderBy: { startedAt: 'desc' },
+        take: 10,
+      }
+    }
   });
 
   for (const config of gitExportConfigs) {
