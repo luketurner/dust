@@ -49,6 +49,7 @@ model User {
   agendas       Agenda[]
   projects      Project[]
   gitExportConfigs GitExportConfig[]
+  gitExportAttempts GitExportAttempt[]
 }
 
 model VerificationToken {
@@ -156,6 +157,22 @@ model GitExportConfig {
   sshPublicKey  String?
   remoteUrl     String?
   branchName    String @default("main")
+  exportAttempts GitExportAttempt[]
 
   @@index(userId)
+}
+
+model GitExportAttempt {
+  id            String @id @default(cuid())
+  userId        String
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  configId      String
+  config        GitExportConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+  result        String
+  status        String
+  startedAt     DateTime?
+  finishedAt    DateTime?
+
+  @@index([userId, startedAt])
+  @@index([configId, startedAt])
 }
