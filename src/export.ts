@@ -1,4 +1,4 @@
-import { GitExportConfig, User } from "@prisma/client";
+import { GitExportAttempt, GitExportConfig, User } from "@prisma/client";
 import { prisma } from "./db/client";
 import { mkdir, mkdtemp, readFile, writeFile } from "fs/promises";
 import { exec as execCb } from "child_process";
@@ -9,7 +9,61 @@ import { tmpdir } from "os";
 
 const exec = promisify(execCb)
 
-export async function exportUserDataToGitRemote(user: User, config: GitExportConfig) {
+export async function exportAll() {
+  const configs = await prisma.gitExportConfig.findMany({});
+
+  for (const config of configs) {
+    await exportConfig(config);
+  }
+}
+
+export async function exportConfig(config: GitExportConfig): Promise<GitExportAttempt> {
+
+  const recentAttempts = await prisma.gitExportAttempt.count({
+    where: { userId: config.userId, startedAt: { gte: DateTime.now().minus({ minutes: 10 }).toJSDate() } },
+  });
+
+  if (recentAttempts >= 10) {
+    console.error('rate-limited git export request');
+    throw new Error('Rate-limiting Git export. Please don\'t send more than ~1 request per minute.')
+  }
+
+  const attempt = await prisma.gitExportAttempt.create({
+    data: {
+      userId: config.userId,
+      configId: config.id,
+      status: 'running',
+      result: '',
+      finishedAt: null,
+      startedAt: new Date()
+    }
+  });
+
+  try {
+    await exportUserDataToGitRemote(config);
+    return await prisma.gitExportAttempt.update({
+      where: { id: attempt.id },
+      data: {
+        status: 'succeeded',
+        result: '', // TODO -- SHA?
+        finishedAt: new Date(),
+      }
+    });
+  } catch (e) {
+    const failedAttempt = await prisma.gitExportAttempt.update({
+      where: { id: attempt.id },
+      data: {
+        status: 'failed',
+        result: 'Error exporting to Git.', // TODO
+        finishedAt: new Date(),
+      }
+    })
+    console.error('exportConfig error', e, failedAttempt);
+    return failedAttempt;
+  }
+}
+
+async function exportUserDataToGitRemote(config: GitExportConfig) {
   // TODO -- support manually specifying authorized keys?
 
   const tmpDir = await mkdtemp(join(tmpdir(), `git-export-${config.id}-`));
@@ -26,8 +80,8 @@ export async function exportUserDataToGitRemote(user: User, config: GitExportCon
     } as any
   });
   await exec(`git checkout "${config.branchName}"`, { cwd: gitRepoDir });
-  const userDataFilename = `${user.id}_${config.id}.json`;
-  await exportUserDataToFile(user, join(gitRepoDir, userDataFilename));
+  const userDataFilename = `${config.userId}_${config.id}.json`;
+  await exportUserDataToFile(config.userId, join(gitRepoDir, userDataFilename));
   await exec(`git add "${userDataFilename}"`, { cwd: gitRepoDir });
   await exec(`git commit --allow-empty -m "${DateTime.now().toISOTime()} dust export"`, { cwd: gitRepoDir });
   await exec(`git push origin "${config.branchName}"`, {
@@ -39,18 +93,18 @@ export async function exportUserDataToGitRemote(user: User, config: GitExportCon
 
 }
 
-export async function exportUserDataToJSON(user: User) {
+async function exportUserDataToJSON(userId: string) {
   return {
-    user: { id: user.id },
-    tasks: await prisma.task.findMany({ where: { userId: user.id }, include: { tags: { select: { id: true } }}, orderBy: { id: 'asc' }}),
-    tags: await prisma.tag.findMany({ where: { userId: user.id }, orderBy: { id: 'asc' }}),
-    agendas: await prisma.agenda.findMany({ where: { userId: user.id }, include: { agendaTasks: true }, orderBy: { id: 'asc' }}),
+    user: { id: userId },
+    tasks: await prisma.task.findMany({ where: { userId }, include: { tags: { select: { id: true } }}, orderBy: { id: 'asc' }}),
+    tags: await prisma.tag.findMany({ where: { userId }, orderBy: { id: 'asc' }}),
+    agendas: await prisma.agenda.findMany({ where: { userId }, include: { agendaTasks: true }, orderBy: { id: 'asc' }}),
     // agendaTasks: await prisma.agendaTask.findMany({ where: { task: { userId: user.id } }, orderBy: { agendaId: 'asc' }}),
   };
 }
 
-export async function exportUserDataToFile(user: User, file: string) {
-  const data = JSON.stringify(await exportUserDataToJSON(user), null, 2);
+async function exportUserDataToFile(userId: string, file: string) {
+  const data = JSON.stringify(await exportUserDataToJSON(userId), null, 2);
   await writeFile(file, data, { encoding: 'utf8' });
 }
 

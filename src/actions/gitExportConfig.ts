@@ -3,10 +3,9 @@
 import { ClientGitExportConfig } from "@/app/(app)/settings/client";
 import { getServerUserOrThrow } from "@/auth";
 import { prisma } from "@/db/client";
-import { exportUserDataToGitRemote } from "@/export";
+import { exportConfig } from "@/export";
 import { generateDeployKeys } from "@/git";
 import { GitExportAttempt, GitExportConfig } from "@prisma/client";
-import { DateTime } from "luxon";
 
 export async function createGitExportConfig(): Promise<ClientGitExportConfig> {
   const { user } = await getServerUserOrThrow();
@@ -64,46 +63,5 @@ export async function testGitExportConfig(configId: string): Promise<GitExportAt
     where: { id: configId, userId: user.id }
   });
 
-  const recentAttempts = await prisma.gitExportAttempt.count({
-    where: { userId: user.id, startedAt: { gte: DateTime.now().minus({ minutes: 10 }).toJSDate() } },
-  });
-
-  if (recentAttempts >= 10) {
-    console.error('rate-limited git export request');
-    throw new Error('Rate-limiting Git export. Please don\'t send more than ~1 request per minute.')
-  }
-
-  const attempt = await prisma.gitExportAttempt.create({
-    data: {
-      userId: user.id,
-      configId: config.id,
-      status: 'running',
-      result: '',
-      finishedAt: null,
-      startedAt: new Date()
-    }
-  });
-
-  try {
-    await exportUserDataToGitRemote(user, config);
-    return await prisma.gitExportAttempt.update({
-      where: { id: attempt.id },
-      data: {
-        status: 'succeeded',
-        result: '', // TODO -- SHA?
-        finishedAt: new Date(),
-      }
-    });
-  } catch (e) {
-    const failedAttempt = await prisma.gitExportAttempt.update({
-      where: { id: attempt.id },
-      data: {
-        status: 'failed',
-        result: 'Error exporting to Git.', // TODO
-        finishedAt: new Date(),
-      }
-    })
-    console.error('testGitExportConfig error', e, failedAttempt);
-    return failedAttempt;
-  }
+  return await exportConfig(config);
 }
