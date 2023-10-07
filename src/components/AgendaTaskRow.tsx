@@ -25,7 +25,7 @@ export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) 
 
   const handleMenuAction = useCallback((key: string) => {
     onAction({ type: key, task });
-  }, []);
+  }, [onAction, task]);
 
   const isEmbedded = useIsEmbedded();
 

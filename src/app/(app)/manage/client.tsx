@@ -173,11 +173,11 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     showNonUrgent: true,
   });
 
-  const handleTagSelectionChange = useCallback((keys: Selection) => { dispatch({ type: 'select-tags', tags: keys }) }, []);
-  const handleAddTag = useCallback(() => { dispatch({ type: 'open-add-tag' }) }, []);
+  const handleTagSelectionChange = useCallback((keys: Selection) => { dispatch({ type: 'select-tags', tags: keys }) }, [dispatch]);
+  const handleAddTag = useCallback(() => { dispatch({ type: 'open-add-tag' }) }, [dispatch]);
 
-  const handleDisplayFilterChange = useCallback((data: string[]) => { dispatch({ type: 'change-display-filters', data }) }, []);
-  const handleSignificanceFilterChange = useCallback((data: string[]) => { dispatch({ type: 'change-significance-filters', data }) }, []);
+  const handleDisplayFilterChange = useCallback((data: string[]) => { dispatch({ type: 'change-display-filters', data }) }, [dispatch]);
+  const handleSignificanceFilterChange = useCallback((data: string[]) => { dispatch({ type: 'change-significance-filters', data }) }, [dispatch]);
 
   const handleTagMenuAction = useCallback((tagId: string, key: Key) => {
     switch (key) {
@@ -188,7 +188,7 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
         dispatch({ type: 'delete-tag', tagId })
         break;
     }
-  }, []);
+  }, [dispatch]);
 
   const handleTaskMenuAction = useCallback((taskId: string, key: Key) => {
     switch (key) {
@@ -205,7 +205,7 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
         dispatch({ type: 'delete-task', taskId })
         break;
     }
-  }, []);
+  }, [dispatch]);
 
   const filteredTasks = state.tasks.filter((task) => {
     if (!state.showActive && !task.archived) return false;

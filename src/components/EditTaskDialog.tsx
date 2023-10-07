@@ -44,25 +44,25 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
     setData(draft => {
       draft.name = value;
     })
-  }, []);
+  }, [setData]);
 
   const handleDescriptionChange = useCallback((value: string) => {
     setData(draft => {
       draft.description = value;
     })
-  }, []);
+  }, [setData]);
 
   const handleImportantChange = useCallback((value: boolean) => {
     setData(draft => {
       draft.important = value;
     })
-  }, []);
+  }, [setData]);
 
   const handleUrgentChange = useCallback((value: boolean) => {
     setData(draft => {
       draft.urgent = value;
     })
-  }, []);
+  }, [setData]);
 
   const handleSave = useCallback(() => {
     onSave(task ? task.id : null, data)
@@ -72,13 +72,13 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
     setData(data => {
       data.tags.push(key as string)
     })
-  }, []);
+  }, [setData]);
 
   const handleRemoveTag = useCallback((key: Key) => {
     setData(data => {
       data.tags = data.tags.filter(id => id !== key);
     })
-  }, []);
+  }, [setData]);
 
   const handleToggleTag = useCallback((tagId: string, value: boolean) => {
     setData(data => {
@@ -88,7 +88,7 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
         data.tags = data.tags.filter(t => t !== tagId)
       }
     })
-  }, []);
+  }, [setData]);
 
   const allTagsById = useMemo(() => {
     return (allTags ?? []).reduce((allTagsById, tag) => {

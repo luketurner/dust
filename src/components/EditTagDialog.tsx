@@ -35,7 +35,7 @@ function EditTagDialogInner({ tag, onClose, onSave, isCreate }: EditTagDialogPro
     setData(draft => {
       draft.name = value;
     })
-  }, []);
+  }, [setData]);
 
   const handleSave = useCallback(() => {
     onSave(tag?.id ?? null, data)

@@ -31,7 +31,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
     if (isEmbedded) return;
     const { url } = breadcrumbs.find(b => b.key === key) ?? {};
     if (url) router.push(url);
-  }, [router, isEmbedded]);
+  }, [router, isEmbedded, breadcrumbs]);
 
   return (
     <Header gridArea="header" width="100%">

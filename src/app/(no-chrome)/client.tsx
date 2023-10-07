@@ -28,7 +28,7 @@ export default function IndexPageClient({ quote }: IndexPageClientProps) {
           <QuoteBlock quote={quote} />
         </View>
         <Flex gridArea="c" direction="column" marginTop={{base: '0', 'M': "single-line-height"}} marginX={{ base: 'auto', 'M': 0 }} gap="single-line-height">
-          <p className="text-lg text-center">Task management for people who don't like tasks.</p>
+          <p className="text-lg text-center">Task management for people who don&apos;t like tasks.</p>
           <TinyAgendaPage date={DateTime.now().toISODate()} quote={quote} />
           <Button alignSelf="center" variant="accent" onPress={(e) => signIn('github')}>
             Log in with Github

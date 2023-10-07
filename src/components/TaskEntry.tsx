@@ -13,7 +13,7 @@ export default function TaskEntry({ onSubmit = () => {} }: TaskEntryProps) {
   const handleSubmit = useCallback(() => {
     onSubmit(taskInput);
     setTaskInput('');
-  }, [taskInput]);
+  }, [onSubmit, taskInput]);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setTaskInput(e.target.value);
@@ -29,7 +29,7 @@ export default function TaskEntry({ onSubmit = () => {} }: TaskEntryProps) {
           placeholder={'Buy socks\n#shopping\nGet six pairs'}
           onChange={handleChange}
         />
-        <Button className="border border-slate-500 text-slate-700 rounded rounded-l-none border-l-0 hover:bg-slate-200 w-12" onPress={handleSubmit}>Send 'em!</Button>
+        <Button className="border border-slate-500 text-slate-700 rounded rounded-l-none border-l-0 hover:bg-slate-200 w-12" onPress={handleSubmit}>Send &apos;em!</Button>
       </div>
       <div className="m-2 text-slate-500 text-sm text-left" slot="description">
         <p>Input examples:</p>

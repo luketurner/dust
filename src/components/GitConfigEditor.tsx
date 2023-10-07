@@ -16,9 +16,9 @@ export interface GitConfigEditorProps {
 
 export default function GitConfigEditor({ config, onSave, onDelete, onTest }: GitConfigEditorProps) {
   const [state, setState] = useImmer(config)
-  const handleNameChange = useCallback((value: string) => { setState(draft => { draft.name = value; }) }, []);
-  const handleRemoteUrlChange = useCallback((value: string) => { setState(draft => { draft.remoteUrl = value; }) }, []);
-  const handleBranchNameChange = useCallback((value: string) => { setState(draft => { draft.branchName = value; }) }, []);
+  const handleNameChange = useCallback((value: string) => { setState(draft => { draft.name = value; }) }, [setState]);
+  const handleRemoteUrlChange = useCallback((value: string) => { setState(draft => { draft.remoteUrl = value; }) }, [setState]);
+  const handleBranchNameChange = useCallback((value: string) => { setState(draft => { draft.branchName = value; }) }, [setState]);
 
   const handleDelete = useCallback(() => { onDelete(config.id) }, [onDelete, config.id]);
   const handleTest = useCallback(() => { onTest(config.id) }, [onTest, config.id]);
