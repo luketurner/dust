@@ -1,5 +1,5 @@
 import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from "next"
-import type { NextAuthOptions as NextAuthConfig } from "next-auth"
+// import type { NextAuthOptions as NextAuthConfig } from "next-auth"
 import { getServerSession } from "next-auth/next"
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import GitHub from "next-auth/providers/github";
@@ -26,7 +26,7 @@ export const config = {
       return token
     },
   },
-} satisfies NextAuthConfig
+}; // satisfies NextAuthConfig
 
 // Helper function to get session without passing config every time
 // https://next-auth.js.org/configuration/nextjs#getserversession

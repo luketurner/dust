@@ -3,7 +3,7 @@
 import { ActionButton, Grid, Header, Item, Menu, MenuTrigger, View, Breadcrumbs } from "@adobe/react-spectrum";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { Key, useCallback } from "react";
 import ShowMenu from "@spectrum-icons/workflow/ShowMenu";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
 
@@ -16,7 +16,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
   const router = useRouter();
   const isEmbedded = useIsEmbedded();
 
-  const handleMenuAction = useCallback((key: string) => {
+  const handleMenuAction = useCallback((key: Key) => {
     if (isEmbedded) return;
     switch (key) {
       case 'login': return signIn('github');
@@ -27,9 +27,9 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
     }
   }, [router, isEmbedded]);
 
-  const handleBreadcrumbAction = useCallback((key: string) => {
+  const handleBreadcrumbAction = useCallback((key: Key) => {
     if (isEmbedded) return;
-    const { url } = breadcrumbs.find(b => b.key === key) ?? {};
+    const { url } = breadcrumbs?.find(b => b.key === key) ?? {};
     if (url) router.push(url);
   }, [router, isEmbedded, breadcrumbs]);
 
@@ -38,8 +38,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
       <Grid areas={['left right']} justifyContent='space-between' columns={["1fr", "max-content"]}>
         {breadcrumbs && 
           <Breadcrumbs gridArea="left" size="M" showRoot onAction={handleBreadcrumbAction}>
-            <Item key="home">DUST</Item>
-            {breadcrumbs.map(({ key, label }) => <Item key={key}>{label}</Item>)}
+            {[{ key: 'home', label: 'DUST' }, ...breadcrumbs].map(({ key, label }) => <Item key={key}>{label}</Item>)}
           </Breadcrumbs>
         }
         <View gridArea="right">
@@ -48,11 +47,11 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
               <ShowMenu />
             </ActionButton>
             <Menu onAction={handleMenuAction}>
-              {user && <Item key="today">Daily agenda</Item>}
-              {user && <Item key="manage">Manage tasks</Item>}
-              {user && <Item key="settings">Settings</Item>}
-              {user && <Item key="logout">Log out</Item>}
-              {!user && <Item key="login">Log in</Item>}
+              {user ? <Item key="today">Daily agenda</Item> : undefined!}
+              {user ? <Item key="manage">Manage tasks</Item> : undefined!}
+              {user ? <Item key="settings">Settings</Item> : undefined!}
+              {user ? <Item key="logout">Log out</Item> : undefined!}
+              {!user ? <Item key="login">Log in</Item> : undefined!}
             </Menu>
           </MenuTrigger>
         </View>

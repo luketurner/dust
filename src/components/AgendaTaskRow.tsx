@@ -2,7 +2,7 @@
 
 import { ActionMenu, Grid, Item, ToggleButton, View } from "@adobe/react-spectrum";
 import { Agenda, Task } from "@prisma/client";
-import { useCallback } from "react";
+import { Key, useCallback } from "react";
 import CheckmarkCircleOutline from "@spectrum-icons/workflow/CheckmarkCircleOutline";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
 
@@ -23,8 +23,8 @@ export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) 
     onAction({ type: 'toggle', task });
   }, [task, onAction]);
 
-  const handleMenuAction = useCallback((key: string) => {
-    onAction({ type: key, task });
+  const handleMenuAction = useCallback((key: Key) => {
+    onAction({ type: key as AgendaTaskRowAction["type"], task });
   }, [onAction, task]);
 
   const isEmbedded = useIsEmbedded();

@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 import { join } from "path";
 import { DateTime } from "luxon";
 import { tmpdir } from "os";
+import { ClientGitExportConfig } from "./app/(app)/settings/client";
 
 const exec = promisify(execCb)
 
@@ -20,4 +21,15 @@ export async function generateDeployKeys(): Promise<Pick<GitExportConfig, 'sshPr
     sshPrivateKey: (await readFile(privateKeyFilename)).toString('base64'),
     sshPublicKey: (await readFile(publicKeyFilename, { encoding: 'utf8' })),
   }
+}
+
+export function gitConfigForClient(serverConfig: GitExportConfig): ClientGitExportConfig {
+  const clientConfig: ClientGitExportConfig = {
+    ...serverConfig,
+    hasPrivateKey: !!serverConfig.sshPrivateKey,
+  };
+
+  delete (clientConfig as any).sshPrivateKey;
+
+  return clientConfig;
 }

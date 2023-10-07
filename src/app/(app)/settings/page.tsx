@@ -1,6 +1,7 @@
 import { getServerUserOrRedirect } from "@/auth"
 import SettingsPageClient, { ClientGitExportConfig } from "./client";
 import { prisma } from "@/db/client";
+import { gitConfigForClient } from "@/git";
 
 export default async function SettingsPage() {
   const { user } = await getServerUserOrRedirect();
@@ -15,14 +16,9 @@ export default async function SettingsPage() {
     }
   });
 
-  for (const config of gitExportConfigs) {
-    if (config.sshPrivateKey) {
-      delete config.sshPrivateKey;
-      config.hasPrivateKey = true;
-    }
-  }
+  const clientConfigs = gitExportConfigs.map(config => gitConfigForClient(config));
 
   return (
-    <SettingsPageClient user={user} gitExportConfigs={gitExportConfigs} />
+    <SettingsPageClient user={user} gitExportConfigs={clientConfigs} />
   );
 }

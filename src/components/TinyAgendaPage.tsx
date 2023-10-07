@@ -22,6 +22,7 @@ function demoTask(data: Partial<Task>) {
     urgent: false,
     displayOrder: 0,
     description: '',
+    tags: [],
     ...data
   };
 }
@@ -41,7 +42,7 @@ function demoAgenda(date: string) {
   return {
     id: '123',
     userId: '123',
-    date: Date.parse(date),
+    date: new Date(Date.parse(date)),
     agendaTasks: [
       demoAgendaTask('Buy milk'),
       demoAgendaTask('Buy eggs'),
@@ -54,7 +55,7 @@ export default function TinyAgendaPage({ quote, date }: TinyAgendaPageProps) {
 
   return (
     <TinyDemoPage>
-      <AgendaPageClient date={date} agenda={demoAgenda(date)} quote={quote} />
+      <AgendaPageClient date={date} agenda={demoAgenda(date)} quote={quote} allTags={[]} />
     </TinyDemoPage>
   );
 }

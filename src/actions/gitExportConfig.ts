@@ -4,7 +4,7 @@ import { ClientGitExportConfig } from "@/app/(app)/settings/client";
 import { getServerUserOrThrow } from "@/auth";
 import { prisma } from "@/db/client";
 import { exportConfig } from "@/export";
-import { generateDeployKeys } from "@/git";
+import { generateDeployKeys, gitConfigForClient } from "@/git";
 import { GitExportAttempt, GitExportConfig } from "@prisma/client";
 
 export async function createGitExportConfig(): Promise<ClientGitExportConfig> {
@@ -24,11 +24,7 @@ export async function createGitExportConfig(): Promise<ClientGitExportConfig> {
       sshPublicKey
     }
   });
-  if (data.sshPrivateKey) {
-    delete data.sshPrivateKey;
-    data.hasPrivateKey = true;
-  }
-  return data;
+  return gitConfigForClient(data);
 }
 
 export async function updateGitExportConfig(configId: string, data: Partial<GitExportConfig>): Promise<void> {

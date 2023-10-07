@@ -79,7 +79,7 @@ function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAct
       if (typeof action.data.description === 'string') taskToUpdate.description = action.data.description;
       taskToUpdate.urgent = action.data.urgent ?? false;
       taskToUpdate.important = action.data.important ?? false;
-      if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.allTags.find((tag) => tag.id === id));
+      if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.allTags.find((tag) => tag.id === id)!);
       delete state.dialog;
       break;
     case 'server-error':
@@ -121,7 +121,7 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
       <EditTaskDialog
        task={tasks.find(t => t.id === state.dialog?.taskId)}
        onClose={() => dispatchAction({ type: 'close-dialog' })}
-       onSave={(taskId, data) => dispatchAction({ type: 'save-task', taskId, data })}
+       onSave={(taskId, data) => dispatchAction({ type: 'save-task', taskId: taskId!, data })}
        allTags={state.allTags}
        isOpen={!!state.dialog?.taskId}
        />
