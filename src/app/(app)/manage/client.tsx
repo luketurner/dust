@@ -4,7 +4,7 @@ import { Tag, Tag as TagType, Task, Task as TaskType } from "@prisma/client";
 import { Key, useCallback } from "react";
 import AppLayout from "@/components/AppLayout";
 import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
-import { ActionButton, ActionMenu, Checkbox, CheckboxGroup, Flex, Heading, Item, ListView, Selection, Text, View } from "@adobe/react-spectrum";
+import { ActionButton, ActionMenu, Button, Checkbox, CheckboxGroup, Content, Flex, Heading, IllustratedMessage, Item, ListView, Selection, Text, View } from "@adobe/react-spectrum";
 import EditTagDialog from "@/components/EditTagDialog";
 import { createTag, deleteTag, updateTag } from "@/actions/tag";
 import { ToastQueue } from "@react-spectrum/toast";
@@ -12,6 +12,7 @@ import SidebarLayout from "@/components/SidebarLayout";
 import EditTaskDialog from "@/components/EditTaskDialog";
 import { createTask, deleteTask, updateTask } from "@/actions/task";
 import Add from '@spectrum-icons/workflow/Add';
+import NotFound from '@spectrum-icons/illustrations/NotFound';
 
 type TaskWithTags = TaskType & { tags: TagType[] };
 
@@ -173,6 +174,8 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     showNonUrgent: true,
   });
 
+  const handleAddTask = useCallback(() => { dispatch({ type: 'open-add-task' }) }, [dispatch]);
+
   const handleTagSelectionChange = useCallback((keys: Selection) => { dispatch({ type: 'select-tags', tags: keys }) }, [dispatch]);
   const handleAddTag = useCallback(() => { dispatch({ type: 'open-add-tag' }) }, [dispatch]);
 
@@ -235,14 +238,19 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
       />
       <SidebarLayout>
         <View gridArea="sidebar">
-          <CheckboxGroup label="Display filters" value={[...state.showActive ? ['active'] : [], ...state.showArchived ? ['archived'] : [] ]} onChange={handleDisplayFilterChange}>
-            <Checkbox value="active">Active</Checkbox>
-            <Checkbox value="archived">Archived</Checkbox>
-          </CheckboxGroup>
-          <CheckboxGroup label="Significance filters" value={[...state.showNonImportant ? [] : ['important'], ...state.showNonUrgent ? [] : ['urgent'] ]} onChange={handleSignificanceFilterChange}>
-            <Checkbox value="important">Important</Checkbox>
-            <Checkbox value="urgent">Urgent</Checkbox>
-          </CheckboxGroup>
+          <Flex direction="row" justifyContent="center">
+            <Button variant="primary" onPress={handleAddTask}>Add Task</Button>
+          </Flex>
+          <Flex direction="row" marginTop="single-line-height">
+            <CheckboxGroup label="Display filters" value={[...state.showActive ? ['active'] : [], ...state.showArchived ? ['archived'] : [] ]} onChange={handleDisplayFilterChange}>
+              <Checkbox value="active">Active</Checkbox>
+              <Checkbox value="archived">Archived</Checkbox>
+            </CheckboxGroup>
+            <CheckboxGroup label="Significance filters" value={[...state.showNonImportant ? [] : ['important'], ...state.showNonUrgent ? [] : ['urgent'] ]} onChange={handleSignificanceFilterChange}>
+              <Checkbox value="important">Important</Checkbox>
+              <Checkbox value="urgent">Urgent</Checkbox>
+            </CheckboxGroup>
+          </Flex>
           <Flex direction="row" alignItems="center" justifyContent="space-between" marginTop="single-line-height">
             <Heading UNSAFE_className="text-lg" level={2}>Tags</Heading>
             <ActionButton onPress={handleAddTag} isQuiet><Add /><Text>New tag...</Text></ActionButton>
@@ -260,7 +268,7 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
           </ListView>
         </View>
         <View gridArea="content" width="100%">
-          <ListView items={filteredTasks} aria-label="List of tasks" width="100%">
+          <ListView renderEmptyState={renderEmptyState} items={filteredTasks} aria-label="List of tasks" maxWidth="100%">
             {(task) => (
               <Item key={task.id} textValue={task.name}>
                 <Text>{task.name}</Text>
@@ -275,5 +283,15 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
         </View>
       </SidebarLayout>
     </AppLayout>
+  );
+}
+
+function renderEmptyState() {
+  return (
+    <IllustratedMessage>
+      <NotFound />
+      <Heading>No tasks</Heading>
+      <Content>You haven&apos;t created any tasks yet!</Content>
+    </IllustratedMessage>
   );
 }

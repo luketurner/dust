@@ -1,8 +1,8 @@
 'use client';
 
-import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, TagGroup, TextArea, Checkbox, Item, ListBox, CheckboxGroup, ToggleButton, Flex } from "@adobe/react-spectrum";
+import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, TextArea, Checkbox, ToggleButton, Flex } from "@adobe/react-spectrum";
 import { Tag, Task } from "@prisma/client";
-import { useCallback, useMemo, Key } from "react";
+import { useCallback } from "react";
 import { useImmer } from "use-immer";
 
 export interface EditTaskDialogData {
@@ -30,7 +30,7 @@ export default function EditTaskDialog({ task, onClose, onSave, allTags, isCreat
   )
 }
 
-function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogProps) {
+function EditTaskDialogInner({ task, onClose, onSave, allTags, isCreate }: EditTaskDialogProps) {
 
   const [data, setData] = useImmer<EditTaskDialogData>({
     name: task?.name ?? "",
@@ -65,20 +65,8 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
   }, [setData]);
 
   const handleSave = useCallback(() => {
-    onSave(task ? task.id : null, data)
+    onSave(isCreate ? null : task!.id, data)
   }, [onSave, task, data]);
-
-  const handleAddTag = useCallback((key: Key) => {
-    setData(data => {
-      data.tags.push(key as string)
-    })
-  }, [setData]);
-
-  const handleRemoveTag = useCallback((key: Key) => {
-    setData(data => {
-      data.tags = data.tags.filter(id => id !== key);
-    })
-  }, [setData]);
 
   const handleToggleTag = useCallback((tagId: string, value: boolean) => {
     setData(data => {
@@ -90,16 +78,9 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags }: EditTaskDialogP
     })
   }, [setData]);
 
-  const allTagsById = useMemo(() => {
-    return (allTags ?? []).reduce((allTagsById, tag) => {
-      allTagsById[tag.id] = tag;
-      return allTagsById;
-    }, {} as Record<string, Tag>);
-  }, [allTags])
-
   return (
     <Dialog>
-      <Heading>Edit task</Heading>
+      <Heading>{isCreate ? 'Add' : 'Edit'} task</Heading>
       <Content>
         <Form maxWidth="size-3600">
           <TextField label="Name" value={data.name} onChange={handleNameChange} />
