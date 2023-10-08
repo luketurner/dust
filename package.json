@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:prod": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "db:setup": "podman run -d -p 5432:5432 --name dust -e POSTGRES_PASSWORD=postgres postgres:15",
