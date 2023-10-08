@@ -66,7 +66,7 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags, isCreate }: EditT
 
   const handleSave = useCallback(() => {
     onSave(isCreate ? null : task!.id, data)
-  }, [onSave, task, data]);
+  }, [onSave, isCreate, task, data]);
 
   const handleToggleTag = useCallback((tagId: string, value: boolean) => {
     setData(data => {
