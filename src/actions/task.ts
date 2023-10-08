@@ -1,10 +1,9 @@
 'use server';
 
 import { prisma } from "@/db/client";
-import { Task, Prisma, Tag } from "@prisma/client";
+import { Task, Tag } from "@prisma/client";
 import { getServerUserOrThrow } from "@/auth"
-import { getHighestDisplayOrderServer, parseTaskInput } from "@/task";
-import { NotFoundError, PrismaClientUnknownRequestError } from "@prisma/client/runtime/library";
+import { parseTaskInput } from "@/task";
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
@@ -65,13 +64,12 @@ export async function createTask(data: {
 }): Promise<Task & { tags: Tag[] }> {
   const { user } = await getServerUserOrThrow();
 
-  const highestDisplayOrder = await getHighestDisplayOrderServer(user.id);
   
   return await prisma.task.create({
     data: {
       userId: user.id,
       name: data.name ?? 'Unnamed task',
-      displayOrder: highestDisplayOrder + 1,
+      createdAt: new Date(),
       archived: data.archived,
       completed: data.completed,
       description: data.description,
@@ -93,13 +91,13 @@ export async function addTasksFromText(text: string): Promise<(Task & { tags: Ta
 
   const parsedTasks = parseTaskInput(text);
 
-  const highestDisplayOrder = await getHighestDisplayOrderServer(user.id);
+  const now = new Date();
 
   const tasksToInsert = parsedTasks.map(({ name, tags, description }, index) => ({
     name,
     userId: user.id,
-    displayOrder: highestDisplayOrder + 1 + index,
     description,
+    createdAt: now,
     tags: {
       connectOrCreate: (tags ?? []).map(tag => ({
         create: {

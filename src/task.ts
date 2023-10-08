@@ -34,17 +34,3 @@ export function parseTagLine(line?: string): { tags: string[] } {
   }
   return { tags };
 }
-
-export async function getHighestDisplayOrderServer(userId: string) {
-  return (await prisma.task.findFirst({
-    where: {
-      userId
-    },
-    orderBy: {
-      displayOrder: 'desc'
-    },
-    select: {
-      displayOrder: true
-    }
-  }))?.displayOrder ?? 0;
-}

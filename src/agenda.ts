@@ -15,7 +15,7 @@ export async function upsertAgendaServer(userId: string, date: string) {
       archived: false,
     },
     orderBy: {
-      displayOrder: 'asc'
+      createdAt: 'desc'
     },
     include: {
       tags: true

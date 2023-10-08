@@ -10,7 +10,7 @@ export default async function ManagePage() {
       userId: user.id
     },
     orderBy: {
-      displayOrder: 'asc'
+      createdAt: 'desc'
     },
     include: {
       tags: true

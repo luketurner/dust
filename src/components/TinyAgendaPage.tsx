@@ -20,7 +20,7 @@ function demoTask(data: Partial<Task>) {
     archived: false,
     important: false,
     urgent: false,
-    displayOrder: 0,
+    createdAt: new Date(),
     description: '',
     tags: [],
     ...data
