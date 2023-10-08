@@ -26,7 +26,7 @@ export function useClientServerReducer<S, A extends Action>(
     try {
       const result = await serverReducer(action);
       if (result) {
-        console.debug("[clientServerReducer] Server reducer dispatched", result);
+        console.debug("[clientServerReducer] Server result dispatched", result);
         clientDispatch(result);
       }
     } catch (e) {
