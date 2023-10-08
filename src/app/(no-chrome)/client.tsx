@@ -20,7 +20,6 @@ export default function IndexPageClient({ quote }: IndexPageClientProps) {
   return (
     <AppLayout>
       <ThreeSpotLayout>
-        <AppHeader />
         <Heading gridArea="a" UNSAFE_className="text-6xl font-thin" level={1} justifySelf={{base: 'center', 'M': 'end'}}>
           Dust
         </Heading>
@@ -34,7 +33,6 @@ export default function IndexPageClient({ quote }: IndexPageClientProps) {
             Log in with Github
           </Button>
         </Flex>
-        <AppFooter />
       </ThreeSpotLayout>
     </AppLayout>
   );
