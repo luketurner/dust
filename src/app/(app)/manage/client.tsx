@@ -4,7 +4,7 @@ import { Tag, Tag as TagType, Task, Task as TaskType } from "@prisma/client";
 import { Key, useCallback } from "react";
 import AppLayout from "@/components/AppLayout";
 import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
-import { ActionButton, ActionMenu, Button, Checkbox, CheckboxGroup, Content, Flex, Heading, IllustratedMessage, Item, ListView, Selection, Text, View } from "@adobe/react-spectrum";
+import { ActionButton, ActionMenu, Button, Cell, Checkbox, CheckboxGroup, Column, Content, Flex, Heading, IllustratedMessage, Item, ListView, Row, Selection, TableBody, TableHeader, TableView, Text, View } from "@adobe/react-spectrum";
 import EditTagDialog from "@/components/EditTagDialog";
 import { createTag, deleteTag, updateTag } from "@/actions/tag";
 import { ToastQueue } from "@react-spectrum/toast";
@@ -13,6 +13,7 @@ import EditTaskDialog from "@/components/EditTaskDialog";
 import { createTask, deleteTask, updateTask } from "@/actions/task";
 import Add from '@spectrum-icons/workflow/Add';
 import NotFound from '@spectrum-icons/illustrations/NotFound';
+import { DateTime } from "luxon";
 
 type TaskWithTags = TaskType & { tags: TagType[] };
 
@@ -267,19 +268,35 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
             )}
           </ListView>
         </View>
-        <View gridArea="content" width="100%">
-          <ListView renderEmptyState={renderEmptyState} items={filteredTasks} aria-label="List of tasks" maxWidth="100%">
-            {(task) => (
-              <Item key={task.id} textValue={task.name}>
-                <Text>{task.name}</Text>
-                <ActionMenu onAction={(key) => handleTaskMenuAction(task.id, key)}>
-                  <Item key="edit">Edit...</Item>
-                  {task.archived ? <Item key="unarchive">Restore</Item> : <Item key="archive">Archive</Item>}                  
-                  <Item key="delete">Delete</Item>
-                </ActionMenu>
-              </Item>
-            )}
-          </ListView>
+        <View gridArea="content" justifySelf="stretch">
+          <TableView renderEmptyState={renderEmptyState} aria-label="List of tasks">
+            <TableHeader>
+              <Column>Name</Column>
+              <Column width={150}>Created</Column>
+              <Column width={32} align="end"> </Column>
+            </TableHeader>
+            <TableBody items={filteredTasks}>
+              {(task) => (
+                <Row key={task.id} textValue={task.name}>
+                  <Cell>
+                    {task.name}
+                  </Cell>
+                  <Cell>
+                    <span title={DateTime.fromJSDate(task.createdAt).toISO()!}>
+                      {DateTime.fromJSDate(task.createdAt).toRelative({ style: 'narrow' })}
+                    </span>
+                  </Cell>
+                  <Cell>
+                    <ActionMenu isQuiet onAction={(key) => handleTaskMenuAction(task.id, key)}>
+                      <Item key="edit">Edit...</Item>
+                      {task.archived ? <Item key="unarchive">Restore</Item> : <Item key="archive">Archive</Item>}                  
+                      <Item key="delete">Delete</Item>
+                    </ActionMenu>
+                  </Cell>
+                </Row>
+              )}
+            </TableBody>
+          </TableView>
         </View>
       </SidebarLayout>
     </AppLayout>
