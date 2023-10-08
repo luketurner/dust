@@ -19,13 +19,7 @@ export const config = {
   // https://next-auth.js.org/configuration/providers/oauth
   providers: [
     GitHub({ clientId: process.env.AUTH_GITHUB_ID, clientSecret: process.env.AUTH_GITHUB_SECRET }),
-  ],
-  callbacks: {
-    async jwt({ token }: any) {
-      token.userRole = "admin"
-      return token
-    },
-  },
+  ]
 }; // satisfies NextAuthConfig
 
 // Helper function to get session without passing config every time
