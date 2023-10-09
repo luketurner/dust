@@ -4,5 +4,6 @@
       "path": "/api/cron/daily-git-export",
       "schedule": "0 5 * * *"
     }
-  ]
+  ],
+  "installCommand": "yum install git openssh && npm install"
 }
