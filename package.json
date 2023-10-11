@@ -45,7 +45,24 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.4.10",
     "prisma": "^5.3.1",
     "yaml": "^2.3.2"
+  },
+  "dockerfile": {
+    "envs": {
+      "base": {
+        "NEXT_TELEMETRY_DISABLED": "1"
+      },
+      "deploy": {
+        "NEXTAUTH_URL": "https://dust.luketurner.org"
+      }
+    },
+    "packages": {
+      "deploy": [
+        "openssh-client",
+        "git"
+      ]
+    }
   }
 }

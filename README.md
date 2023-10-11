@@ -25,6 +25,16 @@ npm run dev
 npm run dev:db:migrate
 ```
 
+## Deployment
+
+Required secrets:
+
+```
+NEXTAUTH_SECRET
+AUTH_GITHUB_ID
+AUTH_GITHUB_SECRET
+```
+
 ## Quote loading
 
 Dust provides daily motivational quotes. Quotes are stored in a `Quote` table in the database. They have to be manually loaded in -- Dust doesn't have UI for creating/editing quotes.
