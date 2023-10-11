@@ -1,7 +1,5 @@
 'use client';
 
-import AppFooter from "@/components/AppFooter";
-import AppHeader from "@/components/AppHeader";
 import AppLayout from "@/components/AppLayout";
 import QuoteBlock from "@/components/QuoteBlock";
 import ThreeSpotLayout from "@/components/ThreeSpotLayout";

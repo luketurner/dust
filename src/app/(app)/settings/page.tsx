@@ -1,5 +1,5 @@
 import { getServerUserOrRedirect } from "@/auth"
-import SettingsPageClient, { ClientGitExportConfig } from "./client";
+import SettingsPageClient from "./client";
 import { prisma } from "@/db/client";
 import { gitConfigForClient } from "@/git";
 
