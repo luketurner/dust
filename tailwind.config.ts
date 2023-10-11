@@ -7,8 +7,6 @@ const config: Config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {},
-  plugins: [
-    require('tailwindcss-react-aria-components')
-  ],
+  plugins: [],
 }
 export default config
