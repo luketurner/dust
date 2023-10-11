@@ -6,6 +6,9 @@
 app = "lt-dust"
 primary_region = "sea"
 
+[deploy]
+  release_command = "npm run db:migrate:prod"
+
 [build]
 
 [http_service]
