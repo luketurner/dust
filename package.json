@@ -59,7 +59,9 @@
     "packages": {
       "deploy": [
         "openssh-client",
-        "git"
+        "git",
+        "curl",
+        "ca-certificates"
       ]
     }
   }

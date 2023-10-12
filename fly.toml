@@ -5,9 +5,14 @@
 
 app = "lt-dust"
 primary_region = "sea"
+swap_size_mb = 512
 
 [deploy]
   release_command = "npm run db:migrate:prod"
+
+[processes]
+  app = "npm run start"
+  cron = "supercronic /app/crontab"
 
 [build]
 
