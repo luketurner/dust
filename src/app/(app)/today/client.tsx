@@ -144,9 +144,11 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
           <QuoteBlock quote={quote} />
         </View>
         <Flex gridArea="c" direction="column" width="100%" gap="size-100" maxWidth="size-5000" marginX={{ base: 'auto', 'M': 0 }}>
-          {tasks.map(task => (
+          {tasks.length > 0 ? tasks.map(task => (
             <AgendaTaskRow key={task.id} task={task} onDefer={handleDeferTask} onEdit={handleEditTask} onToggle={handleToggleTask} />
-          ))}
+          )) : (
+            <>No tasks for the day!</>
+          )}
         </Flex>
       </ThreeSpotLayout>
     </AppLayout>
