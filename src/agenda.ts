@@ -3,6 +3,40 @@ import { prisma } from "./db/client";
 import { DateTime } from "luxon";
 import { defaultAgendaRules, pickTasks } from "./agendaRules";
 
+export async function addTasksToAgenda(agenda: Agenda, num?: number) {
+  const allTasks = await prisma.task.findMany({
+    where: {
+      userId: agenda.userId,
+      completed: false,
+      archived: false,
+    },
+    orderBy: {
+      createdAt: 'desc'
+    },
+    include: {
+      tags: true
+    }
+  });
+
+  const rules = defaultAgendaRules();
+
+  if (num) rules.max = num;
+
+  const pickedTasks = pickTasks(rules, allTasks);
+
+  await prisma.agendaTask.createMany({
+    data: pickedTasks.map((task) => ({
+      agendaId: agenda.id,
+      taskId: task.id
+    }))
+  });
+
+  // TODO -- probably more efficient way to do this without querying for everything again.
+  const updatedAgenda = await findAgendaServer(agenda.userId, agenda.date);
+  return updatedAgenda;
+
+}
+
 export async function upsertAgendaServer(userId: string, date: string) {
   // try finding agenda first to avoid task lookup if it's not needed
   const existingAgenda = await findAgendaServer(userId, date);
@@ -60,8 +94,8 @@ export async function upsertAgendaServer(userId: string, date: string) {
   });
 }
 
-export async function findAgendaServer(userId: string, date: string) {
-  const dbDate = DateTime.fromFormat(date, 'yyyy-MM-dd').toISO();
+export async function findAgendaServer(userId: string, date: string | Date) {
+  const dbDate = (typeof date === 'string' ? DateTime.fromFormat(date, 'yyyy-MM-dd') : DateTime.fromJSDate(date)).toISO();
   return await prisma.agenda.findUnique({
     where: {
       userId_date: {
