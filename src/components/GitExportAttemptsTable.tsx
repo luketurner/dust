@@ -23,8 +23,8 @@ export default function GitExportAttemptsTable({ config }: GitExportAttemptsTabl
           <Row>
             <Cell>{attempt.status}</Cell>
             <Cell>{attempt.result}</Cell>
-            <Cell>{attempt.startedAt ? DateTime.fromJSDate(attempt.startedAt).toISOTime() : 'N/A'}</Cell>
-            <Cell>{attempt.finishedAt ? DateTime.fromJSDate(attempt.finishedAt).toISOTime() : 'N/A'}</Cell>
+            <Cell>{attempt.startedAt ? DateTime.fromJSDate(attempt.startedAt).toLocaleString(DateTime.DATETIME_SHORT) : 'N/A'}</Cell>
+            <Cell>{attempt.finishedAt ? DateTime.fromJSDate(attempt.finishedAt).toLocaleString(DateTime.DATETIME_SHORT) : 'N/A'}</Cell>
           </Row>
         )}
       </TableBody>
