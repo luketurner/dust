@@ -14,6 +14,8 @@ import { createTask, deleteTask, updateTask } from "@/actions/task";
 import Add from '@spectrum-icons/workflow/Add';
 import NotFound from '@spectrum-icons/illustrations/NotFound';
 import { DateTime } from "luxon";
+import Flag from "@spectrum-icons/workflow/Flag";
+import HotFixes from "@spectrum-icons/workflow/HotFixes";
 
 type TaskWithTags = TaskType & { tags: TagType[] };
 
@@ -272,6 +274,8 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
           <TableView renderEmptyState={renderEmptyState} aria-label="List of tasks">
             <TableHeader>
               <Column>Name</Column>
+              <Column width={32} textValue="Important/Urgent Flags"><Flag aria-label="Important" size="XS" marginEnd="size-50" color="informative" /> /  <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" /></Column>
+              <Column width={150}>Tags</Column>
               <Column width={150}>Created</Column>
               <Column width={32} align="end"> </Column>
             </TableHeader>
@@ -280,6 +284,15 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
                 <Row key={task.id} textValue={task.name}>
                   <Cell>
                     {task.name}
+                  </Cell>
+                  <Cell>
+                    {task.important ? <Flag aria-label="Important" size="XS" marginEnd="size-50" color="informative" /> : undefined}
+                    {task.urgent ? <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" /> : undefined}
+                  </Cell>
+                  <Cell>
+                    {task.tags.map(tag => (
+                      <View elementType="span" marginEnd="size-50" key={tag.id}>#{tag.name}</View>
+                    ))}
                   </Cell>
                   <Cell>
                     <span title={DateTime.fromJSDate(task.createdAt).toISO()!}>
