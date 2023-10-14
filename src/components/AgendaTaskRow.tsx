@@ -1,31 +1,32 @@
 'use client';
 
-import { ActionMenu, Grid, Item, ToggleButton, View } from "@adobe/react-spectrum";
-import { Agenda, Task } from "@prisma/client";
+import { ActionMenu, Flex, Grid, Item, TagGroup, ToggleButton, View } from "@adobe/react-spectrum";
+import { Tag, Task } from "@prisma/client";
 import { Key, useCallback } from "react";
 import CheckmarkCircleOutline from "@spectrum-icons/workflow/CheckmarkCircleOutline";
+import Flag from "@spectrum-icons/workflow/Flag";
+import HotFixes from "@spectrum-icons/workflow/HotFixes";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
 
-export interface AgendaTaskRowAction {
-  type: 'toggle' | 'defer' | 'edit'
-  task: Task
-  agenda?: Agenda
+type TaskWithTags = Task & { tags: Tag[] }
+
+export interface AgendaTaskRowProps {
+  task: TaskWithTags
+  onToggle?(taskId: string, completed: boolean): void
+  onDefer?(taskId: string): void
+  onEdit?(taskId: string): void
 }
 
-export interface TaskProps {
-  task: Task
-  onAction?(action: AgendaTaskRowAction): void
-}
+export default function AgendaTaskRow({ task, onToggle = () => {}, onDefer = () => {}, onEdit = () => {} }: AgendaTaskRowProps) {
 
-export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) {
-
-  const toggleTask = useCallback(() => {
-    onAction({ type: 'toggle', task });
-  }, [task, onAction]);
+  const handleToggle = useCallback(() => onToggle(task.id, !task.completed), [task.id, task.completed, onToggle]);
 
   const handleMenuAction = useCallback((key: Key) => {
-    onAction({ type: key as AgendaTaskRowAction["type"], task });
-  }, [onAction, task]);
+    switch (key) {
+      case 'defer': return onDefer(task.id);
+      case 'edit': return onEdit(task.id);
+    }
+  }, [onDefer, onEdit, task.id]);
 
   const isEmbedded = useIsEmbedded();
 
@@ -38,12 +39,19 @@ export default function AgendaTaskRow({ task, onAction = () => {} }: TaskProps) 
               alignItems="center"
               UNSAFE_className="rounded border shadow p-1">
       <View gridArea="toggle">
-        <ToggleButton isEmphasized isQuiet onPress={toggleTask} isSelected={task.completed}>
+        <ToggleButton isEmphasized isQuiet onPress={handleToggle} isSelected={task.completed}>
           <CheckmarkCircleOutline />
         </ToggleButton>
       </View>
       <View alignSelf="start" gridArea="name">{task.name}</View>
-      <View gridArea="tags">#foo #bar</View>
+      <Flex gridArea="tags" direction="row" wrap>
+        
+        {task.important ? <Flag aria-label="Important" size="S" marginEnd="size-50" color="informative" /> : undefined}
+        {task.urgent ? <HotFixes aria-label="Urgent" size="S" marginEnd="size-50" color="negative" /> : undefined}
+        <TagGroup items={task.tags} aria-label="Tags" renderEmptyState={() => <></>}>
+          {(tag) => <Item key={tag.id}>{tag.name}</Item>}
+        </TagGroup>
+      </Flex>
       <View gridArea="actions">
         <ActionMenu isQuiet onAction={handleMenuAction} isDisabled={isEmbedded}>
           <Item key="defer">Defer</Item>
