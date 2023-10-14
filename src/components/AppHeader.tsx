@@ -16,14 +16,21 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
   const router = useRouter();
   const isEmbedded = useIsEmbedded();
 
+  // Clears the client-side Router Cache using router.refresh() after navigating.
+  // this is necessary for the other page to get new data from the server, in case
+  // mutations have happened.
+  // TODO -- technically, this isn't always necessary, but I'm not sure which pages
+  // have data dependencies on each other, so just refreshing every time.
+  const navigate = (path: string) => { router.push(path); router.refresh(); }
+
   const handleMenuAction = useCallback((key: Key) => {
     if (isEmbedded) return;
     switch (key) {
       case 'login': return signIn('github');
       case 'logout': return signOut();
-      case 'manage': return router.push('/manage');
-      case 'today': return router.push('/today');
-      case 'settings': return router.push('/settings');
+      case 'manage': return navigate('/manage');
+      case 'today': return navigate('/today');
+      case 'settings': return navigate('/settings');
     }
   }, [router, isEmbedded]);
 
