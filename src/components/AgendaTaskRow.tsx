@@ -44,13 +44,13 @@ export default function AgendaTaskRow({ task, onToggle = () => {}, onDefer = () 
         </ToggleButton>
       </View>
       <View alignSelf="start" gridArea="name">{task.name}</View>
-      <Flex gridArea="tags" direction="row" wrap>
+      <Flex gridArea="tags" direction="row" wrap alignItems="center">
         
-        {task.important ? <Flag aria-label="Important" size="S" marginEnd="size-50" color="informative" /> : undefined}
-        {task.urgent ? <HotFixes aria-label="Urgent" size="S" marginEnd="size-50" color="negative" /> : undefined}
-        <TagGroup items={task.tags} aria-label="Tags" renderEmptyState={() => <></>}>
-          {(tag) => <Item key={tag.id}>{tag.name}</Item>}
-        </TagGroup>
+        {task.important ? <Flag aria-label="Important" size="XS" marginEnd="size-50" color="informative" /> : undefined}
+        {task.urgent ? <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" /> : undefined}
+        {task.tags.map(tag => (
+          <View marginEnd="size-50" key={tag.id}>#{tag.name}</View>
+        ))}
       </Flex>
       <View gridArea="actions">
         <ActionMenu isQuiet onAction={handleMenuAction} isDisabled={isEmbedded}>
