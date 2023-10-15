@@ -78,7 +78,7 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
   await exec(`git fetch --depth 1 origin "${config.branchName}"`, {
     cwd: gitRepoDir,
     env: {
-      GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes`
+      GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new`
     } as any
   });
   await exec(`git checkout "${config.branchName}"`, { cwd: gitRepoDir });
@@ -94,7 +94,7 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
   await exec(`git push origin "${config.branchName}"`, {
     cwd: gitRepoDir,
     env: {
-      GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes`
+      GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new`
     } as any
   });
   return { hasChanges: true, commitSha };
