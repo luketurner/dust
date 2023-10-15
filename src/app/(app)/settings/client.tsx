@@ -1,6 +1,6 @@
 'use client';
 
-import { createGitExportConfig, removeGitExportConfig, testGitExportConfig, updateGitExportConfig } from "@/actions/gitExportConfig";
+import { createGitExportConfig, removeGitExportConfig, saveAndTestGitExportConfig, updateGitExportConfig } from "@/actions/gitExportConfig";
 import AppLayout from "@/components/AppLayout";
 import GitConfigEditor from "@/components/GitConfigEditor";
 import GitExportAttemptsTable from "@/components/GitExportAttemptsTable";
@@ -56,6 +56,7 @@ interface TestGitConfigAction {
   type: 'test-git-config';
   configId: string;
   pendingExportId: string;
+  data: Partial<ClientGitExportConfig>;
 }
 
 interface TestGitConfigFinishedAction {
@@ -126,7 +127,7 @@ async function serverReducer(action: SettingsPageAction): Promise<SettingsPageAc
       await removeGitExportConfig(action.configId);
       break;
     case 'test-git-config':
-      const exportAttempt = await testGitExportConfig(action.configId);
+      const exportAttempt = await saveAndTestGitExportConfig(action.configId, action.data);
       return { type: 'test-git-config-finished', configId: action.configId, exportAttempt, pendingExportId: action.pendingExportId };
   }
 }
@@ -150,8 +151,8 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
     dispatch({ type: 'add-git-config' })
   }, [dispatch]);
 
-  const handleGitConfigTest = useCallback(async (configId: string) => { 
-    dispatch({ type: 'test-git-config', configId, pendingExportId: uuid() })
+  const handleGitConfigTest = useCallback(async (configId: string, data: ClientGitExportConfig) => { 
+    dispatch({ type: 'test-git-config', configId, data, pendingExportId: uuid() })
   }, [dispatch]);
 
   return (

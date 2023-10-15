@@ -61,3 +61,11 @@ export async function testGitExportConfig(configId: string): Promise<GitExportAt
 
   return await exportConfig(config);
 }
+
+export async function saveAndTestGitExportConfig(configId: string, data: Partial<GitExportConfig>): Promise<GitExportAttempt> {
+  await getServerUserOrThrow();
+
+  await updateGitExportConfig(configId, data);
+
+  return await testGitExportConfig(configId);
+}

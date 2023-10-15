@@ -10,7 +10,7 @@ export type GitConfigEditorState = ClientGitExportConfig
 export interface GitConfigEditorProps {
   onSave(configId: string, data: GitConfigEditorState): void
   onDelete(configId: string): void
-  onTest(configId: string): void
+  onTest(configId: string, data: GitConfigEditorState): void
   config: ClientGitExportConfig
 }
 
@@ -21,11 +21,8 @@ export default function GitConfigEditor({ config, onSave, onDelete, onTest }: Gi
   const handleBranchNameChange = useCallback((value: string) => { setState(draft => { draft.branchName = value; }) }, [setState]);
 
   const handleDelete = useCallback(() => { onDelete(config.id) }, [onDelete, config.id]);
-  const handleTest = useCallback(() => { onTest(config.id) }, [onTest, config.id]);
-
-  const handleSave = useCallback(() => {
-    onSave(config.id, state)
-  }, [onSave, config.id, state]);
+  const handleTest = useCallback(() => { onTest(config.id, state) }, [onTest, config.id, state]);
+  const handleSave = useCallback(() => { onSave(config.id, state) }, [onSave, config.id, state]);
 
   return (
     <Form maxWidth="size-3600">
@@ -36,8 +33,8 @@ export default function GitConfigEditor({ config, onSave, onDelete, onTest }: Gi
       
       <ButtonGroup>
         <Button variant="negative" onPress={handleDelete}>Delete</Button>
-        <Button variant="secondary" onPress={handleTest}>Test</Button>
-        <Button variant="accent" onPress={handleSave}>Update</Button>
+        <Button variant="accent" onPress={handleSave}>Save</Button>
+        <Button variant="secondary" onPress={handleTest} isDisabled={!(state.remoteUrl && state.branchName && state.hasPrivateKey)}>Save & Test</Button>
       </ButtonGroup>
     </Form>
   )
