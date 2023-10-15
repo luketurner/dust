@@ -84,11 +84,11 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
   await exec(`git checkout "${config.branchName}"`, { cwd: gitRepoDir });
   const userDataFilename = `${config.userId}_${config.id}.json`;
   await exportUserDataToFile(config.userId, join(gitRepoDir, userDataFilename));
-  const { stdout: diffOutput } = await exec(`git diff --name-only`, { cwd: gitRepoDir });
+  await exec(`git add "${userDataFilename}"`, { cwd: gitRepoDir });
+  const { stdout: diffOutput } = await exec(`git diff --cached --shortstat`, { cwd: gitRepoDir });
   if (diffOutput.trim() === "") {
     return { hasChanges: false };
   }
-  await exec(`git add "${userDataFilename}"`, { cwd: gitRepoDir });
   await exec(`git commit -m "${DateTime.now().toISOTime()} dust export"`, { cwd: gitRepoDir });
   const { stdout: commitSha } = await exec(`git rev-parse HEAD`, { cwd: gitRepoDir });
   await exec(`git push origin "${config.branchName}"`, {
