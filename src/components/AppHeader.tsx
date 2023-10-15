@@ -21,7 +21,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
   // mutations have happened.
   // TODO -- technically, this isn't always necessary, but I'm not sure which pages
   // have data dependencies on each other, so just refreshing every time.
-  const navigate = (path: string) => { router.push(path); router.refresh(); }
+  const navigate = useCallback((path: string) => { router.push(path); router.refresh(); }, [router])
 
   const handleMenuAction = useCallback((key: Key) => {
     if (isEmbedded) return;
@@ -32,7 +32,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
       case 'today': return navigate('/today');
       case 'settings': return navigate('/settings');
     }
-  }, [router, isEmbedded]);
+  }, [navigate, isEmbedded]);
 
   const handleBreadcrumbAction = useCallback((key: Key) => {
     if (isEmbedded) return;

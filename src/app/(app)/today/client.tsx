@@ -170,7 +170,7 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
           </Flex>
           {tasks.some(task => !task.completed) ? undefined : 
             <Flex direction="column" marginTop="single-line-height" alignSelf="center" alignItems="center" gap="size-100">
-              <View marginBottom="size-200">Looks like you're done for the day! 🎉</View>
+              <View marginBottom="size-200">Looks like you&apos;re done for the day! 🎉</View>
               <View>(If you want, you can add some more tasks to the agenda...)</View>
               <ButtonGroup>
                 <Button variant="secondary" onPress={handleAddOneTask}>Add 1 task</Button>
