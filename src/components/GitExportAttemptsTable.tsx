@@ -18,7 +18,7 @@ export default function GitExportAttemptsTable({ config }: GitExportAttemptsTabl
         <Column>Started</Column>
         <Column>Finished</Column>
       </TableHeader>
-      <TableBody items={config.exportAttempts}>
+      <TableBody items={config.exportAttempts ?? []}>
         {(attempt) => (
           <Row>
             <Cell>{attempt.status}</Cell>

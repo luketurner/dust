@@ -105,7 +105,8 @@ function clientReducer(state: SettingsPageState, action: SettingsPageAction) {
       });
       break;
     case 'test-git-config-finished':
-      ToastQueue.positive('Git export succeeded!');
+      if (action.exportAttempt.status === 'failed') ToastQueue.negative('Git export failed.');
+      if (action.exportAttempt.status === 'succeeded') ToastQueue.positive('Git export succeeded!');
       Object.assign(
         state.gitExportConfigs.find(({ id }) => id === action.configId)!.exportAttempts?.find(({ id }) => id === action.pendingExportId)!,
         action.exportAttempt
