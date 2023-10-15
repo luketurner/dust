@@ -15,20 +15,8 @@ export async function generateDeployKeys(): Promise<Pick<GitExportConfig, 'sshPr
   const privateKeyFilename = join(tmpDir, 'id_rsa');
   const publicKeyFilename = join(tmpDir, 'id_rsa.pub');
 
-  try {
-    await exec(`/usr/bin/git --help`);
-  } catch (e) {
-    console.log("git help error", e)
-  }
-
-  try {
-    await exec(`/usr/bin/ssh --help`);
-  } catch (e) {
-    console.log("ssh help error", e)
-  }
-
   // TODO -- hardcoded domain
-  await exec(`/usr/bin/ssh-keygen -q -t ed25519 -C "gitexport@dust.luketurner.org" -N "" -f "${privateKeyFilename}"`);
+  await exec(`ssh-keygen -q -t ed25519 -C "gitexport@dust.luketurner.org" -N "" -f "${privateKeyFilename}"`);
 
   return {
     sshPrivateKey: (await readFile(privateKeyFilename)).toString('base64'),
