@@ -40,12 +40,12 @@ export async function exportConfig(config: GitExportConfig): Promise<GitExportAt
   });
 
   try {
-    await exportUserDataToGitRemote(config);
+    const result = await exportUserDataToGitRemote(config);
     return await prisma.gitExportAttempt.update({
       where: { id: attempt.id },
       data: {
         status: 'succeeded',
-        result: '', // TODO -- SHA?
+        result: result.hasChanges ? `SHA: ${result.commitSha}` : 'Nothing to commit',
         finishedAt: new Date(),
       }
     });
@@ -63,7 +63,9 @@ export async function exportConfig(config: GitExportConfig): Promise<GitExportAt
   }
 }
 
-async function exportUserDataToGitRemote(config: GitExportConfig) {
+export type GitExportResult = { hasChanges: true; commitSha: string; } | { hasChanges: false; }
+
+async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitExportResult> {
   // TODO -- support manually specifying authorized keys?
 
   const tmpDir = await mkdtemp(join(tmpdir(), `git-export-${config.id}-`));
@@ -82,14 +84,20 @@ async function exportUserDataToGitRemote(config: GitExportConfig) {
   await exec(`git checkout "${config.branchName}"`, { cwd: gitRepoDir });
   const userDataFilename = `${config.userId}_${config.id}.json`;
   await exportUserDataToFile(config.userId, join(gitRepoDir, userDataFilename));
+  const { stdout: diffOutput } = await exec(`git diff --name-only`, { cwd: gitRepoDir });
+  if (diffOutput.trim() === "") {
+    return { hasChanges: false };
+  }
   await exec(`git add "${userDataFilename}"`, { cwd: gitRepoDir });
-  await exec(`git commit --allow-empty -m "${DateTime.now().toISOTime()} dust export"`, { cwd: gitRepoDir });
+  await exec(`git commit -m "${DateTime.now().toISOTime()} dust export"`, { cwd: gitRepoDir });
+  const { stdout: commitSha } = await exec(`git rev-parse HEAD`, { cwd: gitRepoDir });
   await exec(`git push origin "${config.branchName}"`, {
     cwd: gitRepoDir,
     env: {
       GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes`
     } as any
   });
+  return { hasChanges: true, commitSha };
 
 }
 
