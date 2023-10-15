@@ -71,7 +71,7 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
   const tmpDir = await mkdtemp(join(tmpdir(), `git-export-${config.id}-`));
   const privateKeyFilename = join(tmpDir, 'ssh_key');
   const gitRepoDir = join(tmpDir, 'repo');
-  await writeFile(privateKeyFilename, Buffer.from(config.sshPrivateKey!, 'base64'))
+  await writeFile(privateKeyFilename, Buffer.from(config.sshPrivateKey!, 'base64'), { mode: 0o600 });
   await mkdir(gitRepoDir);
   await exec(`git init --quiet "${gitRepoDir}"`);
   await exec(`git remote add origin "${config.remoteUrl}"`, { cwd: gitRepoDir });
