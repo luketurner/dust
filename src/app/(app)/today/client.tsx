@@ -10,7 +10,7 @@ import { DateTime } from "luxon";
 import AppLayout from "@/components/AppLayout";
 import QuoteBlock from "@/components/QuoteBlock";
 import ThreeSpotLayout from "@/components/ThreeSpotLayout";
-import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
+import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ToastQueue } from "@react-spectrum/toast";
 import { useCallback } from "react";
 
@@ -69,9 +69,9 @@ export interface EditTaskAction { type: 'edit-task'; taskId: string; }
 export interface DeferTaskAction { type: 'defer-task'; taskId: string; agendaId: string; }
 export interface ToggleTaskAction { type: 'toggle-task'; taskId: string; completed: boolean; }
 
-type AgendaPageClientAction = AddAgendaTasksFinishedAction | AddAgendaTasksAction | EditTaskAction | DeferTaskAction | ToggleTaskAction | SaveTaskAction | DialogAction | ServerErrorAction;
+type AgendaPageClientAction = AddAgendaTasksFinishedAction | AddAgendaTasksAction | EditTaskAction | DeferTaskAction | ToggleTaskAction | SaveTaskAction | DialogAction | ServerErrorAction | EffectErrorAction;
 
-function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAction) {
+function stateReducer(state: AgendaPageClientState, action: AgendaPageClientAction) {
   switch (action.type) {
     case 'toggle-task':
       state.agenda!.agendaTasks.find(v => v.taskId === action.taskId)!.task.completed = action.completed;
@@ -100,6 +100,11 @@ function clientReducer(state: AgendaPageClientState, action: AgendaPageClientAct
       if (action.agenda.id !== state.agenda.id) return;
       state.agenda = action.agenda;
       break;
+  }
+}
+
+async function effectReducer(action: AgendaPageClientAction) {
+  switch (action.type) {
     case 'server-error':
       ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
       break;
@@ -128,7 +133,7 @@ async function serverReducer(action: AgendaPageClientAction) {
 }
 
 export default function AgendaPageClient({ date, agenda, quote, allTags }: AgendaPageClientProps) {
-  const [state, dispatchAction] = useClientServerReducer<AgendaPageClientState, AgendaPageClientAction>(clientReducer, serverReducer, {
+  const [state, dispatchAction] = useClientServerReducer<AgendaPageClientState, AgendaPageClientAction>(stateReducer, effectReducer, serverReducer, {
     agenda,
     allTags
   });

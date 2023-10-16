@@ -4,7 +4,7 @@ import { createGitExportConfig, removeGitExportConfig, saveAndTestGitExportConfi
 import AppLayout from "@/components/AppLayout";
 import GitConfigEditor from "@/components/GitConfigEditor";
 import GitExportAttemptsTable from "@/components/GitExportAttemptsTable";
-import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
+import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ActionButton, Item, TabList, TabPanels, Tabs } from "@adobe/react-spectrum";
 import { GitExportAttempt, GitExportConfig, User } from "@prisma/client";
 import { ToastQueue } from "@react-spectrum/toast";
@@ -66,9 +66,9 @@ interface TestGitConfigFinishedAction {
   pendingExportId: string;
 }
 
-export type SettingsPageAction = ServerErrorAction | AddGitConfigAction | AddGitConfigFinishedAction | UpdateGitConfigAction | RemoveGitConfigAction | TestGitConfigAction | TestGitConfigFinishedAction;
+export type SettingsPageAction = EffectErrorAction | ServerErrorAction | AddGitConfigAction | AddGitConfigFinishedAction | UpdateGitConfigAction | RemoveGitConfigAction | TestGitConfigAction | TestGitConfigFinishedAction;
 
-function clientReducer(state: SettingsPageState, action: SettingsPageAction) {
+function stateReducer(state: SettingsPageState, action: SettingsPageAction) {
   switch (action.type) {
     case 'update-git-config':
       Object.assign(state.gitExportConfigs.find(({ id }) => id === action.configId)!, action.data)
@@ -82,7 +82,6 @@ function clientReducer(state: SettingsPageState, action: SettingsPageAction) {
       state.gitExportConfigs = state.gitExportConfigs.filter(({ id }) => id !== action.configId);
       break;
     case 'server-error':
-      ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
       if ((action.error as Error)?.message.includes('Rate-limiting Git export.')) {
         const failedAction = (action.failedAction as TestGitConfigAction);
         Object.assign(
@@ -106,12 +105,22 @@ function clientReducer(state: SettingsPageState, action: SettingsPageAction) {
       });
       break;
     case 'test-git-config-finished':
-      if (action.exportAttempt.status === 'failed') ToastQueue.negative('Git export failed.');
-      if (action.exportAttempt.status === 'succeeded') ToastQueue.positive('Git export succeeded!');
       Object.assign(
         state.gitExportConfigs.find(({ id }) => id === action.configId)!.exportAttempts?.find(({ id }) => id === action.pendingExportId)!,
         action.exportAttempt
       );
+      break;
+  }
+}
+
+async function effectReducer(action: SettingsPageAction) {
+  switch (action.type) {
+    case 'server-error':
+      ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
+      break;
+    case 'test-git-config-finished':
+      if (action.exportAttempt.status === 'failed') ToastQueue.negative('Git export failed.');
+      if (action.exportAttempt.status === 'succeeded') ToastQueue.positive('Git export succeeded!');
       break;
   }
 }
@@ -134,7 +143,7 @@ async function serverReducer(action: SettingsPageAction): Promise<SettingsPageAc
 
 
 export default function SettingsPageClient({ user, gitExportConfigs }: SettingsPageClientProps) {
-  const [state, dispatch] = useClientServerReducer<SettingsPageState, SettingsPageAction>(clientReducer, serverReducer, {
+  const [state, dispatch] = useClientServerReducer<SettingsPageState, SettingsPageAction>(stateReducer, effectReducer, serverReducer, {
     user,
     gitExportConfigs
   });

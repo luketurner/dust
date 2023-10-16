@@ -3,7 +3,7 @@
 import { Tag, Tag as TagType, Task, Task as TaskType } from "@prisma/client";
 import { Key, useCallback } from "react";
 import AppLayout from "@/components/AppLayout";
-import { ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
+import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ActionButton, ActionMenu, Button, Cell, Checkbox, CheckboxGroup, Column, Content, Flex, Heading, IllustratedMessage, Item, ListView, Row, Selection, TableBody, TableHeader, TableView, Text, View } from "@adobe/react-spectrum";
 import EditTagDialog from "@/components/EditTagDialog";
 import { createTag, deleteTag, updateTag } from "@/actions/tag";
@@ -60,9 +60,9 @@ interface ArchiveTaskAction { type: 'archive-task'; taskId: string; }
 interface UnarchiveTaskAction { type: 'unarchive-task'; taskId: string; }
 
 
-type ManagePageClientAction = ChangeSignficanceFiltersAction | ServerErrorAction | SelectTagsAction | OpenAddTagAction | OpenEditTagAction | AddTagAction | EditTagAction | DeleteTagAction | AddTagFinishedAction | CloseDialogAction | ChangeDisplayFiltersAction | OpenAddTaskAction | OpenEditTaskAction | AddTaskAction | AddTaskFinishedAction | EditTaskAction | DeleteTaskAction | ArchiveTaskAction | UnarchiveTaskAction;
+type ManagePageClientAction = EffectErrorAction | ChangeSignficanceFiltersAction | ServerErrorAction | SelectTagsAction | OpenAddTagAction | OpenEditTagAction | AddTagAction | EditTagAction | DeleteTagAction | AddTagFinishedAction | CloseDialogAction | ChangeDisplayFiltersAction | OpenAddTaskAction | OpenEditTaskAction | AddTaskAction | AddTaskFinishedAction | EditTaskAction | DeleteTaskAction | ArchiveTaskAction | UnarchiveTaskAction;
 
-function clientReducer(state: ManagePageClientState, action: ManagePageClientAction) {
+function stateReducer(state: ManagePageClientState, action: ManagePageClientAction) {
   switch (action.type) {
     case 'select-tags':
       state.selectedTags = action.tags === 'all' ? state.tags.map(({ id }) => id) : Array.from(action.tags as Set<string>)
@@ -130,6 +130,11 @@ function clientReducer(state: ManagePageClientState, action: ManagePageClientAct
       state.showNonImportant = !action.data.includes('important');
       state.showNonUrgent = !action.data.includes('urgent');
       break;
+  }
+}
+
+async function effectReducer(action: ManagePageClientAction) {
+  switch (action.type) {
     case 'server-error':
       ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
       break;
@@ -167,7 +172,7 @@ async function serverReducer(action: ManagePageClientAction) {
 
 export default function ManagePageClient({ tasks: initialTasks, tags: initialTags }: TaskManagerProps) {
 
-  const [state, dispatch] = useClientServerReducer<ManagePageClientState, ManagePageClientAction>(clientReducer, serverReducer, {
+  const [state, dispatch] = useClientServerReducer<ManagePageClientState, ManagePageClientAction>(stateReducer, effectReducer, serverReducer, {
     tasks: initialTasks,
     tags: initialTags,
     selectedTags: [],
