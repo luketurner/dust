@@ -45,7 +45,7 @@ export async function exportConfig(config: GitExportConfig): Promise<GitExportAt
     return await prisma.gitExportAttempt.update({
       where: { id: attempt.id },
       data: {
-        status: 'succeeded',
+        status: 'success',
         result: result.hasChanges ? `SHA: ${result.commitSha}` : 'Nothing to commit',
         finishedAt: new Date(),
       }

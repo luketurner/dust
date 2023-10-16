@@ -22,7 +22,7 @@ export default function GitExportAttemptsTable({ config }: GitExportAttemptsTabl
         {(attempt) => (
           <Row>
             <Cell>
-              <StatusLight variant={attempt.status === 'failed' ? 'negative' : attempt.status === 'succeeded' ? 'positive' : 'neutral'} UNSAFE_className="capitalize">
+              <StatusLight variant={attempt.status === 'failed' ? 'negative' : attempt.status === 'success' ? 'positive' : 'neutral'} UNSAFE_className="capitalize">
                 {attempt.status}
               </StatusLight>
             </Cell>

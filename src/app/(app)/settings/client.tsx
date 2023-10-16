@@ -120,7 +120,7 @@ async function effectReducer(action: SettingsPageAction) {
       break;
     case 'test-git-config-finished':
       if (action.exportAttempt.status === 'failed') ToastQueue.negative('Git export failed.');
-      if (action.exportAttempt.status === 'succeeded') ToastQueue.positive('Git export succeeded!');
+      if (action.exportAttempt.status === 'success') ToastQueue.positive('Git export success!');
       break;
   }
 }
