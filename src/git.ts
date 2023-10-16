@@ -7,6 +7,7 @@ import { join } from "path";
 import { DateTime } from "luxon";
 import { tmpdir } from "os";
 import { ClientGitExportConfig } from "./app/(app)/settings/client";
+import { GIT_EMAIL } from "./config";
 
 const exec = promisify(execCb)
 
@@ -15,8 +16,7 @@ export async function generateDeployKeys(): Promise<Pick<GitExportConfig, 'sshPr
   const privateKeyFilename = join(tmpDir, 'id_rsa');
   const publicKeyFilename = join(tmpDir, 'id_rsa.pub');
 
-  // TODO -- hardcoded domain
-  await exec(`ssh-keygen -q -t ed25519 -C "gitexport@dust.luketurner.org" -N "" -f "${privateKeyFilename}"`);
+  await exec(`ssh-keygen -q -t ed25519 -C "${GIT_EMAIL}" -N "" -f "${privateKeyFilename}"`);
 
   return {
     sshPrivateKey: (await readFile(privateKeyFilename)).toString('base64'),

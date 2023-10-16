@@ -1,11 +1,12 @@
-import { GitExportAttempt, GitExportConfig, User } from "@prisma/client";
+import { GitExportAttempt, GitExportConfig } from "@prisma/client";
 import { prisma } from "./db/client";
-import { mkdir, mkdtemp, readFile, writeFile } from "fs/promises";
+import { mkdir, mkdtemp, writeFile } from "fs/promises";
 import { exec as execCb } from "child_process";
 import { promisify } from "node:util";
 import { join } from "path";
 import { DateTime } from "luxon";
 import { tmpdir } from "os";
+import { GIT_EMAIL, GIT_NAME } from "./config";
 
 const exec = promisify(execCb)
 
@@ -74,6 +75,8 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
   await writeFile(privateKeyFilename, Buffer.from(config.sshPrivateKey!, 'base64'), { mode: 0o600 });
   await mkdir(gitRepoDir);
   await exec(`git init --quiet "${gitRepoDir}"`);
+  await exec(`git config user.email "${GIT_EMAIL}"`, { cwd: gitRepoDir });
+  await exec(`git config user.name "${GIT_NAME}"`, { cwd: gitRepoDir });
   await exec(`git remote add origin "${config.remoteUrl}"`, { cwd: gitRepoDir });
   await exec(`git fetch --depth 1 origin "${config.branchName}"`, {
     cwd: gitRepoDir,
@@ -89,7 +92,7 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
   if (diffOutput.trim() === "") {
     return { hasChanges: false };
   }
-  await exec(`git commit -m "${DateTime.now().toISOTime()} dust export"`, { cwd: gitRepoDir });
+  await exec(`git commit -m "${DateTime.now().toISOTime()} dust export"`, {cwd: gitRepoDir });
   const { stdout: commitSha } = await exec(`git rev-parse HEAD`, { cwd: gitRepoDir });
   await exec(`git push origin "${config.branchName}"`, {
     cwd: gitRepoDir,
