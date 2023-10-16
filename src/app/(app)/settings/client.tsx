@@ -5,7 +5,7 @@ import AppLayout from "@/components/AppLayout";
 import GitConfigEditor from "@/components/GitConfigEditor";
 import GitExportAttemptsTable from "@/components/GitExportAttemptsTable";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
-import { ActionButton, Item, TabList, TabPanels, Tabs } from "@adobe/react-spectrum";
+import { ActionButton, Heading, Item, TabList, TabPanels, Tabs, View } from "@adobe/react-spectrum";
 import { GitExportAttempt, GitExportConfig, User } from "@prisma/client";
 import { ToastQueue } from "@react-spectrum/toast";
 import { useCallback } from "react";
@@ -166,7 +166,18 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
 
   return (
     <AppLayout user={true} breadcrumbs={[{ label: 'Settings', url: '/settings', key: 'settings' }]}>
-      <ActionButton onPress={handleGitConfigAdd}>Add Git Export Config</ActionButton>
+      <Heading level={1} UNSAFE_className="text-xl" marginBottom="single-line-height">Git Export Settings</Heading>
+      <View marginBottom="single-line-height">
+        Dust can export a snapshot of your user data (incl. all tasks, tags, historical agendas, etc.) to one or more Git repo(s) every two hours.
+        The repos can then be used as a versioned backup of your task data. User data is exported in a raw JSON format.<br /><br />
+        In order to do so, Dust will need to know the Git <em>Remote URL</em> and the <em>Branch name</em> on the remote to push to.
+        (Note that only SSH-style remote URLs will work.)
+        <br /><br />
+        You&apos;ll also need to authorize Dust&apos;s <em>SSH Public Key</em> to access your repo.
+        In Github, this is done by adding the SSH Public Key as a <em>Deploy Key</em> in the repository
+        settings. Make sure to enable write access. (Also, note that each export configuration has its own unique public key.)
+      </View>
+      <ActionButton onPress={handleGitConfigAdd}>Add Git Export</ActionButton>
       {state.gitExportConfigs.length > 0 ? (
         <Tabs items={state.gitExportConfigs}>
           <TabList>
