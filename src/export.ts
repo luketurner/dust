@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { join } from "path";
 import { DateTime } from "luxon";
 import { tmpdir } from "os";
-import { GIT_EMAIL, GIT_NAME } from "./config";
+import { GIT_EMAIL, GIT_NAME, SSH_KEY_PASSPHRASE } from "./config";
 
 const exec = promisify(execCb)
 
@@ -71,8 +71,10 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
 
   const tmpDir = await mkdtemp(join(tmpdir(), `git-export-${config.id}-`));
   const privateKeyFilename = join(tmpDir, 'ssh_key');
+  const askpassFilename = join(tmpDir, 'askpass');
   const gitRepoDir = join(tmpDir, 'repo');
   await writeFile(privateKeyFilename, Buffer.from(config.sshPrivateKey!, 'base64'), { mode: 0o600 });
+  await writeFile(askpassFilename, `#!/usr/bin/env bash\necho '${SSH_KEY_PASSPHRASE}'`, { encoding: 'utf8', mode: 0o700 });
   await mkdir(gitRepoDir);
   await exec(`git init --quiet "${gitRepoDir}"`);
   await exec(`git config user.email "${GIT_EMAIL}"`, { cwd: gitRepoDir });
@@ -81,6 +83,8 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
   await exec(`git fetch --depth 1 origin "${config.branchName}"`, {
     cwd: gitRepoDir,
     env: {
+      SSH_ASKPASS: askpassFilename,
+      SSH_ASKPASS_REQUIRE: 'force',
       GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new`
     } as any
   });
@@ -97,6 +101,8 @@ async function exportUserDataToGitRemote(config: GitExportConfig): Promise<GitEx
   await exec(`git push origin "${config.branchName}"`, {
     cwd: gitRepoDir,
     env: {
+      SSH_ASKPASS: askpassFilename,
+      SSH_ASKPASS_REQUIRE: 'force',
       GIT_SSH_COMMAND: `ssh -i "${privateKeyFilename}" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new`
     } as any
   });

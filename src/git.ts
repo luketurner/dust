@@ -1,13 +1,11 @@
-import { GitExportConfig, User } from "@prisma/client";
-import { prisma } from "./db/client";
-import { mkdtemp, readFile, writeFile } from "fs/promises";
+import { GitExportConfig } from "@prisma/client";
+import { mkdtemp, readFile } from "fs/promises";
 import { exec as execCb } from "child_process";
 import { promisify } from "node:util";
 import { join } from "path";
-import { DateTime } from "luxon";
 import { tmpdir } from "os";
 import { ClientGitExportConfig } from "./app/(app)/settings/client";
-import { GIT_EMAIL } from "./config";
+import { GIT_EMAIL, SSH_KEY_PASSPHRASE } from "./config";
 
 const exec = promisify(execCb)
 
@@ -16,7 +14,7 @@ export async function generateDeployKeys(): Promise<Pick<GitExportConfig, 'sshPr
   const privateKeyFilename = join(tmpDir, 'id_rsa');
   const publicKeyFilename = join(tmpDir, 'id_rsa.pub');
 
-  await exec(`ssh-keygen -q -t ed25519 -C "${GIT_EMAIL}" -N "" -f "${privateKeyFilename}"`);
+  await exec(`ssh-keygen -q -t ed25519 -C "${GIT_EMAIL}" -N "${SSH_KEY_PASSPHRASE}" -f "${privateKeyFilename}"`);
 
   return {
     sshPrivateKey: (await readFile(privateKeyFilename)).toString('base64'),
