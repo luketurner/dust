@@ -51,6 +51,7 @@ export interface SaveTaskAction {
     tags?: string[];
     important?: boolean;
     urgent?: boolean;
+    someday?: boolean;
   }
 }
 
@@ -93,6 +94,7 @@ function stateReducer(state: AgendaPageClientState, action: AgendaPageClientActi
       if (typeof action.data.description === 'string') taskToUpdate.description = action.data.description;
       taskToUpdate.urgent = action.data.urgent ?? false;
       taskToUpdate.important = action.data.important ?? false;
+      taskToUpdate.someday = action.data.someday ?? false;
       if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.allTags.find((tag) => tag.id === id)!);
       delete state.dialog;
       break;

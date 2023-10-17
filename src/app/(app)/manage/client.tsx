@@ -16,6 +16,7 @@ import NotFound from '@spectrum-icons/illustrations/NotFound';
 import { DateTime } from "luxon";
 import Flag from "@spectrum-icons/workflow/Flag";
 import HotFixes from "@spectrum-icons/workflow/HotFixes";
+import Moon from "@spectrum-icons/workflow/Moon";
 
 type TaskWithTags = TaskType & { tags: TagType[] };
 
@@ -105,6 +106,7 @@ function stateReducer(state: ManagePageClientState, action: ManagePageClientActi
         if (typeof action.data.description === 'string') taskToUpdate.description = action.data.description;
         taskToUpdate.urgent = action.data.urgent ?? false;
         taskToUpdate.important = action.data.important ?? false;
+        taskToUpdate.someday = action.data.someday ?? false;
         if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.tags.find((tag) => tag.id === id)).filter(v => !!v) as Tag[];
       }
       delete state.dialog;
@@ -291,7 +293,11 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
           <TableView renderEmptyState={renderEmptyState} aria-label="List of tasks">
             <TableHeader>
               <Column>Name</Column>
-              <Column width={32} textValue="Important/Urgent Flags"><Flag aria-label="Important" size="XS" marginEnd="size-50" color="informative" /> /  <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" /></Column>
+              <Column width={96} textValue="Important/Urgent Flags">
+                <Flag aria-label="Important" size="XS" marginEnd="size-50" color="notice" />
+                <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" />
+                <Moon aria-label="Someday/Maybe" size="XS" marginEnd="size-50" color="informative" />
+              </Column>
               <Column width={150}>Tags</Column>
               <Column width={150}>Created</Column>
               <Column width={32} align="end"> </Column>
@@ -303,8 +309,9 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
                     {task.name}
                   </Cell>
                   <Cell>
-                    {task.important ? <Flag aria-label="Important" size="XS" marginEnd="size-50" color="informative" /> : undefined}
+                    {task.important ? <Flag aria-label="Important" size="XS" marginEnd="size-50" color="notice" /> : undefined}
                     {task.urgent ? <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" /> : undefined}
+                    {task.someday ? <Moon aria-label="Someday/Maybe" size="XS" marginEnd="size-50" color="informative" /> : undefined}
                   </Cell>
                   <Cell>
                     {task.tags.map(tag => (
