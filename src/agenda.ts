@@ -1,7 +1,7 @@
 import { Agenda } from "@prisma/client";
 import { prisma } from "./db/client";
 import { DateTime } from "luxon";
-import { defaultAgendaRules, pickTasks } from "./agendaRules";
+import { pickTasks } from "./pickTasks";
 
 export async function addTasksToAgenda(agenda: Agenda, num?: number) {
   const allTasks = await prisma.task.findMany({
@@ -18,11 +18,7 @@ export async function addTasksToAgenda(agenda: Agenda, num?: number) {
     }
   });
 
-  const rules = defaultAgendaRules();
-
-  if (num) rules.max = num;
-
-  const pickedTasks = pickTasks(rules, allTasks);
+  const pickedTasks = pickTasks(allTasks, { limit: num ?? 1 });
 
   await prisma.agendaTask.createMany({
     data: pickedTasks.map((task) => ({
@@ -56,7 +52,7 @@ export async function upsertAgendaServer(userId: string, date: string) {
     }
   });
 
-  const pickedTasks = pickTasks(defaultAgendaRules(), allTasks);
+  const pickedTasks = pickTasks(allTasks, { limit: 3 });
 
   const dbDate = DateTime.fromFormat(date, 'yyyy-MM-dd').toISO();
 
