@@ -31,8 +31,15 @@ export async function updateTask(taskId: string, data: {
   description?: string
   important?: boolean
   urgent?: boolean
+  someday?: boolean
 }): Promise<void> {
   const { user } = await getServerUserOrThrow();
+
+  // TODO -- this check doesn't work very well because it doesn't know what the current values of task are
+  if (data.someday && (data.important || data.urgent)) {
+    throw new Error('Someday tasks cannot be important/urgent')
+  }
+
   await prisma.task.update({
     where: {
       id: taskId,
@@ -45,6 +52,7 @@ export async function updateTask(taskId: string, data: {
       description: data.description,
       important: data.important,
       urgent: data.urgent,
+      someday: data.someday,
       tags: (data.tags ? { connect: data.tags.map(id => ({ id, userId: user.id })) } : undefined)
     }
   });
@@ -61,9 +69,13 @@ export async function createTask(data: {
   description?: string
   important?: boolean
   urgent?: boolean
+  someday?: boolean
 }): Promise<Task & { tags: Tag[] }> {
   const { user } = await getServerUserOrThrow();
 
+  if (data.someday && (data.important || data.urgent)) {
+    throw new Error('Someday tasks cannot be important/urgent')
+  }
   
   return await prisma.task.create({
     data: {
@@ -74,6 +86,7 @@ export async function createTask(data: {
       completed: data.completed,
       description: data.description,
       important: data.important,
+      someday: data.someday,
       urgent: data.urgent,
       tags: (data.tags ? { connect: data.tags.map(id => ({ id, userId: user.id })) } : undefined)
     },
@@ -81,45 +94,6 @@ export async function createTask(data: {
       tags: true
     }
   });
-}
-
-/**
- * (Server Action) Accepts a string containing 0+ task declarations, and creates tasks for each of them.
- */
-export async function addTasksFromText(text: string): Promise<(Task & { tags: Tag[] })[]> {
-  const { user } = await getServerUserOrThrow();
-
-  const parsedTasks = parseTaskInput(text);
-
-  const now = new Date();
-
-  const tasksToInsert = parsedTasks.map(({ name, tags, description }, index) => ({
-    name,
-    userId: user.id,
-    description,
-    createdAt: now,
-    tags: {
-      connectOrCreate: (tags ?? []).map(tag => ({
-        create: {
-          userId: user.id,
-          name: tag
-        },
-        where: {
-          userId_name: {
-            userId: user.id,
-            name: tag
-          }
-        }
-      }))
-    }
-  }));
-
-  const tasks = [];
-  // Can't use createMany because it doesn't return the created rows
-  for (const data of tasksToInsert) {
-    tasks.push(await prisma.task.create({ data, include: { tags: true } }));
-  }
-  return tasks;
 }
 
 export async function removeTags(taskId: string, tagIds: string[]) {

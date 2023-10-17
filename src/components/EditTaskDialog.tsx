@@ -11,6 +11,7 @@ export interface EditTaskDialogData {
   description: string;
   important: boolean;
   urgent: boolean;
+  someday: boolean;
 }
 
 export interface EditTaskDialogProps {
@@ -38,35 +39,15 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags, isCreate }: EditT
     description: task?.description ?? "",
     important: task?.important ?? false,
     urgent: task?.urgent ?? false,
+    someday: task?.someday ?? false,
   });
 
-  const handleNameChange = useCallback((value: string) => {
-    setData(draft => {
-      draft.name = value;
-    })
-  }, [setData]);
-
-  const handleDescriptionChange = useCallback((value: string) => {
-    setData(draft => {
-      draft.description = value;
-    })
-  }, [setData]);
-
-  const handleImportantChange = useCallback((value: boolean) => {
-    setData(draft => {
-      draft.important = value;
-    })
-  }, [setData]);
-
-  const handleUrgentChange = useCallback((value: boolean) => {
-    setData(draft => {
-      draft.urgent = value;
-    })
-  }, [setData]);
-
-  const handleSave = useCallback(() => {
-    onSave(isCreate ? null : task!.id, data)
-  }, [onSave, isCreate, task, data]);
+  const handleNameChange = useCallback((value: string) => {setData(draft => {draft.name = value;})}, [setData]);
+  const handleDescriptionChange = useCallback((value: string) => {setData(draft => {draft.description = value;})}, [setData]);
+  const handleImportantChange = useCallback((value: boolean) => {setData(draft => {draft.important = value;})}, [setData]);
+  const handleUrgentChange = useCallback((value: boolean) => {setData(draft => {draft.urgent = value;})}, [setData]);
+  const handleSomedayChange = useCallback((value: boolean) => {setData(draft => {draft.someday = value;})}, [setData]);
+  const handleSave = useCallback(() => {onSave(isCreate ? null : task!.id, data)}, [onSave, isCreate, task, data]);
 
   const handleToggleTag = useCallback((tagId: string, value: boolean) => {
     setData(data => {
@@ -84,8 +65,9 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags, isCreate }: EditT
       <Content>
         <Form maxWidth="size-3600">
           <TextField label="Name" value={data.name} onChange={handleNameChange} />
-          <Checkbox isSelected={data.important} onChange={handleImportantChange}>Important</Checkbox>
-          <Checkbox isSelected={data.urgent} onChange={handleUrgentChange}>Urgent</Checkbox>
+          <Checkbox isDisabled={data.someday} isSelected={data.important} onChange={handleImportantChange}>Important</Checkbox>
+          <Checkbox isDisabled={data.someday} isSelected={data.urgent} onChange={handleUrgentChange}>Urgent</Checkbox>
+          <Checkbox isDisabled={data.important || data.urgent} isSelected={data.someday} onChange={handleSomedayChange}>Someday/Maybe</Checkbox>
           <Flex direction="row" wrap gap="size-100">
             {allTags.map((tag) => (
               <ToggleButton key={tag.id} isSelected={data.tags.includes(tag.id)} onChange={(v: boolean) => handleToggleTag(tag.id, v)}>{tag.name}</ToggleButton>

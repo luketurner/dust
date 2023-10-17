@@ -37,6 +37,7 @@ interface ManagePageClientState {
   showArchived: boolean;
   showNonUrgent: boolean;
   showNonImportant: boolean;
+  showSomeday: boolean;
 }
 
 interface SelectTagsAction { type: 'select-tags'; tags: Set<Key> | 'all'; }
@@ -125,6 +126,7 @@ function stateReducer(state: ManagePageClientState, action: ManagePageClientActi
     case 'change-display-filters':
       state.showActive = action.data.includes('active');
       state.showArchived = action.data.includes('archived');
+      state.showSomeday = action.data.includes('someday');
       break;
     case 'change-significance-filters':
       state.showNonImportant = !action.data.includes('important');
@@ -178,6 +180,7 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     selectedTags: [],
     showActive: true,
     showArchived: false,
+    showSomeday: false,
     showNonImportant: true,
     showNonUrgent: true,
   });
@@ -219,8 +222,9 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
   }, [dispatch]);
 
   const filteredTasks = state.tasks.filter((task) => {
-    if (!state.showActive && !task.archived) return false;
+    if (!state.showActive && !task.archived && !(state.showSomeday && task.someday)) return false;
     if (!state.showArchived && task.archived) return false;
+    if (!state.showSomeday && task.someday) return false;
     if (state.selectedTags.length > 0 && !task.tags.some((tag) => state.selectedTags.includes(tag.id))) return false;
     if (!state.showNonImportant && !task.important) return false;
     if (!state.showNonUrgent && !task.urgent) return false;
@@ -250,11 +254,19 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
             <Button variant="primary" onPress={handleAddTask}>Add Task</Button>
           </Flex>
           <Flex direction="row" marginTop="single-line-height">
-            <CheckboxGroup label="Display filters" value={[...state.showActive ? ['active'] : [], ...state.showArchived ? ['archived'] : [] ]} onChange={handleDisplayFilterChange}>
+            <CheckboxGroup label="Display filters" value={[
+              ...state.showActive ? ['active'] : [],
+              ...state.showArchived ? ['archived'] : [],
+              ...state.showSomeday ? ['someday'] : [],
+            ]} onChange={handleDisplayFilterChange}>
               <Checkbox value="active">Active</Checkbox>
               <Checkbox value="archived">Archived</Checkbox>
+              <Checkbox value="someday">Someday/Maybe</Checkbox>
             </CheckboxGroup>
-            <CheckboxGroup label="Significance filters" value={[...state.showNonImportant ? [] : ['important'], ...state.showNonUrgent ? [] : ['urgent'] ]} onChange={handleSignificanceFilterChange}>
+            <CheckboxGroup label="Significance filters" value={[
+              ...state.showNonImportant ? [] : ['important'],
+              ...state.showNonUrgent ? [] : ['urgent'],
+            ]} onChange={handleSignificanceFilterChange}>
               <Checkbox value="important">Important</Checkbox>
               <Checkbox value="urgent">Urgent</Checkbox>
             </CheckboxGroup>
