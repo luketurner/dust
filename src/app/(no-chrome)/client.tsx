@@ -29,9 +29,7 @@ export default function IndexPageClient({ quote }: IndexPageClientProps) {
           <View elementType="ul" UNSAFE_className="text-center" marginBottom="single-line-height">
             <li>Add all your tasks.</li>
             <li>Every day, Dust picks 3 tasks for you to do.</li>
-            <li>Urgent/Important tasks are picked first.</li>
-            <li>Someday/Maybe tasks are picked last.</li>
-            <li>Automatically sync task data with Git repo(s).</li>
+            <li>Tasks can be synced to a Git repo for safekeeping.</li>
           </View>
           <TinyAgendaPage date={DateTime.now().toISODate()!} quote={quote} />
           <Button alignSelf="center" variant="accent" onPress={(e) => signIn('github')} marginTop="single-line-height">
