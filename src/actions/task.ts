@@ -3,6 +3,7 @@
 import { prisma } from "@/db/client";
 import { Task, Tag } from "@prisma/client";
 import { getServerUserOrThrow } from "@/models/auth"
+import { MAX_ACTIVE_TASKS } from "@/config";
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
@@ -74,6 +75,19 @@ export async function createTask(data: {
 
   if (data.someday && (data.important || data.urgent)) {
     throw new Error('Someday tasks cannot be important/urgent')
+  }
+
+  const activeTasks = await prisma.task.count({
+    where: {
+      userId: user.id,
+      archived: false,
+      completed: false,
+      someday: false
+    }
+  });
+
+  if (activeTasks >= MAX_ACTIVE_TASKS) {
+    throw new Error('Reached active task limit.')
   }
   
   return await prisma.task.create({

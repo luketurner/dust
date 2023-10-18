@@ -1,5 +1,5 @@
 import { TaskWithTags } from "@/models/task";
-import { ActionMenu, Cell, Column, Item, Row, TableBody, TableHeader, TableView, View } from "@adobe/react-spectrum";
+import { ActionMenu, Cell, Checkbox, Column, Item, Row, TableBody, TableHeader, TableView, View } from "@adobe/react-spectrum";
 import { DateTime } from "luxon";
 import ImportantIcon from "./ImportantIcon";
 import SomedayIcon from "./SomedayIcon";
@@ -15,6 +15,7 @@ export default function TaskTable({ tasks, onTaskAction }: TaskTableProps) {
   return (
     <TableView aria-label="List of tasks">
       <TableHeader>
+        <Column width={32}> </Column>
         <Column>Name</Column>
         <Column width={96} textValue="Important/Urgent Flags">
           <ImportantIcon />
@@ -28,6 +29,9 @@ export default function TaskTable({ tasks, onTaskAction }: TaskTableProps) {
       <TableBody items={tasks}>
         {(task) => (
           <Row key={task.id} textValue={task.name}>
+            <Cell>
+              <Checkbox isDisabled isSelected={task.completed} />
+            </Cell>
             <Cell>
               {task.name}
             </Cell>

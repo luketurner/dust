@@ -4,7 +4,7 @@ import { Tag, Tag as TagType, Task } from "@prisma/client";
 import { Key, useCallback } from "react";
 import AppLayout from "@/components/AppLayout";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
-import { ActionButton, Button, Checkbox, CheckboxGroup, Content, Flex, Heading, IllustratedMessage, Selection, Text, View } from "@adobe/react-spectrum";
+import { ActionButton, Button, Checkbox, CheckboxGroup, Content, ContextualHelp, Flex, Heading, IllustratedMessage, Meter, Selection, Text, View } from "@adobe/react-spectrum";
 import EditTagDialog from "@/components/EditTagDialog";
 import { createTag, deleteTag, updateTag } from "@/actions/tag";
 import { ToastQueue } from "@react-spectrum/toast";
@@ -16,6 +16,7 @@ import NotFound from '@spectrum-icons/illustrations/NotFound';
 import { TaskWithTags } from "@/models/task";
 import TagList from "@/components/TagList";
 import TaskTable from "@/components/TaskTable";
+import { MAX_ACTIVE_TASKS } from "@/config";
 
 export interface TaskManagerProps {
   tasks: TaskWithTags[]
@@ -33,6 +34,7 @@ interface ManagePageClientState {
   }
   showActive: boolean;
   showArchived: boolean;
+  showCompleted: boolean;
   showNonUrgent: boolean;
   showNonImportant: boolean;
   showSomeday: boolean;
@@ -126,6 +128,7 @@ function stateReducer(state: ManagePageClientState, action: ManagePageClientActi
       state.showActive = action.data.includes('active');
       state.showArchived = action.data.includes('archived');
       state.showSomeday = action.data.includes('someday');
+      state.showCompleted = action.data.includes('completed');
       break;
     case 'change-significance-filters':
       state.showNonImportant = !action.data.includes('important');
@@ -173,6 +176,35 @@ async function serverReducer(action: ManagePageClientAction) {
 
 export default function ManagePageClient({ tasks: initialTasks, tags: initialTags }: TaskManagerProps) {
 
+  async function effectReducer(action: ManagePageClientAction) {
+    switch (action.type) {
+      case 'add-task-finished':
+        if (!taskMatchesFilter(action.task)) ToastQueue.info('Task was created but is not visible with your current filters.')
+        break;
+      case 'server-error':
+        ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
+        break;
+    }
+  }
+
+  function taskMatchesFilter(task: TaskWithTags) {
+
+    // display filters
+    if (!state.showActive && !task.archived && !(state.showSomeday && task.someday)) return false;
+    if (!state.showArchived && task.archived) return false;
+    if (!state.showSomeday && task.someday) return false;
+    if (!state.showCompleted && task.completed) return false;
+
+    // significance filters
+    if (!state.showNonImportant && !task.important) return false;
+    if (!state.showNonUrgent && !task.urgent) return false;
+
+    // tag filters
+    if (state.selectedTags.length > 0 && !task.tags.some((tag) => state.selectedTags.includes(tag.id))) return false;
+
+    return true;
+  };
+
   const [state, dispatch] = useClientServerReducer<ManagePageClientState, ManagePageClientAction>(stateReducer, effectReducer, serverReducer, {
     tasks: initialTasks,
     tags: initialTags,
@@ -180,6 +212,7 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     showActive: true,
     showArchived: false,
     showSomeday: false,
+    showCompleted: false,
     showNonImportant: true,
     showNonUrgent: true,
   });
@@ -220,15 +253,9 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
     }
   }, [dispatch]);
 
-  const filteredTasks = state.tasks.filter((task) => {
-    if (!state.showActive && !task.archived && !(state.showSomeday && task.someday)) return false;
-    if (!state.showArchived && task.archived) return false;
-    if (!state.showSomeday && task.someday) return false;
-    if (state.selectedTags.length > 0 && !task.tags.some((tag) => state.selectedTags.includes(tag.id))) return false;
-    if (!state.showNonImportant && !task.important) return false;
-    if (!state.showNonUrgent && !task.urgent) return false;
-    return true;
-  });
+  const filteredTasks = state.tasks.filter(taskMatchesFilter);
+
+  const activeTasks = state.tasks.filter(task => !task.completed && !task.archived && !task.someday);
 
   return (
     <AppLayout user={true} breadcrumbs={[{ label: 'Manage', url: '/manage', key: 'manage' }]}>
@@ -250,26 +277,38 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
       <SidebarLayout>
         <View gridArea="sidebar">
           <Flex direction="row" justifyContent="center">
-            <Button variant="primary" onPress={handleAddTask}>Add Task</Button>
+            <Button variant="primary" onPress={handleAddTask} isDisabled={activeTasks.length >= MAX_ACTIVE_TASKS}>Add Task</Button>
           </Flex>
-          <Flex direction="row" marginTop="single-line-height">
-            <CheckboxGroup label="Display filters" value={[
-              ...state.showActive ? ['active'] : [],
-              ...state.showArchived ? ['archived'] : [],
-              ...state.showSomeday ? ['someday'] : [],
-            ]} onChange={handleDisplayFilterChange}>
-              <Checkbox value="active">Active</Checkbox>
-              <Checkbox value="archived">Archived</Checkbox>
-              <Checkbox value="someday">Someday/Maybe</Checkbox>
-            </CheckboxGroup>
-            <CheckboxGroup label="Significance filters" value={[
-              ...state.showNonImportant ? [] : ['important'],
-              ...state.showNonUrgent ? [] : ['urgent'],
-            ]} onChange={handleSignificanceFilterChange}>
-              <Checkbox value="important">Important</Checkbox>
-              <Checkbox value="urgent">Urgent</Checkbox>
-            </CheckboxGroup>
+          <Flex direction="row" marginTop="single-line-height" gap="size-100" alignItems="center">
+            <Meter label="Active Tasks" value={activeTasks.length} minValue={0} maxValue={Math.max(MAX_ACTIVE_TASKS, activeTasks.length)} valueLabel={`${activeTasks.length}/${MAX_ACTIVE_TASKS}`} variant={ activeTasks.length < (MAX_ACTIVE_TASKS / 3) ? 'positive' : activeTasks.length < (MAX_ACTIVE_TASKS * 2 / 3) ? 'warning' : 'critical' } />
+            <ContextualHelp variant="info">
+              <Heading>Active Task Limit</Heading>
+              <Content>
+                <Text>
+                  Dust imposes a limit on active tasks for your own sanity.
+                  Doesn&apos;t include tasks that are: (1) completed, (2) archived, or (3) flagged Someday/Maybe.
+                </Text>
+              </Content>
+            </ContextualHelp>
           </Flex>
+          <CheckboxGroup marginTop="single-line-height" label="Display filters" value={[
+            ...state.showActive ? ['active'] : [],
+            ...state.showArchived ? ['archived'] : [],
+            ...state.showCompleted ? ['completed'] : [],
+            ...state.showSomeday ? ['someday'] : [],
+          ]} onChange={handleDisplayFilterChange}>
+            <Checkbox value="active">Active</Checkbox>
+            <Checkbox value="archived">Archived</Checkbox>
+            <Checkbox value="completed">Completed</Checkbox>
+            <Checkbox value="someday">Someday/Maybe</Checkbox>
+          </CheckboxGroup>
+          <CheckboxGroup marginTop="single-line-height" label="Significance filters" value={[
+            ...state.showNonImportant ? [] : ['important'],
+            ...state.showNonUrgent ? [] : ['urgent'],
+          ]} onChange={handleSignificanceFilterChange}>
+            <Checkbox value="important">Important</Checkbox>
+            <Checkbox value="urgent">Urgent</Checkbox>
+          </CheckboxGroup>
           <Flex direction="row" alignItems="center" justifyContent="space-between" marginTop="single-line-height">
             <Heading UNSAFE_className="text-lg" level={2}>Tags</Heading>
             <ActionButton onPress={handleAddTag} isQuiet><Add /><Text>New tag...</Text></ActionButton>
@@ -281,15 +320,5 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
         </View>
       </SidebarLayout>
     </AppLayout>
-  );
-}
-
-function renderEmptyState() {
-  return (
-    <IllustratedMessage>
-      <NotFound />
-      <Heading>No tasks</Heading>
-      <Content>You haven&apos;t created any tasks yet!</Content>
-    </IllustratedMessage>
   );
 }
