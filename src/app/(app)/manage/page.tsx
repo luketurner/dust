@@ -1,4 +1,4 @@
-import { getServerUserOrRedirect } from "@/auth"
+import { getServerUserOrRedirect } from "@/models/auth"
 import { prisma } from "@/db/client";
 import ManagePageClient from "./client";
 

@@ -1,5 +1,5 @@
-import { getServerUser } from "@/auth"
-import { getDailyQuote } from "@/quote";
+import { getServerUser } from "@/models/auth"
+import { getDailyQuote } from "@/models/quote";
 import { DateTime } from "luxon";
 import { redirect } from "next/navigation";
 import IndexPageClient from "./client";

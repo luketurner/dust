@@ -1,7 +1,7 @@
 'use server';
 
-import { addTasksToAgenda } from "@/agenda";
-import { getServerUserOrThrow } from "@/auth";
+import { addTasksToAgenda } from "@/models/agenda";
+import { getServerUserOrThrow } from "@/models/auth";
 import { prisma } from "@/db/client";
 
 

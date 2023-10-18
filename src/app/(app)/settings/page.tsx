@@ -1,7 +1,7 @@
-import { getServerUserOrRedirect } from "@/auth"
+import { getServerUserOrRedirect } from "@/models/auth"
 import SettingsPageClient from "./client";
 import { prisma } from "@/db/client";
-import { gitConfigForClient } from "@/git";
+import { gitConfigForClient } from "@/models/gitExportConfig";
 
 export default async function SettingsPage() {
   const { user } = await getServerUserOrRedirect();

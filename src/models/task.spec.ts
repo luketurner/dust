@@ -1,5 +1,5 @@
 import { Task } from "@prisma/client";
-import { pickTasks } from "./pickTasks"
+import { pickTasks } from "./task"
 import { v4 as uuid } from "uuid";
 
 // mock shuffle so we get deterministic test results
@@ -21,7 +21,7 @@ const task = (data: Partial<Task> = {}) => ({
   ...data
 });
 
-describe('./pickTasks', () => {
+describe('./task', () => {
   describe('#pickTasks()', () => {
     it('should pick `limit` tasks from the list', () => {
       const picked = pickTasks(

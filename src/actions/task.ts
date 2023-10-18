@@ -2,8 +2,7 @@
 
 import { prisma } from "@/db/client";
 import { Task, Tag } from "@prisma/client";
-import { getServerUserOrThrow } from "@/auth"
-import { parseTaskInput } from "@/task";
+import { getServerUserOrThrow } from "@/models/auth"
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.

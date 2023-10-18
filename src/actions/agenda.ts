@@ -1,7 +1,7 @@
 'use server';
 
-import { getServerUserOrThrow } from "@/auth";
-import { upsertAgendaServer } from "@/agenda";
+import { getServerUserOrThrow } from "@/models/auth";
+import { upsertAgendaServer } from "@/models/agenda";
 
 /**
  * (Server Action) Creates an agenda for the day if it doesn't already exist.

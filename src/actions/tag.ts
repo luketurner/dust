@@ -1,6 +1,6 @@
 'use server';
 
-import { getServerUserOrThrow } from "@/auth";
+import { getServerUserOrThrow } from "@/models/auth";
 import { prisma } from "@/db/client";
 import { Tag } from "@prisma/client";
 

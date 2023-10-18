@@ -1,19 +1,19 @@
-import { Tag, Task } from "@prisma/client"
+import { Task } from "@prisma/client";
 import shuffle from "lodash.shuffle";
 
 export interface PickTaskOptions {
   limit: number
 }
 
-type Score = -1 | 0 | 1 | 2 | 3;
+export type PickTaskScore = -1 | 0 | 1 | 2 | 3;
 
 export function pickTasks(tasks: Task[], rules: PickTaskOptions): Task[] {
-  const scores: Record<Score, Task[]> = { [-1]: [], [0]: [], [1]: [], [2]: [], [3]: [] };
+  const scores: Record<PickTaskScore, Task[]> = { [-1]: [], [0]: [], [1]: [], [2]: [], [3]: [] };
   for (const task of tasks) {
-    const score: Score
+    const score: PickTaskScore
       = (task.important ? 1 : 0)
       + (task.urgent ? 2 : 0)
-      + (task.someday ? -1 : 0) as Score;
+      + (task.someday ? -1 : 0) as PickTaskScore;
     scores[score].push(task);
   }
 

@@ -1,10 +1,10 @@
 'use server';
 
 import { ClientGitExportConfig } from "@/app/(app)/settings/client";
-import { getServerUserOrThrow } from "@/auth";
+import { getServerUserOrThrow } from "@/models/auth";
 import { prisma } from "@/db/client";
-import { exportConfig } from "@/export";
-import { generateDeployKeys, gitConfigForClient } from "@/git";
+import { exportConfig } from "@/models/gitExportConfig";
+import { generateDeployKeys, gitConfigForClient } from "@/models/gitExportConfig";
 import { GitExportAttempt, GitExportConfig } from "@prisma/client";
 
 export async function createGitExportConfig(): Promise<ClientGitExportConfig> {

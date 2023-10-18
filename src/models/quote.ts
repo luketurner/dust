@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { prisma } from "./db/client";
+import { prisma } from "../db/client";
 import { Quote } from "@prisma/client";
 import { randomInt } from "crypto";
 

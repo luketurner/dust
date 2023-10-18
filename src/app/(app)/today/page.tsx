@@ -1,8 +1,8 @@
-import { getServerUserOrRedirect } from "@/auth"
+import { getServerUserOrRedirect } from "@/models/auth"
 import { DateTime } from 'luxon';
-import { upsertAgendaServer } from "@/agenda";
+import { upsertAgendaServer } from "@/models/agenda";
 import AgendaPageClient from "./client";
-import { getDailyQuote } from "@/quote";
+import { getDailyQuote } from "@/models/quote";
 import { prisma } from "@/db/client";
 
 export default async function AgendaPage() {

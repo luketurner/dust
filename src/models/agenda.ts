@@ -1,7 +1,7 @@
 import { Agenda } from "@prisma/client";
-import { prisma } from "./db/client";
+import { prisma } from "../db/client";
 import { DateTime } from "luxon";
-import { pickTasks } from "./pickTasks";
+import { pickTasks } from "./task";
 
 export async function addTasksToAgenda(agenda: Agenda, num?: number) {
   const allTasks = await prisma.task.findMany({
