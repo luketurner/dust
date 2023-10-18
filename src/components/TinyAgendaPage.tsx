@@ -3,6 +3,7 @@
 import AgendaPageClient from "@/app/(app)/today/client";
 import TinyDemoPage from "@/components/TinyDemoPage";
 import { Quote, Task } from "@prisma/client";
+import { v4 as uuid } from "uuid";
 
 export interface TinyAgendaPageProps {
   quote: Quote;
@@ -11,7 +12,7 @@ export interface TinyAgendaPageProps {
 
 let nextId = 1;
 
-function demoTask(data: Partial<Task>) {
+function demoTask(data: Partial<Task> & { tags?: string[] }) {
   return {
     id: (nextId++).toString(),
     userId: '123',
@@ -23,13 +24,13 @@ function demoTask(data: Partial<Task>) {
     someday: false,
     createdAt: new Date(),
     description: '',
-    tags: [],
-    ...data
+    ...data,
+    tags: data.tags?.map(name => ({ id: uuid(), name, userId: '123' })) ?? [],
   };
 }
 
-function demoAgendaTask(name: string) {
-  const task = demoTask({ name })
+function demoAgendaTask(data: Partial<Task> & { tags?: string[] }) {
+  const task = demoTask(data)
   return {
     agendaId: '123',
     taskId: task.id,
@@ -45,9 +46,9 @@ function demoAgenda(date: string) {
     userId: '123',
     date: new Date(Date.parse(date)),
     agendaTasks: [
-      demoAgendaTask('Buy milk'),
-      demoAgendaTask('Buy eggs'),
-      demoAgendaTask('Take over the world'),
+      demoAgendaTask({name: 'Buy milk', important: true, tags: ["groceries"]}),
+      demoAgendaTask({name: 'Buy eggs', urgent: true, tags: ["groceries"]}),
+      demoAgendaTask({name: 'Take over the world', someday: true}),
     ],
   }
 }
