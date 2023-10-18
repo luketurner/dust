@@ -1,6 +1,9 @@
 import 'server-only';
-import { Task } from "@prisma/client";
+import { Tag, Task } from "@prisma/client";
 import shuffle from "lodash.shuffle";
+
+export type TaskWithTags = Task & { tags: Tag[] };
+
 
 export interface PickTaskOptions {
   limit: number

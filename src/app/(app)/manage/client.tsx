@@ -17,8 +17,9 @@ import { DateTime } from "luxon";
 import UrgentIcon from "@/components/UrgentIcon";
 import ImportantIcon from "@/components/ImportantIcon";
 import SomedayIcon from "@/components/SomedayIcon";
-
-type TaskWithTags = TaskType & { tags: TagType[] };
+import { TaskWithTags } from "@/models/task";
+import TagList from "@/components/TagList";
+import TaskTable from "@/components/TaskTable";
 
 export interface TaskManagerProps {
   tasks: TaskWithTags[]
@@ -277,63 +278,10 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
             <Heading UNSAFE_className="text-lg" level={2}>Tags</Heading>
             <ActionButton onPress={handleAddTag} isQuiet><Add /><Text>New tag...</Text></ActionButton>
           </Flex>
-          <ListView isQuiet items={state.tags} selectionMode="multiple" aria-label="List of selected tags" onSelectionChange={handleTagSelectionChange} width="single-line-width">
-            {(tag) => (
-              <Item key={tag.id} textValue={tag.name}>
-                <Text>{tag.name}</Text>
-                <ActionMenu onAction={(key) => handleTagMenuAction(tag.id, key)}>
-                  <Item key="edit">Edit...</Item>
-                  <Item key="delete">Delete</Item>
-                </ActionMenu>
-              </Item>
-            )}
-          </ListView>
+          <TagList tags={state.tags} onSelectionChange={handleTagSelectionChange} onTagAction={handleTagMenuAction} />
         </View>
         <View gridArea="content" justifySelf="stretch">
-          <TableView renderEmptyState={renderEmptyState} aria-label="List of tasks">
-            <TableHeader>
-              <Column>Name</Column>
-              <Column width={96} textValue="Important/Urgent Flags">
-                <ImportantIcon />
-                <UrgentIcon />
-                <SomedayIcon />
-              </Column>
-              <Column width={150}>Tags</Column>
-              <Column width={150}>Created</Column>
-              <Column width={32} align="end"> </Column>
-            </TableHeader>
-            <TableBody items={filteredTasks}>
-              {(task) => (
-                <Row key={task.id} textValue={task.name}>
-                  <Cell>
-                    {task.name}
-                  </Cell>
-                  <Cell>
-                    {task.important ? <ImportantIcon /> : undefined}
-                    {task.urgent ? <UrgentIcon /> : undefined}
-                    {task.someday ? <SomedayIcon /> : undefined}
-                  </Cell>
-                  <Cell>
-                    {task.tags.map(tag => (
-                      <View elementType="span" marginEnd="size-50" key={tag.id}>#{tag.name}</View>
-                    ))}
-                  </Cell>
-                  <Cell>
-                    <span title={DateTime.fromJSDate(task.createdAt).toISO()!}>
-                      {DateTime.fromJSDate(task.createdAt).toRelative({ style: 'narrow' })}
-                    </span>
-                  </Cell>
-                  <Cell>
-                    <ActionMenu isQuiet onAction={(key) => handleTaskMenuAction(task.id, key)}>
-                      <Item key="edit">Edit...</Item>
-                      {task.archived ? <Item key="unarchive">Restore</Item> : <Item key="archive">Archive</Item>}                  
-                      <Item key="delete">Delete</Item>
-                    </ActionMenu>
-                  </Cell>
-                </Row>
-              )}
-            </TableBody>
-          </TableView>
+          <TaskTable tasks={filteredTasks} onTaskAction={handleTaskMenuAction}/>
         </View>
       </SidebarLayout>
     </AppLayout>
