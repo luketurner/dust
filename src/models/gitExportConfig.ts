@@ -5,7 +5,8 @@ import { exec as execCb } from "child_process";
 import { promisify } from "node:util";
 import { join } from "path";
 import { tmpdir } from "os";
-import { GIT_EMAIL, GIT_NAME, SSH_KEY_PASSPHRASE } from "../config";
+import { SSH_KEY_PASSPHRASE } from "../serverConfig";
+import { GIT_EMAIL, GIT_NAME } from "../config";
 import { prisma } from "@/db/client";
 import { DateTime } from "luxon";
 
