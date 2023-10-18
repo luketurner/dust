@@ -5,14 +5,12 @@ import AppLayout from "@/components/AppLayout";
 import GitConfigEditor from "@/components/GitConfigEditor";
 import GitExportAttemptsTable from "@/components/GitExportAttemptsTable";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
+import { ClientGitExportConfig, ClientGitExportConfigWithAttempts } from "@/models/gitExportConfig";
 import { ActionButton, Heading, Item, TabList, TabPanels, Tabs, View } from "@adobe/react-spectrum";
-import { GitExportAttempt, GitExportConfig, User } from "@prisma/client";
+import { GitExportAttempt, User } from "@prisma/client";
 import { ToastQueue } from "@react-spectrum/toast";
 import { useCallback } from "react";
 import { v4 as uuid } from "uuid";
-
-export type ClientGitExportConfig = Omit<GitExportConfig, 'sshPrivateKey'> & { hasPrivateKey?: boolean };
-export type ClientGitExportConfigWithAttempts = ClientGitExportConfig & { exportAttempts?: GitExportAttempt[] };
 
 export interface SettingsPageClientProps {
   user: User;

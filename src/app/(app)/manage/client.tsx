@@ -1,10 +1,10 @@
 'use client';
 
-import { Tag, Tag as TagType, Task, Task as TaskType } from "@prisma/client";
+import { Tag, Tag as TagType, Task } from "@prisma/client";
 import { Key, useCallback } from "react";
 import AppLayout from "@/components/AppLayout";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
-import { ActionButton, ActionMenu, Button, Cell, Checkbox, CheckboxGroup, Column, Content, Flex, Heading, IllustratedMessage, Item, ListView, Row, Selection, TableBody, TableHeader, TableView, Text, View } from "@adobe/react-spectrum";
+import { ActionButton, Button, Checkbox, CheckboxGroup, Content, Flex, Heading, IllustratedMessage, Selection, Text, View } from "@adobe/react-spectrum";
 import EditTagDialog from "@/components/EditTagDialog";
 import { createTag, deleteTag, updateTag } from "@/actions/tag";
 import { ToastQueue } from "@react-spectrum/toast";
@@ -13,10 +13,6 @@ import EditTaskDialog from "@/components/EditTaskDialog";
 import { createTask, deleteTask, updateTask } from "@/actions/task";
 import Add from '@spectrum-icons/workflow/Add';
 import NotFound from '@spectrum-icons/illustrations/NotFound';
-import { DateTime } from "luxon";
-import UrgentIcon from "@/components/UrgentIcon";
-import ImportantIcon from "@/components/ImportantIcon";
-import SomedayIcon from "@/components/SomedayIcon";
 import { TaskWithTags } from "@/models/task";
 import TagList from "@/components/TagList";
 import TaskTable from "@/components/TaskTable";

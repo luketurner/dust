@@ -1,6 +1,6 @@
 'use client';
 
-import { ClientGitExportConfig } from "@/app/(app)/settings/client";
+import { ClientGitExportConfig } from "@/models/gitExportConfig";
 import { Button, ButtonGroup, Form, LabeledValue, TextField } from "@adobe/react-spectrum";
 import { useCallback } from "react";
 import { useImmer } from "use-immer";

@@ -1,7 +1,8 @@
 'use client';
 
+import { TaskWithTags } from "@/models/task";
 import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, TextArea, Checkbox, ToggleButton, Flex } from "@adobe/react-spectrum";
-import { Tag, Task } from "@prisma/client";
+import { Tag } from "@prisma/client";
 import { useCallback } from "react";
 import { useImmer } from "use-immer";
 
@@ -15,7 +16,7 @@ export interface EditTaskDialogData {
 }
 
 export interface EditTaskDialogProps {
-  task: (Task & { tags: Tag[] }) | null | undefined
+  task: TaskWithTags | null | undefined
   allTags: Tag[]
   onClose(): void
   onSave(taskId: string | null, data: EditTaskDialogData): void

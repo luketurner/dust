@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, ButtonGroup, Flex, Heading, View } from "@adobe/react-spectrum";
-import { Agenda, AgendaTask, Quote, Tag, Task } from "@prisma/client";
+import { Quote, Tag } from "@prisma/client";
 import AgendaTaskRow from "@/components/AgendaTaskRow";
 import { updateTask } from "@/actions/task";
 import { updateAgendaTask, addAgendaTasks } from "@/actions/agendaTask";
@@ -13,12 +13,7 @@ import ThreeSpotLayout from "@/components/ThreeSpotLayout";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ToastQueue } from "@react-spectrum/toast";
 import { useCallback } from "react";
-
-export type TaskWithTags = (Task & { tags: Tag[] })
-
-export type AgendaTaskWithTags = (AgendaTask & { task: TaskWithTags })
-
-export type AgendaWithIncludes = (Agenda & { agendaTasks: AgendaTaskWithTags[] })
+import { AgendaWithIncludes } from "@/models/agenda";
 
 export interface AgendaPageClientProps {
   date: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { ClientGitExportConfigWithAttempts } from "@/app/(app)/settings/client";
+import { ClientGitExportConfigWithAttempts } from "@/models/gitExportConfig";
 import { Cell, Column, Row, StatusLight, TableBody, TableHeader, TableView } from "@adobe/react-spectrum";
 import { DateTime } from "luxon";
 

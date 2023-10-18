@@ -1,15 +1,13 @@
 'use client';
 
 import { ActionMenu, Flex, Grid, Item, ToggleButton, View } from "@adobe/react-spectrum";
-import { Tag, Task } from "@prisma/client";
 import { Key, useCallback } from "react";
 import CheckmarkCircleOutline from "@spectrum-icons/workflow/CheckmarkCircleOutline";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
 import ImportantIcon from "./ImportantIcon";
 import UrgentIcon from "./UrgentIcon";
 import SomedayIcon from "./SomedayIcon";
-
-type TaskWithTags = Task & { tags: Tag[] }
+import { TaskWithTags } from "@/models/task";
 
 export interface AgendaTaskRowProps {
   task: TaskWithTags

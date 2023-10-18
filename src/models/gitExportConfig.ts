@@ -5,10 +5,12 @@ import { exec as execCb } from "child_process";
 import { promisify } from "node:util";
 import { join } from "path";
 import { tmpdir } from "os";
-import { ClientGitExportConfig } from "../app/(app)/settings/client";
 import { GIT_EMAIL, GIT_NAME, SSH_KEY_PASSPHRASE } from "../config";
 import { prisma } from "@/db/client";
 import { DateTime } from "luxon";
+
+export type ClientGitExportConfig = Omit<GitExportConfig, 'sshPrivateKey'> & { hasPrivateKey?: boolean };
+export type ClientGitExportConfigWithAttempts = ClientGitExportConfig & { exportAttempts?: GitExportAttempt[] };
 
 const exec = promisify(execCb)
 
