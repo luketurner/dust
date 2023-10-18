@@ -4,10 +4,10 @@ import { ActionMenu, Flex, Grid, Item, ToggleButton, View } from "@adobe/react-s
 import { Tag, Task } from "@prisma/client";
 import { Key, useCallback } from "react";
 import CheckmarkCircleOutline from "@spectrum-icons/workflow/CheckmarkCircleOutline";
-import Flag from "@spectrum-icons/workflow/Flag";
-import HotFixes from "@spectrum-icons/workflow/HotFixes";
-import Moon from "@spectrum-icons/workflow/Moon";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
+import ImportantIcon from "./ImportantIcon";
+import UrgentIcon from "./UrgentIcon";
+import SomedayIcon from "./SomedayIcon";
 
 type TaskWithTags = Task & { tags: Tag[] }
 
@@ -46,10 +46,9 @@ export default function AgendaTaskRow({ task, onToggle = () => {}, onDefer = () 
       </View>
       <View alignSelf="start" gridArea="name">{task.name}</View>
       <Flex gridArea="tags" direction="row" wrap alignItems="center">
-        
-        {task.important ? <Flag aria-label="Important" size="XS" marginEnd="size-50" color="notice" /> : undefined}
-        {task.urgent ? <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" /> : undefined}
-        {task.someday ? <Moon aria-label="Someday/Maybe" size="XS" marginEnd="size-50" color="informative" /> : undefined}
+        {task.important ? <ImportantIcon /> : undefined}
+        {task.urgent ? <UrgentIcon /> : undefined}
+        {task.someday ? <SomedayIcon /> : undefined}
         {task.tags.map(tag => (
           <View marginEnd="size-50" key={tag.id}>#{tag.name}</View>
         ))}

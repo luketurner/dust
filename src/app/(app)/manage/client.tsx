@@ -14,9 +14,9 @@ import { createTask, deleteTask, updateTask } from "@/actions/task";
 import Add from '@spectrum-icons/workflow/Add';
 import NotFound from '@spectrum-icons/illustrations/NotFound';
 import { DateTime } from "luxon";
-import Flag from "@spectrum-icons/workflow/Flag";
-import HotFixes from "@spectrum-icons/workflow/HotFixes";
-import Moon from "@spectrum-icons/workflow/Moon";
+import UrgentIcon from "@/components/UrgentIcon";
+import ImportantIcon from "@/components/ImportantIcon";
+import SomedayIcon from "@/components/SomedayIcon";
 
 type TaskWithTags = TaskType & { tags: TagType[] };
 
@@ -294,9 +294,9 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
             <TableHeader>
               <Column>Name</Column>
               <Column width={96} textValue="Important/Urgent Flags">
-                <Flag aria-label="Important" size="XS" marginEnd="size-50" color="notice" />
-                <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" />
-                <Moon aria-label="Someday/Maybe" size="XS" marginEnd="size-50" color="informative" />
+                <ImportantIcon />
+                <UrgentIcon />
+                <SomedayIcon />
               </Column>
               <Column width={150}>Tags</Column>
               <Column width={150}>Created</Column>
@@ -309,9 +309,9 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
                     {task.name}
                   </Cell>
                   <Cell>
-                    {task.important ? <Flag aria-label="Important" size="XS" marginEnd="size-50" color="notice" /> : undefined}
-                    {task.urgent ? <HotFixes aria-label="Urgent" size="XS" marginEnd="size-50" color="negative" /> : undefined}
-                    {task.someday ? <Moon aria-label="Someday/Maybe" size="XS" marginEnd="size-50" color="informative" /> : undefined}
+                    {task.important ? <ImportantIcon /> : undefined}
+                    {task.urgent ? <UrgentIcon /> : undefined}
+                    {task.someday ? <SomedayIcon /> : undefined}
                   </Cell>
                   <Cell>
                     {task.tags.map(tag => (
