@@ -1,3 +1,4 @@
+import 'server-only';
 import { Task } from "@prisma/client";
 import shuffle from "lodash.shuffle";
 

@@ -1,3 +1,4 @@
+import 'server-only';
 import { GitExportAttempt, GitExportConfig } from "@prisma/client";
 import { mkdir, mkdtemp, readFile, writeFile } from "fs/promises";
 import { exec as execCb } from "child_process";

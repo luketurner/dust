@@ -1,3 +1,4 @@
+import 'server-only';
 import { Agenda } from "@prisma/client";
 import { prisma } from "../db/client";
 import { DateTime } from "luxon";

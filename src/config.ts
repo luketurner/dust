@@ -1,3 +1,5 @@
+import 'server-only';
+
 export const ROOT_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 export const HOSTNAME = (new URL(ROOT_URL)).hostname;
 

@@ -1,3 +1,4 @@
+import 'server-only';
 import { DateTime } from "luxon";
 import { prisma } from "../db/client";
 import { Quote } from "@prisma/client";
