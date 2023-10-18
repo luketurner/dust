@@ -29,7 +29,7 @@ export function useClientServerReducer<S, A extends Action>(
 ): [S, Dispatch<A | ServerErrorAction | EffectErrorAction>] {
   const [clientState, stateDispatch] = useImmerReducer(stateReducer, initialClientState);
   const isEmbedded = useIsEmbedded();
-  let dispatch: (action: A | ServerErrorAction | EffectErrorAction) => void = () => {};
+  let dispatch: (action: A | ServerErrorAction | EffectErrorAction) => void = useCallback(() => {}, []);
 
   const serverDispatch = useCallback(async (action: A | ServerErrorAction | EffectErrorAction) => {
     try {

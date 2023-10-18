@@ -1,4 +1,4 @@
-import { exportAll } from "../src/export";
+import { exportAll } from "../src/models/gitExportConfig";
 
 const main = async () => {
   console.log("exporting...")
