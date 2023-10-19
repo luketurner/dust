@@ -17,9 +17,8 @@ const quoteList = [];
 
 for (const [author, sources] of Object.entries(quoteDefinitions)) {
   for (const [source, quotes] of Object.entries(sources)) {
-    for (const quote of quotes) {
-      const content = quote.trim();
-      const hash = createHash('md5').update(author).update(source).update(content).digest('hex');
+    for (const [index, quote] of quotes.entries()) {
+      const hash = createHash('md5').update(author).update(source).update(index.toString()).digest('hex');
       quoteList.push({
         id: hash,
         author,
@@ -38,10 +37,11 @@ VALUES (
   encode(decode('${Buffer.from(source).toString('base64')}', 'base64'), 'escape'),
   encode(decode('${Buffer.from(content).toString('base64')}', 'base64'), 'escape')
 )
-ON CONFLICT DO NOTHING;`
+ON CONFLICT (id) DO UPDATE SET 
+content = encode(decode('${Buffer.from(content).toString('base64')}', 'base64'), 'escape');`
 ));
 
 console.log("writing: ", outputPath);
-writeFileSync(outputPath, statementList.join('\n') + '\n');
+writeFileSync(outputPath, statementList.join('\n\n') + '\n');
 
 console.log("done")
