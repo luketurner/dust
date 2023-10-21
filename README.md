@@ -6,7 +6,7 @@ Dust is a free, open-source task-management app, hosted at https://dust.luketurn
 
 Dust uses Next.js and Prisma with a Postgres database.
 
-Development dpendencies:
+Development dependencies:
 
 - Node 16+
 - Postgres 15+ (or `podman` to run containerized postgres locally)
