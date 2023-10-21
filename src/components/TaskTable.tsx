@@ -12,28 +12,25 @@ export interface TaskTableProps {
 }
 
 export default function TaskTable({ tasks, onTaskAction }: TaskTableProps) {
+  const handleCheckboxChange = useCallback((taskId: string, value: boolean) => onTaskAction(taskId, value ? 'complete' : 'uncomplete'), [onTaskAction])
   return (
     <TableView aria-label="List of tasks">
       <TableHeader>
-        <Column width={32}> </Column>
         <Column>Name</Column>
-        <Column width={96} textValue="Important/Urgent Flags">
+        <Column defaultWidth={80} textValue="Important/Urgent Flags">
           <ImportantIcon />
           <UrgentIcon />
           <SomedayIcon />
         </Column>
-        <Column width={150}>Tags</Column>
-        <Column width={150}>Created</Column>
-        <Column width={32} align="end"> </Column>
+        <Column defaultWidth={125}>Tags</Column>
+        <Column defaultWidth={125}>Created</Column>
+        <Column defaultWidth={32} align="end"> </Column>
       </TableHeader>
       <TableBody items={tasks}>
         {(task) => (
           <Row key={task.id} textValue={task.name}>
             <Cell>
-              <Checkbox isDisabled isSelected={task.completed} />
-            </Cell>
-            <Cell>
-              {task.name}
+              <TaskCheckbox task={task} onChange={handleCheckboxChange} />
             </Cell>
             <Cell>
               {task.important ? <ImportantIcon /> : undefined}
@@ -75,3 +72,18 @@ function TaskMenu({ task, onAction }: TaskMenuProps) {
     </ActionMenu>
   );
 }
+
+interface TaskCheckboxProps {
+  task: TaskWithTags;
+  onChange: (taskId: string, value: boolean) => void;
+}
+
+function TaskCheckbox({ task, onChange }: TaskCheckboxProps) {
+  const handleChange = useCallback((value: boolean) => onChange(task.id, value), [task.id, onChange]);
+  return (
+    <Checkbox isSelected={task.completed} onChange={handleChange}>
+      {task.name}
+    </Checkbox>
+  );
+}
+

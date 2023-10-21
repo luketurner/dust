@@ -100,12 +100,13 @@ function stateReducer(state: ManagePageClientState, action: ManagePageClientActi
       break;
     case 'edit-task':
       const taskToUpdate = state.tasks.find(({ id }) => id === action.taskId)
-      if (taskToUpdate && typeof action.data.name === 'string') {
+      if (taskToUpdate) {
         if (typeof action.data.name === 'string') taskToUpdate.name = action.data.name;
         if (typeof action.data.description === 'string') taskToUpdate.description = action.data.description;
-        taskToUpdate.urgent = action.data.urgent ?? false;
-        taskToUpdate.important = action.data.important ?? false;
-        taskToUpdate.someday = action.data.someday ?? false;
+        taskToUpdate.urgent = action.data.urgent ?? taskToUpdate.urgent;
+        taskToUpdate.important = action.data.important ?? taskToUpdate.important;
+        taskToUpdate.someday = action.data.someday ?? taskToUpdate.someday;
+        taskToUpdate.completed = action.data.completed ?? taskToUpdate.completed;
         if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.tags.find((tag) => tag.id === id)).filter(v => !!v) as Tag[];
       }
       delete state.dialog;
@@ -133,14 +134,6 @@ function stateReducer(state: ManagePageClientState, action: ManagePageClientActi
     case 'change-significance-filters':
       state.showNonImportant = !action.data.includes('important');
       state.showNonUrgent = !action.data.includes('urgent');
-      break;
-  }
-}
-
-async function effectReducer(action: ManagePageClientAction) {
-  switch (action.type) {
-    case 'server-error':
-      ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
       break;
   }
 }
@@ -248,7 +241,13 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
         dispatch({ type: 'unarchive-task', taskId });
         break;
       case 'delete':
-        dispatch({ type: 'delete-task', taskId })
+        dispatch({ type: 'delete-task', taskId });
+        break;
+      case 'complete':
+        dispatch({ type: 'edit-task', taskId, data: { completed: true } });
+        break;
+      case 'uncomplete':
+        dispatch({ type: 'edit-task', taskId, data: { completed: false } });
         break;
     }
   }, [dispatch]);
