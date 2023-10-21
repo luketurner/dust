@@ -159,7 +159,7 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
 
   const handleDeferTask = useCallback((taskId: string) => dispatchAction({ type: 'defer-task', taskId, agendaId: agenda.id }), [dispatchAction, agenda.id]);
   const handleEditTask = useCallback((taskId: string) => dispatchAction({ type: 'edit-task', taskId }), [dispatchAction]);
-  const handleOpenCreateTask = useCallback((taskId: string) => dispatchAction({ type: 'open-create-task' }), [dispatchAction]);
+  const handleOpenCreateTask = useCallback(() => dispatchAction({ type: 'open-create-task' }), [dispatchAction]);
   const handleToggleTask = useCallback((taskId: string, completed: boolean) => dispatchAction({ type: 'toggle-task', taskId, completed }), [dispatchAction]);
   const handleDialogClose = useCallback(() => dispatchAction({ type: 'close-dialog' }), [dispatchAction]);
   const handleAddOneTask = useCallback(() => dispatchAction({ type: 'add-agenda-tasks', agendaId: agenda.id, num: 1 }), [dispatchAction, agenda.id]);
