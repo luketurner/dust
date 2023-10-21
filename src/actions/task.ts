@@ -53,7 +53,7 @@ export async function updateTask(taskId: string, data: {
       important: data.important,
       urgent: data.urgent,
       someday: data.someday,
-      tags: (data.tags ? { connect: data.tags.map(id => ({ id, userId: user.id })) } : undefined)
+      tags: (data.tags ? { set: data.tags.map(id => ({ id, userId: user.id })) } : undefined)
     }
   });
 }
