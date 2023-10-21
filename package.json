@@ -22,6 +22,7 @@
     "@prisma/client": "^5.3.1",
     "@react-spectrum/toast": "^3.0.0-beta.4",
     "@spectrum-icons/illustrations": "^3.6.6",
+    "@tailwindcss/typography": "^0.5.10",
     "@types/lodash.shuffle": "^4.2.7",
     "@types/luxon": "^3.3.2",
     "@types/node": "20.6.1",
