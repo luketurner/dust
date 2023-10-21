@@ -15,7 +15,7 @@ export interface ManualPageClientProps {
 export default function ManualPageClient({ user }: ManualPageClientProps) {
 
   return (
-    <AppLayout user={!!user}>
+    <AppLayout user={!!user} breadcrumbs={[{ label: 'Manual', url: '/manual', key: 'manual' }]}>
       <main className="prose">
         <p>
           This is the manual for <Link><NextLink href="/">Dust</NextLink></Link>, a free, <Link><a href="https://github.com/luketurner/dust">open-source</a></Link>, online task management tool.
