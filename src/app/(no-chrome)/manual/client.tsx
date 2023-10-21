@@ -48,10 +48,10 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
           how tasks are prioritized or which tasks are selected for the agenda.
         </p>
         <p>
-          If you can't do some of the selected tasks for the day, you can <em>Defer</em> them for another day to get them out of your face.
+          If you can&apos;t do some of the selected tasks for the day, you can <em>Defer</em> them for another day to get them out of your face.
         </p>
         <p>
-          Once you've completed (or deferred) all your tasks, you will also have the option to pick more tasks for the day.
+          Once you&apos;ve completed (or deferred) all your tasks, you will also have the option to pick more tasks for the day.
           I recommend not using this feature unless you really feel excited by doing some more tasks.
         </p>
         <h2>Manage tasks</h2>
@@ -74,8 +74,8 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
           Dust has a limit of 100 active tasks per user, which is also displayed on this screen.
           This is not a technical limitation, but a deliberate effort to force a certain level of task curation.
           In particular, users are strongly encouraged to mark tasks as <strong><SomedayIcon/>Someday/Maybe</strong> if
-          they aren't immediately relevant. (Note that <strong><SomedayIcon/>Someday/Maybe</strong> tasks, along with completed
-          and archived tasks, aren't considered "active" and so don't count against this limit.)
+          they aren&apos;t immediately relevant. (Note that <strong><SomedayIcon/>Someday/Maybe</strong> tasks, along with completed
+          and archived tasks, aren&apos;t considered &quot;active&quot; and so don&apos;t count against this limit.)
         </p>
 
         <p>
@@ -87,7 +87,7 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
         <h2>Settings</h2>
 
         <p>The <em>Settings</em> page is where you configure general, user-level options for your Dust account.</p>
-        <p>Currently, the only real "setting" is Git export configuration.</p>
+        <p>Currently, the only real &quot;setting&quot; is Git export configuration.</p>
 
         <h3>Git export config</h3>
 
@@ -105,7 +105,7 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
 
         <p>
           Currently, Dust only supports SSH key authentication for these operations. The <em>Remote URL</em> must be an SSH-style URL,
-          and the Git remote must be configured to allow the Git configuration's <em>SSH Public Key</em> that's displayed in the Dust
+          and the Git remote must be configured to allow the Git configuration&apos;s <em>SSH Public Key</em> that&apos;s displayed in the Dust
           settings page.
         </p>
         <p>
@@ -117,10 +117,10 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
         </p>
         <p>
           Also note, Dust saves the SSH host key of the Git server in memory to mitigate MITM attacks. If the SSH host key of your Git
-          server changes, you'll have to wait for the Dust instance to be restarted before your Git export will start working again.
+          server changes, you&apos;ll have to wait for the Dust instance to be restarted before your Git export will start working again.
         </p>
         <p>
-          As a final note, this Git export functionality is entirely independent from Dust's usage of Github as an OAuth identity provider.
+          As a final note, this Git export functionality is entirely independent from Dust&apos;s usage of Github as an OAuth identity provider.
           The Git export is not Github-specific and will work with any Git server that supports SSH authentication.
         </p>
       </main>
