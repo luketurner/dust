@@ -14,15 +14,15 @@ Development dependencies:
 ```bash
 # One time setup
 npm install
-npm run dev:db:setup
-npm run dev:db:migrate
+npm run db:setup
+npm run db:migrate
 
 # Launch the app in dev
-npm run dev:db:run
+npm run db:start
 npm run dev
 
 # run after schema updates
-npm run dev:db:migrate
+npm run db:migrate
 ```
 
 ## Deployment
