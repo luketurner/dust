@@ -13,8 +13,8 @@ export default function QuoteBlock({ quote }: QuoteProps) {
       <pre style={{ font: 'inherit', whiteSpace: 'pre-line' }}>
         {quote.content}
       </pre>
-      <p className="text-right italic" style={{maxWidth: '16rem'}}>
-        {quote.author} ({quote.source})
+      <p className="text-right italic" style={{maxWidth: '14rem'}}>
+        {quote.author}
       </p>
     </View>
   )
