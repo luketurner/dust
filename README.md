@@ -1,6 +1,6 @@
 # Dust
 
-Dust is a task-management app.
+Dust is a free, open-source task-management app, hosted at https://dust.luketurner.org. See the [manual](https://dust.luketurner.org/manual) for more information.
 
 ## Development
 
@@ -27,6 +27,16 @@ npm run dev:db:migrate
 
 ## Deployment
 
+Dust is deployed at Fly.io. Deploy with:
+
+```bash
+# first time -- run this
+flyctl launch
+
+# then afterwards run this
+flyctl deploy
+```
+
 Required secrets:
 
 ```
@@ -34,6 +44,12 @@ NEXTAUTH_SECRET
 AUTH_GITHUB_ID
 AUTH_GITHUB_SECRET
 DUST_SSH_KEY_PASSPHRASE
+```
+
+Recommended scale for self-hosting:
+
+```
+flyctl scale count app=1 cron=1
 ```
 
 ## Quote loading
