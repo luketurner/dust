@@ -1,6 +1,6 @@
 'use client';
 
-import AgendaPageClient from "@/app/(app)/today/client";
+import AgendaPageClient from "@/app/(app)/agenda/client";
 import TinyDemoPage from "@/components/TinyDemoPage";
 import { Quote, Task } from "@prisma/client";
 import { v4 as uuid } from "uuid";

@@ -149,7 +149,7 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
   const handleAddThreeTasks = useCallback(() => dispatchAction({ type: 'add-agenda-tasks', agendaId: agenda.id, num: 3 }), [dispatchAction, agenda.id]);
 
   return (
-    <AppLayout user={true} breadcrumbs={[{ label: 'Agenda', url: '/today', key: 'agenda' }]}>
+    <AppLayout user={true} breadcrumbs={[{ label: 'Agenda', url: '/agenda', key: 'agenda' }]}>
       <EditTaskDialog
        task={tasks.find(t => t.id === state.dialog?.taskId)}
        onClose={handleDialogClose}

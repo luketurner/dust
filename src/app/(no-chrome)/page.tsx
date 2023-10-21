@@ -7,7 +7,7 @@ import IndexPageClient from "./client";
 export default async function IndexPage() {
   const { user } = await getServerUser();
 
-  if (user) { redirect('/today'); }
+  if (user) { redirect('/agenda'); }
 
   const quote = await getDailyQuote(DateTime.now().toISODate()!);
 

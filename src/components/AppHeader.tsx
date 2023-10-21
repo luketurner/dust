@@ -29,7 +29,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
       case 'login': return signIn('github');
       case 'logout': return signOut();
       case 'manage': return navigate('/manage');
-      case 'today': return navigate('/today');
+      case 'agenda': return navigate('/agenda');
       case 'settings': return navigate('/settings');
       case 'manual': return navigate('/manual');
     }
@@ -55,7 +55,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
               <ShowMenu />
             </ActionButton>
             <Menu onAction={handleMenuAction}>
-              {user ? <Item key="today">Daily agenda</Item> : undefined!}
+              {user ? <Item key="agenda">Daily agenda</Item> : undefined!}
               {user ? <Item key="manage">Manage tasks</Item> : undefined!}
               {user ? <Item key="settings">Settings</Item> : undefined!}
               {user ? <Item key="manual">Manual</Item> : undefined!}
