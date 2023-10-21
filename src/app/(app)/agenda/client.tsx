@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, ButtonGroup, Flex, Heading, View } from "@adobe/react-spectrum";
-import { Quote, Tag, Task } from "@prisma/client";
+import { Quote, Tag, Task, User } from "@prisma/client";
 import AgendaTaskRow from "@/components/AgendaTaskRow";
 import { createTask, updateTask } from "@/actions/task";
 import { updateAgendaTask, addAgendaTasks } from "@/actions/agendaTask";
@@ -20,6 +20,7 @@ export interface AgendaPageClientProps {
   agenda: AgendaWithIncludes;
   quote: Quote;
   allTags: Tag[];
+  user: User;
 }
 
 interface TaskDialogState {
@@ -147,7 +148,7 @@ async function serverReducer(action: AgendaPageClientAction) {
   }
 }
 
-export default function AgendaPageClient({ date, agenda, quote, allTags }: AgendaPageClientProps) {
+export default function AgendaPageClient({ date, agenda, quote, allTags, user }: AgendaPageClientProps) {
   const [state, dispatchAction] = useClientServerReducer<AgendaPageClientState, AgendaPageClientAction>(stateReducer, effectReducer, serverReducer, {
     agenda,
     allTags
@@ -171,7 +172,7 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
   );
 
   return (
-    <AppLayout user={true} breadcrumbs={[{ label: 'Agenda', url: '/agenda', key: 'agenda' }]} onAddTask={handleOpenCreateTask}>
+    <AppLayout user={user} breadcrumbs={[{ label: 'Agenda', url: '/agenda', key: 'agenda' }]} onAddTask={handleOpenCreateTask}>
       <EditTaskDialog
        task={tasks.find(t => t.id === state.dialog?.taskId)}
        onClose={handleDialogClose}

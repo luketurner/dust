@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { Key, useCallback } from "react";
 import ShowMenu from "@spectrum-icons/workflow/ShowMenu";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
+import { User } from "@prisma/client";
 
 export interface AppHeaderProps {
   breadcrumbs?: { key: string, url: string, label: string }[];
-  user?: boolean;
+  user?: User | undefined | null;
   onAddTask?: () => void;
 }
 

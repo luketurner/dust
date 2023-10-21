@@ -24,6 +24,6 @@ export default async function ManagePage() {
   });
 
   return (
-    <ManagePageClient tasks={tasks} tags={tags} />
+    <ManagePageClient user={user} tasks={tasks} tags={tags} />
   )
 }

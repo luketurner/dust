@@ -1,6 +1,6 @@
 'use client';
 
-import { Tag, Tag as TagType, Task } from "@prisma/client";
+import { Tag, Tag as TagType, Task, User } from "@prisma/client";
 import { Key, useCallback } from "react";
 import AppLayout from "@/components/AppLayout";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
@@ -21,6 +21,7 @@ import { MAX_ACTIVE_TASKS } from "@/config";
 export interface TaskManagerProps {
   tasks: TaskWithTags[]
   tags: TagType[]
+  user: User;
 }
 
 interface ManagePageClientState {
@@ -167,7 +168,7 @@ async function serverReducer(action: ManagePageClientAction) {
   }
 }
 
-export default function ManagePageClient({ tasks: initialTasks, tags: initialTags }: TaskManagerProps) {
+export default function ManagePageClient({ tasks: initialTasks, tags: initialTags, user }: TaskManagerProps) {
 
   async function effectReducer(action: ManagePageClientAction) {
     switch (action.type) {
@@ -257,7 +258,7 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
   const activeTasks = state.tasks.filter(task => !task.completed && !task.archived && !task.someday);
 
   return (
-    <AppLayout user={true} breadcrumbs={[{ label: 'Manage', url: '/manage', key: 'manage' }]}>
+    <AppLayout user={user} breadcrumbs={[{ label: 'Manage', url: '/manage', key: 'manage' }]}>
       <EditTagDialog
        onSave={(tagId, data) => dispatch(tagId ? { type: 'edit-tag', tagId, data } : { type: 'add-tag', data })}
        onClose={() => dispatch({ type: 'close-dialog' })}

@@ -8,7 +8,7 @@ import { prisma } from "@/db/client";
 export default async function AgendaPage() {
   const { user } = await getServerUserOrRedirect();
 
-  const today = DateTime.now().toISODate();
+  const today = DateTime.now().setZone(user.timezone ?? 'utc').toISODate();
   if (!today) throw new Error('Sorry, this function only works on Earth');
 
   const quote = await getDailyQuote(today);
@@ -22,6 +22,6 @@ export default async function AgendaPage() {
   });
 
   return (
-    <AgendaPageClient allTags={allTags} date={today} agenda={agenda} quote={quote} />
+    <AgendaPageClient user={user} allTags={allTags} date={today} agenda={agenda} quote={quote} />
   );
 }
