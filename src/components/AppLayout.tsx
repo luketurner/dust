@@ -10,9 +10,10 @@ export interface AppLayoutProps {
   breadcrumbs?: { key: string, url: string, label: string }[];
   children: React.ReactNode;
   user?: boolean;
+  onAddTask?: () => void;
 }
 
-export default function AppLayout({ children, breadcrumbs, user }: AppLayoutProps) {
+export default function AppLayout({ children, breadcrumbs, user, onAddTask }: AppLayoutProps) {
   const isEmbedded = useIsEmbedded();
   return (
     <Provider minHeight={isEmbedded ? '0' : '100vh'} theme={defaultTheme}>
@@ -24,7 +25,7 @@ export default function AppLayout({ children, breadcrumbs, user }: AppLayoutProp
             gap='single-line-height'
             UNSAFE_className="p-2"
       >
-        <AppHeader user={user} breadcrumbs={breadcrumbs} />
+        <AppHeader user={user} breadcrumbs={breadcrumbs} onAddTask={onAddTask} />
         <Content gridArea="content">
           {children}
         </Content>

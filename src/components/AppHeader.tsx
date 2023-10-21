@@ -1,6 +1,6 @@
 'use client';
 
-import { ActionButton, Grid, Header, Item, Menu, MenuTrigger, View, Breadcrumbs } from "@adobe/react-spectrum";
+import { ActionButton, Grid, Header, Item, Menu, MenuTrigger, View, Breadcrumbs, Button, Flex } from "@adobe/react-spectrum";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Key, useCallback } from "react";
@@ -10,9 +10,10 @@ import { useIsEmbedded } from "@/hooks/isEmbedded";
 export interface AppHeaderProps {
   breadcrumbs?: { key: string, url: string, label: string }[];
   user?: boolean;
+  onAddTask?: () => void;
 }
 
-export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
+export default function AppHeader({ breadcrumbs, user, onAddTask }: AppHeaderProps) {
   const router = useRouter();
   const isEmbedded = useIsEmbedded();
 
@@ -44,11 +45,14 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
   return (
     <Header gridArea="header" width="100%">
       <Grid areas={['left right']} justifyContent='space-between' columns={["1fr", "max-content"]}>
-        {breadcrumbs && 
-          <Breadcrumbs gridArea="left" size="M" showRoot onAction={handleBreadcrumbAction}>
-            {[{ key: 'home', label: 'DUST' }, ...breadcrumbs].map(({ key, label }) => <Item key={key}>{label}</Item>)}
-          </Breadcrumbs>
-        }
+        <Flex gridArea="left" direction="row" gap="single-line-height" alignItems="center">
+          {breadcrumbs && 
+            <Breadcrumbs width={150} size="M" showRoot onAction={handleBreadcrumbAction}>
+              {[{ key: 'home', label: 'DUST' }, ...breadcrumbs].map(({ key, label }) => <Item key={key}>{label}</Item>)}
+            </Breadcrumbs>
+          }
+          {user && onAddTask && <Button variant="secondary" onPress={onAddTask}>Add Task</Button>}
+        </Flex>
         <View gridArea="right">
           <MenuTrigger>
             <ActionButton isQuiet isDisabled={isEmbedded}>
@@ -58,7 +62,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
               {user ? <Item key="agenda">Daily agenda</Item> : undefined!}
               {user ? <Item key="manage">Manage tasks</Item> : undefined!}
               {user ? <Item key="settings">Settings</Item> : undefined!}
-              {user ? <Item key="manual">Manual</Item> : undefined!}
+              <Item key="manual">Manual</Item>
               {user ? <Item key="logout">Log out</Item> : undefined!}
               {!user ? <Item key="login">Log in</Item> : undefined!}
             </Menu>

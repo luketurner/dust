@@ -1,9 +1,9 @@
 'use client';
 
 import { Button, ButtonGroup, Flex, Heading, View } from "@adobe/react-spectrum";
-import { Quote, Tag } from "@prisma/client";
+import { Quote, Tag, Task } from "@prisma/client";
 import AgendaTaskRow from "@/components/AgendaTaskRow";
-import { updateTask } from "@/actions/task";
+import { createTask, updateTask } from "@/actions/task";
 import { updateAgendaTask, addAgendaTasks } from "@/actions/agendaTask";
 import EditTaskDialog, { EditTaskDialogData } from "@/components/EditTaskDialog";
 import { DateTime } from "luxon";
@@ -22,13 +22,14 @@ export interface AgendaPageClientProps {
   allTags: Tag[];
 }
 
-interface EditingTaskDialogState {
-  taskId: string;
+interface TaskDialogState {
+  taskId?: string;
+  type: 'add-task' | 'edit-task';
 }
 
 interface AgendaPageClientState {
   agenda: AgendaWithIncludes;
-  dialog?: EditingTaskDialogState;
+  dialog?: TaskDialogState;
   allTags: Tag[];
 }
 
@@ -62,10 +63,12 @@ interface AddAgendaTasksFinishedAction {
 }
 
 export interface EditTaskAction { type: 'edit-task'; taskId: string; }
+export interface OpenCreateTaskAction { type: 'open-create-task'; }
+export interface CreateTaskAction { type: 'create-task'; data: Partial<Task>; }
 export interface DeferTaskAction { type: 'defer-task'; taskId: string; agendaId: string; }
 export interface ToggleTaskAction { type: 'toggle-task'; taskId: string; completed: boolean; }
 
-type AgendaPageClientAction = AddAgendaTasksFinishedAction | AddAgendaTasksAction | EditTaskAction | DeferTaskAction | ToggleTaskAction | SaveTaskAction | DialogAction | ServerErrorAction | EffectErrorAction;
+type AgendaPageClientAction = OpenCreateTaskAction | CreateTaskAction | AddAgendaTasksFinishedAction | AddAgendaTasksAction | EditTaskAction | DeferTaskAction | ToggleTaskAction | SaveTaskAction | DialogAction | ServerErrorAction | EffectErrorAction;
 
 function stateReducer(state: AgendaPageClientState, action: AgendaPageClientAction) {
   switch (action.type) {
@@ -78,6 +81,7 @@ function stateReducer(state: AgendaPageClientState, action: AgendaPageClientActi
     case 'edit-task':
       state.dialog = {
         taskId: action.taskId,
+        type: 'edit-task'
       };
       break;
     case 'close-dialog':
@@ -93,6 +97,14 @@ function stateReducer(state: AgendaPageClientState, action: AgendaPageClientActi
       if (Array.isArray(action.data.tags)) taskToUpdate.tags = action.data.tags.map(id => state.allTags.find((tag) => tag.id === id)!);
       delete state.dialog;
       break;
+    case 'open-create-task':
+      state.dialog = {
+        type: 'add-task'
+      };
+      break;
+    case 'create-task':
+      delete state.dialog;
+      break;
     case 'add-agenda-tasks-finished':
       if (action.agenda.id !== state.agenda.id) return;
       state.agenda = action.agenda;
@@ -102,6 +114,9 @@ function stateReducer(state: AgendaPageClientState, action: AgendaPageClientActi
 
 async function effectReducer(action: AgendaPageClientAction) {
   switch (action.type) {
+    case 'create-task':
+      ToastQueue.positive('Task created.')
+      break;
     case 'server-error':
       ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
       break;
@@ -111,17 +126,20 @@ async function effectReducer(action: AgendaPageClientAction) {
 async function serverReducer(action: AgendaPageClientAction) {
   switch (action.type) {
     case 'toggle-task':
-      updateTask(action.taskId, {
+      await updateTask(action.taskId, {
         completed: action.completed
       });
       break;
     case 'defer-task':
-      updateAgendaTask(action.agendaId, action.taskId, {
+      await updateAgendaTask(action.agendaId, action.taskId, {
         deferred: true
       });
       break;
     case 'save-task':
-      updateTask(action.taskId, action.data);
+      await updateTask(action.taskId, action.data);
+      break;
+    case 'create-task':
+      await createTask(action.data);
       break;
     case 'add-agenda-tasks':
       const updatedAgenda = await addAgendaTasks(action.agendaId, action.num);
@@ -141,21 +159,26 @@ export default function AgendaPageClient({ date, agenda, quote, allTags }: Agend
 
   const handleDeferTask = useCallback((taskId: string) => dispatchAction({ type: 'defer-task', taskId, agendaId: agenda.id }), [dispatchAction, agenda.id]);
   const handleEditTask = useCallback((taskId: string) => dispatchAction({ type: 'edit-task', taskId }), [dispatchAction]);
+  const handleOpenCreateTask = useCallback((taskId: string) => dispatchAction({ type: 'open-create-task' }), [dispatchAction]);
   const handleToggleTask = useCallback((taskId: string, completed: boolean) => dispatchAction({ type: 'toggle-task', taskId, completed }), [dispatchAction]);
   const handleDialogClose = useCallback(() => dispatchAction({ type: 'close-dialog' }), [dispatchAction]);
-  const handleSaveTask = useCallback((taskId: string, data: EditTaskDialogData) => dispatchAction({ type: 'save-task', taskId, data }), [dispatchAction]);
   const handleAddOneTask = useCallback(() => dispatchAction({ type: 'add-agenda-tasks', agendaId: agenda.id, num: 1 }), [dispatchAction, agenda.id]);
   const handleAddTwoTasks = useCallback(() => dispatchAction({ type: 'add-agenda-tasks', agendaId: agenda.id, num: 2 }), [dispatchAction, agenda.id]);
   const handleAddThreeTasks = useCallback(() => dispatchAction({ type: 'add-agenda-tasks', agendaId: agenda.id, num: 3 }), [dispatchAction, agenda.id]);
+  const handleSaveTask = useCallback(
+    (taskId: string, data: EditTaskDialogData) => taskId ? dispatchAction({ type: 'save-task', taskId, data }) : dispatchAction({ type: 'create-task', data }),
+    [dispatchAction]
+  );
 
   return (
-    <AppLayout user={true} breadcrumbs={[{ label: 'Agenda', url: '/agenda', key: 'agenda' }]}>
+    <AppLayout user={true} breadcrumbs={[{ label: 'Agenda', url: '/agenda', key: 'agenda' }]} onAddTask={handleOpenCreateTask}>
       <EditTaskDialog
        task={tasks.find(t => t.id === state.dialog?.taskId)}
        onClose={handleDialogClose}
        onSave={handleSaveTask}
        allTags={state.allTags}
-       isOpen={!!state.dialog?.taskId}
+       isOpen={state.dialog?.type === 'add-task' || state.dialog?.type === 'edit-task'}
+       isCreate={state.dialog?.type === 'add-task'}
        />
       <ThreeSpotLayout>
         <Heading gridArea="a" UNSAFE_className="text-4xl" level={1}  justifySelf={{base: 'center', 'M': 'end'}}>
