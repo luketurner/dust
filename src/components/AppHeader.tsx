@@ -31,6 +31,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
       case 'manage': return navigate('/manage');
       case 'today': return navigate('/today');
       case 'settings': return navigate('/settings');
+      case 'manual': return navigate('/manual');
     }
   }, [navigate, isEmbedded]);
 
@@ -57,6 +58,7 @@ export default function AppHeader({ breadcrumbs, user }: AppHeaderProps) {
               {user ? <Item key="today">Daily agenda</Item> : undefined!}
               {user ? <Item key="manage">Manage tasks</Item> : undefined!}
               {user ? <Item key="settings">Settings</Item> : undefined!}
+              {user ? <Item key="manual">Manual</Item> : undefined!}
               {user ? <Item key="logout">Log out</Item> : undefined!}
               {!user ? <Item key="login">Log in</Item> : undefined!}
             </Menu>
