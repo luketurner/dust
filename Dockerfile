@@ -32,6 +32,9 @@ RUN npx prisma generate
 # Copy application code
 COPY --link . .
 
+# TODO -- just don't copy this to begin with?
+RUN rm -rf ./ai-server
+
 # Build application
 RUN npm run build
 
