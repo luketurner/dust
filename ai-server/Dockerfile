@@ -1,10 +1,10 @@
-FROM ubuntu:22.04 as base
+FROM ubuntu:22.04
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y ca-certificates wget && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 WORKDIR /app
-
-ADD --chmod=700 https://huggingface.co/jartine/phi-2-llamafile/resolve/main/phi-2.Q2_K.llamafile?download=true ./llamafile
-# Does the --chmod parameter not work?
-RUN chmod 700 ./llamafile
 
 COPY ./run.sh ./run.sh
 

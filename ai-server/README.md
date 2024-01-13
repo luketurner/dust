@@ -15,15 +15,28 @@ Ultimately I'd like this to be used for:
 
 ## Setup
 
+Replace `sea` with your region of choice.
+
 ```bash
 flyctl launch --no-deploy
+flyctl volume create model_data -r sea
 flyctl deploy --ha=false --no-public-ips
 ```
 
 ## Testing
 
 ```bash
+# temporarily scale up (since proxy doesn't auto-scale)
+flyctl machines start
+
 flyctl proxy 8081:8080
 ```
 
 Then open http://localhost:8081 in your browser.
+
+When finished:
+
+```bash
+# Scale back down
+flyctl machines stop
+```

@@ -6,6 +6,10 @@
 app = "lt-dust-ai-server"
 primary_region = "sea"
 
+[mount]
+  source="model_data"
+  destination="/data"
+
 [build]
 
 [http_service]
