@@ -34,6 +34,7 @@ COPY --link . .
 
 # TODO -- just don't copy this to begin with?
 RUN rm -rf ./ai-server
+RUN rm -rf ./postgres
 
 # Build application
 RUN npm run build
