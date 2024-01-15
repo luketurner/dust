@@ -1,52 +1,66 @@
-app = "postgres-ha-example"
+# fly.toml app configuration file generated for lt-dust-db on 2024-01-15T11:40:43-08:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-kill_signal = "SIGTERM"
-kill_timeout = 300
-services = []
-
-[checks]
-
-  [checks.pg]
-    grace_period = "30s"
-    interval = "15s"
-    method = "get"
-    path = "/flycheck/pg"
-    port = 5500
-    timeout = "10s"
-    type = "http"
-
-  [checks.role]
-    grace_period = "30s"
-    interval = "15s"
-    method = "get"
-    path = "/flycheck/role"
-    port = 5500
-    timeout = "10s"
-    type = "http"
-
-  [checks.vm]
-    grace_period = "1s"
-    interval = "1m"
-    method = "get"
-    path = "/flycheck/vm"
-    port = 5500
-    timeout = "10s"
-    type = "http"
+app = "lt-dust-db"
+primary_region = "sea"
 
 [env]
-  BACKEND_STORE = "consul"
-  PRIMARY_REGION = "ord"
-
-[experimental]
-  allowed_public_ports = []
-  auto_rollback = false
-  enable_consul = true
-  private_network = true
-
-[metrics]
-  path = "/metrics"
-  port = 9187
+  FLY_SCALE_TO_ZERO = "1h"
+  PRIMARY_REGION = "sea"
 
 [[mounts]]
-  destination = "/data"
   source = "pg_data"
+  destination = "/data"
+  auto_extend_size_threshold = 0
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 5432
+  auto_start_machines = true
+
+  [[services.ports]]
+    port = 5432
+    handlers = ["pg_tls"]
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 1000
+    soft_limit = 1000
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 5433
+  auto_start_machines = true
+
+  [[services.ports]]
+    port = 5433
+    handlers = ["pg_tls"]
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 1000
+    soft_limit = 1000
+
+[checks]
+  [checks.pg]
+    port = 5500
+    type = "http"
+    interval = "15s"
+    timeout = "10s"
+    path = "/flycheck/pg"
+  [checks.role]
+    port = 5500
+    type = "http"
+    interval = "15s"
+    timeout = "10s"
+    path = "/flycheck/role"
+  [checks.vm]
+    port = 5500
+    type = "http"
+    interval = "15s"
+    timeout = "10s"
+    path = "/flycheck/vm"
+
+[[metrics]]
+  port = 9187
+  path = "/metrics"
