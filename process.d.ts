@@ -5,5 +5,6 @@ declare namespace NodeJS {
     GITHUB_ID: string
     GITHUB_SECRET: string
     DUST_SSH_KEY_PASSPHRASE: string
+    DUST_LLM_SERVER: string
   }
 }

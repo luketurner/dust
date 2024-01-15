@@ -1,9 +1,10 @@
 'use server';
 
 import { prisma } from "@/db/client";
-import { Task, Tag } from "@prisma/client";
+import { Task, Tag, TaskEmbedding } from "@prisma/client";
 import { getServerUserOrThrow } from "@/models/auth"
 import { MAX_ACTIVE_TASKS } from "@/config";
+import { LLM_SERVER } from "@/serverConfig";
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
@@ -70,7 +71,7 @@ export async function createTask(data: {
   important?: boolean
   urgent?: boolean
   someday?: boolean
-}): Promise<Task & { tags: Tag[] }> {
+}): Promise<Task & { tags: Tag[], embeddings: TaskEmbedding[] }> {
   const { user } = await getServerUserOrThrow();
 
   if (data.someday && (data.important || data.urgent)) {
@@ -90,7 +91,7 @@ export async function createTask(data: {
     throw new Error('Reached active task limit.')
   }
   
-  return await prisma.task.create({
+  const newTask = await prisma.task.create({
     data: {
       userId: user.id,
       name: data.name ?? 'Unnamed task',
@@ -104,9 +105,37 @@ export async function createTask(data: {
       tags: (data.tags ? { connect: data.tags.map(id => ({ id, userId: user.id })) } : undefined)
     },
     include: {
-      tags: true
+      tags: true,
+      embeddings: true
     }
   });
+
+  if (!LLM_SERVER || !user.useAI) return newTask;
+
+  // TODO -- get this out of the sync response path?
+  const embeddingVector = (await (await fetch(new URL('/embedding', LLM_SERVER), {
+    method: 'POST',
+    body: JSON.stringify({
+      content: newTask.name
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })).json())?.embedding;
+
+  const embedding = await prisma.taskEmbedding.create({
+    data: {
+      vector: embeddingVector,
+      version: 'test',
+      task: {
+        connect: {
+          id: newTask.id
+        }
+      }
+    }
+  });
+
+  return { ...newTask, embeddings: [embedding] };
 }
 
 export async function removeTags(taskId: string, tagIds: string[]) {
