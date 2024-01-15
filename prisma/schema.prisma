@@ -44,6 +44,7 @@ model User {
   emailVerified DateTime?
   image         String?
   timezone      String?
+  useAI         Boolean   @default(false)
   accounts      Account[]
   sessions      Session[]
   tasks         Task[]
@@ -78,8 +79,18 @@ model Task {
   projects     Project[]
   subjectRelations TaskRelation[] @relation("Subject")
   objectRelations  TaskRelation[] @relation("Object")
+  embeddings  TaskEmbedding[]
 
   @@unique([userId, createdAt])
+}
+
+model TaskEmbedding {
+  taskId       String
+  version      String
+  vector       Float[]
+  task         Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, version])
 }
 
 model Agenda {
@@ -88,6 +99,7 @@ model Agenda {
   user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   date         DateTime @db.Date
   agendaTasks  AgendaTask[]
+  rawCompletion String?
 
   @@unique([userId, date])
 }
