@@ -50,14 +50,27 @@ function demoAgenda(date: string) {
       demoAgendaTask({name: 'Buy eggs', urgent: true, tags: ["groceries"]}),
       demoAgendaTask({name: 'Take over the world', someday: true}),
     ],
+    rawCompletion: null,
   }
+}
+
+function demoUser() {
+  return {
+    id: '123',
+    name: 'Demo User',
+    email: 'user@example.com',
+    emailVerified: null,
+    image: null,
+    timezone: 'Etc/UTC',
+    useAI: false,
+  };
 }
 
 export default function TinyAgendaPage({ quote, date }: TinyAgendaPageProps) {
 
   return (
     <TinyDemoPage>
-      <AgendaPageClient date={date} agenda={demoAgenda(date)} quote={quote} allTags={[]} />
+      <AgendaPageClient date={date} agenda={demoAgenda(date)} quote={quote} allTags={[]} user={demoUser()} />
     </TinyDemoPage>
   );
 }

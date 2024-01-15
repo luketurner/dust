@@ -163,7 +163,7 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
   }, [dispatch]);
 
   return (
-    <AppLayout user={true} breadcrumbs={[{ label: 'Settings', url: '/settings', key: 'settings' }]}>
+    <AppLayout user={user} breadcrumbs={[{ label: 'Settings', url: '/settings', key: 'settings' }]}>
       <Heading level={1} UNSAFE_className="text-xl" marginBottom="single-line-height">Git Export Settings</Heading>
       <View marginBottom="single-line-height">
         Dust can export a snapshot of your user data (incl. all tasks, tags, historical agendas, etc.) to one or more Git repo(s) every two hours.
