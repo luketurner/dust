@@ -100,7 +100,7 @@ To run a tiny LLM server locally:
 ```bash
 cd local
 wget https://huggingface.co/jartine/phi-2-llamafile/resolve/main/phi-2.Q2_K.llamafile
-./phi-2.Q2_K.llamafile --embedding
+./phi-2.Q2_K.llamafile --embedding --nobrowser
 ```
 
 And put the following in your `.env`:
