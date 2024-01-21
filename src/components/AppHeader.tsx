@@ -39,6 +39,7 @@ export default function AppHeader({ breadcrumbs, user, onAddTask }: AppHeaderPro
 
   const handleBreadcrumbAction = useCallback((key: Key) => {
     if (isEmbedded) return;
+    if (key === 'home') return router.push('/');
     const { url } = breadcrumbs?.find(b => b.key === key) ?? {};
     if (url) router.push(url);
   }, [router, isEmbedded, breadcrumbs]);
