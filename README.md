@@ -52,6 +52,47 @@ Recommended scale for self-hosting:
 flyctl scale count app=1 cron=1
 ```
 
+### Postgres
+
+Dust uses a custom version of the [postgres-ha](https://github.com/fly-apps/postgres-ha) app. The vendored version is based on commit [44ab26a7cd0c3f8345887e9e7b9f48a73851eaf5](https://github.com/fly-apps/postgres-ha/commit/44ab26a7cd0c3f8345887e9e7b9f48a73851eaf5).
+
+Changes from the base app:
+
+- Add [pgvector](https://github.com/pgvector/pgvector) extension.
+
+To deploy:
+
+```bash
+cd postgres
+flyctl deploy
+```
+
+Once you do this, the `flyctl postgres` commands won't work anymore, unfortunately.
+
+To connect to the DB, use:
+
+```bash
+cd postgres
+flyctl proxy 5432
+```
+
+To get the password, use:
+
+```bash
+cd postgres
+flyctl ssh console
+
+# get password
+echo $OPERATOR_PASSWORD
+```
+
+To get started, need to do the following queries (only need to do this once):
+
+```sql
+CREATE DATABASE lt_dust;
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
 ## Quote loading
 
 Dust provides daily motivational quotes. Quotes are stored in a `Quote` table in the database. They have to be manually loaded in -- Dust doesn't have UI for creating/editing quotes.
