@@ -93,6 +93,24 @@ To get started, need to do the following queries (only need to do this once):
 CREATE DATABASE lt_dust;
 ```
 
+### LLM Server
+
+To run a tiny LLM server locally:
+
+```bash
+cd local
+wget https://huggingface.co/jartine/phi-2-llamafile/resolve/main/phi-2.Q2_K.llamafile
+./phi-2.Q2_K.llamafile --embedding
+```
+
+And put the following in your `.env`:
+
+```bash
+DUST_LLM_SERVER="http://127.0.0.1:8080"
+DUST_LLM_VERSION="phi-2.Q2_K"
+DUST_LLM_EMBEDDING_VERSION="phi-2.Q2_K"
+```
+
 ## Quote loading
 
 Dust provides daily motivational quotes. Quotes are stored in a `Quote` table in the database. They have to be manually loaded in -- Dust doesn't have UI for creating/editing quotes.
