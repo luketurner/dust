@@ -4,7 +4,7 @@ import { prisma } from "@/db/client";
 import { Task, Tag, TaskEmbedding } from "@prisma/client";
 import { getServerUserOrThrow } from "@/models/auth"
 import { MAX_ACTIVE_TASKS } from "@/config";
-import { LLM_SERVER } from "@/serverConfig";
+import { calculateEmbedding } from "@/models/task";
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
@@ -110,32 +110,15 @@ export async function createTask(data: {
     }
   });
 
-  if (!LLM_SERVER || !user.useAI) return newTask;
-
-  // TODO -- get this out of the sync response path?
-  const embeddingVector = (await (await fetch(new URL('/embedding', LLM_SERVER), {
-    method: 'POST',
-    body: JSON.stringify({
-      content: newTask.name
-    }),
-    headers: {
-      'Content-Type': 'application/json'
+  if (user.useAI) {
+    try {
+      await calculateEmbedding(newTask);
+    } catch (e) {
+      console.error('Error calculating embedding', e);
     }
-  })).json())?.embedding;
+  }
 
-  const embedding = await prisma.taskEmbedding.create({
-    data: {
-      vector: embeddingVector,
-      version: 'test',
-      task: {
-        connect: {
-          id: newTask.id
-        }
-      }
-    }
-  });
-
-  return { ...newTask, embeddings: [embedding] };
+  return { ...newTask };
 }
 
 export async function removeTags(taskId: string, tagIds: string[]) {
@@ -174,4 +157,18 @@ export async function removeTags(taskId: string, tagIds: string[]) {
   }
 
   return { deletedTagIds };
+}
+
+export async function recalculateEmbeddings(): Promise<void> {
+  const { user } = await getServerUserOrThrow();
+
+  const allTasks = await prisma.task.findMany({
+    where: {
+      userId: user.id
+    }
+  });
+
+  for (const task of allTasks) {
+    await calculateEmbedding(task);
+  }
 }

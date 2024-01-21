@@ -1,12 +1,13 @@
 'use client';
 
 import { createGitExportConfig, removeGitExportConfig, saveAndTestGitExportConfig, updateGitExportConfig } from "@/actions/gitExportConfig";
+import { recalculateEmbeddings } from "@/actions/task";
 import AppLayout from "@/components/AppLayout";
 import GitConfigEditor from "@/components/GitConfigEditor";
 import GitExportAttemptsTable from "@/components/GitExportAttemptsTable";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ClientGitExportConfig, ClientGitExportConfigWithAttempts } from "@/models/gitExportConfig";
-import { ActionButton, Heading, Item, Switch, TabList, TabPanels, Tabs, View } from "@adobe/react-spectrum";
+import { ActionButton, Button, Heading, Item, Switch, TabList, TabPanels, Tabs, View } from "@adobe/react-spectrum";
 import { GitExportAttempt, User } from "@prisma/client";
 import { ToastQueue } from "@react-spectrum/toast";
 import { useCallback } from "react";
@@ -162,11 +163,16 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
     dispatch({ type: 'test-git-config', configId, data, pendingExportId: uuid() })
   }, [dispatch]);
 
+  const handleRecalculateEmbeddings = useCallback(async () => { 
+    await recalculateEmbeddings();
+  }, []);
+
   return (
     <AppLayout user={user} breadcrumbs={[{ label: 'Settings', url: '/settings', key: 'settings' }]}>
       {user.useAI ? <>
         <Heading level={1} UNSAFE_className="text-xl" marginY="single-line-height">AI Settings</Heading>
         <Switch isSelected={user.useAI} isReadOnly={true}>AI Features Enabled</Switch>
+        <Button variant="primary" onPress={handleRecalculateEmbeddings}>Recalculate embeddings for all tasks (debug)</Button>
       </> : null}
       <Heading level={1} UNSAFE_className="text-xl" marginY="single-line-height">Git Export Settings</Heading>
       <View marginBottom="single-line-height">
