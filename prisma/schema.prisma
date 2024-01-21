@@ -3,11 +3,13 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
 }
 
 model Account {
@@ -87,7 +89,7 @@ model Task {
 model TaskEmbedding {
   taskId       String
   version      String
-  vector       Float[]
+  vector       Unsupported("vector")
   task         Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, version])
