@@ -9,16 +9,17 @@ Dust uses Next.js and Prisma with a Postgres database.
 Development dependencies:
 
 - Node 16+
-- Postgres 15+ (or `podman` to run containerized postgres locally)
+- Postgres 15+ w/pgvector extension (or `podman` to run containerized postgres locally)
 
 ```bash
 # One time setup
 npm install
-npm run db:setup
+npm run db:build:dev
+npm run db:setup:dev
 npm run db:migrate
 
 # Launch the app in dev
-npm run db:start
+npm run db:start:dev
 npm run dev
 
 # run after schema updates
@@ -90,7 +91,6 @@ To get started, need to do the following queries (only need to do this once):
 
 ```sql
 CREATE DATABASE lt_dust;
-CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
 ## Quote loading
