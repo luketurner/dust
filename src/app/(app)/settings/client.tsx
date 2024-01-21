@@ -6,7 +6,7 @@ import GitConfigEditor from "@/components/GitConfigEditor";
 import GitExportAttemptsTable from "@/components/GitExportAttemptsTable";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ClientGitExportConfig, ClientGitExportConfigWithAttempts } from "@/models/gitExportConfig";
-import { ActionButton, Heading, Item, TabList, TabPanels, Tabs, View } from "@adobe/react-spectrum";
+import { ActionButton, Heading, Item, Switch, TabList, TabPanels, Tabs, View } from "@adobe/react-spectrum";
 import { GitExportAttempt, User } from "@prisma/client";
 import { ToastQueue } from "@react-spectrum/toast";
 import { useCallback } from "react";
@@ -164,7 +164,11 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
 
   return (
     <AppLayout user={user} breadcrumbs={[{ label: 'Settings', url: '/settings', key: 'settings' }]}>
-      <Heading level={1} UNSAFE_className="text-xl" marginBottom="single-line-height">Git Export Settings</Heading>
+      {user.useAI ? <>
+        <Heading level={1} UNSAFE_className="text-xl" marginY="single-line-height">AI Settings</Heading>
+        <Switch isSelected={user.useAI} isReadOnly={true}>AI Features Enabled</Switch>
+      </> : null}
+      <Heading level={1} UNSAFE_className="text-xl" marginY="single-line-height">Git Export Settings</Heading>
       <View marginBottom="single-line-height">
         Dust can export a snapshot of your user data (incl. all tasks, tags, historical agendas, etc.) to one or more Git repo(s) every two hours.
         The repos can then be used as a versioned backup of your task data. User data is exported in a raw JSON format.<br /><br />
