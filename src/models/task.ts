@@ -52,3 +52,30 @@ export async function calculateEmbedding(task: Task): Promise<void> {
     ON CONFLICT ("taskId", version) DO UPDATE SET vector = ${stringifiedVector}::vector
   `;
 }
+
+export async function findSimilarTasks(task: Task, limit: number = 5): Promise<Task[]> {
+  const embedding = await prisma.taskEmbedding.findUnique({
+    where: {
+      taskId_version: {
+        taskId: task.id,
+        version: EMBEDDING_VERSION
+      }
+    },
+    select: {
+      taskId: true,
+    }
+  });
+  if (!embedding) return [];
+
+  const similarTasks = await prisma.$queryRaw<Task[]>`
+    SELECT t FROM "TaskEmbedding" AS te
+    JOIN "Task" AS t ON (t.id = te."taskId")
+    WHERE
+      te."taskId" != ${task.id}
+      AND te.version = ${EMBEDDING_VERSION}
+      AND t."userId" = ${task.userId}
+    ORDER BY te.vector <-> (SELECT vector FROM "TaskEmbedding" WHERE "taskId" = ${task.id})
+    LIMIT ${limit};
+  `;
+  return similarTasks;
+}

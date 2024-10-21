@@ -4,7 +4,7 @@ import { prisma } from "@/db/client";
 import { Task, Tag, TaskEmbedding } from "@prisma/client";
 import { getServerUserOrThrow } from "@/models/auth"
 import { MAX_ACTIVE_TASKS } from "@/config";
-import { calculateEmbedding } from "@/models/task";
+import { calculateEmbedding, findSimilarTasks } from "@/models/task";
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
@@ -161,6 +161,7 @@ export async function removeTags(taskId: string, tagIds: string[]) {
 
 export async function recalculateEmbeddings(): Promise<void> {
   const { user } = await getServerUserOrThrow();
+  if (!user.useAI) return;
 
   const allTasks = await prisma.task.findMany({
     where: {
@@ -171,4 +172,20 @@ export async function recalculateEmbeddings(): Promise<void> {
   for (const task of allTasks) {
     await calculateEmbedding(task);
   }
+}
+
+export async function findSimilarTaskIds(taskId: string): Promise<string[]> {
+  const { user } = await getServerUserOrThrow();
+  if (!user.useAI) return [];
+
+  const task = await prisma.task.findUniqueOrThrow({
+    where: {
+      userId: user.id,
+      id: taskId
+    }
+  });
+
+  const similarTasks = await findSimilarTasks(task);
+
+  return similarTasks.map(({ id }) => id);
 }
