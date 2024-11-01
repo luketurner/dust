@@ -1,9 +1,12 @@
 'use client';
 
-import { TaskWithTags } from "@/models/task";
-import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, TextArea, Checkbox, ToggleButton, Flex } from "@adobe/react-spectrum";
-import { Tag } from "@prisma/client";
-import { useCallback } from "react";
+import { findSimilarTasks } from "@/actions/task";
+import { useUser } from "@/hooks/user";
+import { TaskWithDistance, TaskWithTags } from "@/models/task";
+import { Button, ButtonGroup, Content, Dialog, DialogContainer, Form, Heading, TextField, TextArea, Checkbox, ToggleButton, Flex, Well, ProgressCircle } from "@adobe/react-spectrum";
+import { Tag, Task } from "@prisma/client";
+import { ToastQueue } from "@react-spectrum/toast";
+import { useCallback, useState } from "react";
 import { useImmer } from "use-immer";
 
 export interface EditTaskDialogData {
@@ -43,6 +46,10 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags, isCreate }: EditT
     someday: task?.someday ?? false,
   });
 
+  const [similarTasks, setSimilarTasks] = useState<TaskWithDistance[] | null>(null);
+
+  const { user } = useUser();
+
   const handleNameChange = useCallback((value: string) => {setData(draft => {draft.name = value;})}, [setData]);
   const handleDescriptionChange = useCallback((value: string) => {setData(draft => {draft.description = value;})}, [setData]);
   const handleImportantChange = useCallback((value: boolean) => {setData(draft => {draft.important = value;})}, [setData]);
@@ -60,6 +67,14 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags, isCreate }: EditT
     })
   }, [setData]);
 
+  if (user?.useAI && task && !similarTasks) {
+    findSimilarTasks(task.id)
+      .then(setSimilarTasks)
+      .catch(e => {
+        ToastQueue.negative('Error loading similar tasks.');
+      });
+  }
+
   return (
     <Dialog>
       <Heading>{isCreate ? 'Add' : 'Edit'} task</Heading>
@@ -76,6 +91,15 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags, isCreate }: EditT
           </Flex>
           <TextArea label="Description" value={data.description} onChange={handleDescriptionChange} />
         </Form>
+          {user?.useAI && <Well>
+            <Heading UNSAFE_className="text-lg" level={2}>
+              {similarTasks === null && <ProgressCircle size="S" aria-label="Loading…" isIndeterminate />}
+              {' '}Similar tasks
+            </Heading>
+            {similarTasks?.map(({ task, distance }) => <div key={task.id}>
+              {task.name} ({distance.toPrecision(3)})
+            </div>)}
+          </Well>}
       </Content>
       <ButtonGroup>
         <Button variant="secondary" onPress={onClose}>Cancel</Button>

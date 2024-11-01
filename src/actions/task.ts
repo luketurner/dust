@@ -4,7 +4,7 @@ import { prisma } from "@/db/client";
 import { Task, Tag, TaskEmbedding } from "@prisma/client";
 import { getServerUserOrThrow } from "@/models/auth"
 import { MAX_ACTIVE_TASKS } from "@/config";
-import { calculateEmbedding, findSimilarTasks } from "@/models/task";
+import { calculateEmbedding, findSimilarTasks as findSimilarTasksImpl, TaskWithDistance } from "@/models/task";
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
@@ -161,7 +161,7 @@ export async function removeTags(taskId: string, tagIds: string[]) {
 
 export async function recalculateEmbeddings(): Promise<void> {
   const { user } = await getServerUserOrThrow();
-  if (!user.useAI) return;
+  if (!user.useAI) throw new Error('Feature not enabled');
 
   const allTasks = await prisma.task.findMany({
     where: {
@@ -174,9 +174,9 @@ export async function recalculateEmbeddings(): Promise<void> {
   }
 }
 
-export async function findSimilarTaskIds(taskId: string): Promise<string[]> {
+export async function findSimilarTasks(taskId: string, limit: number = 3): Promise<TaskWithDistance[]> {
   const { user } = await getServerUserOrThrow();
-  if (!user.useAI) return [];
+  if (!user.useAI) throw new Error('Feature not enabled');
 
   const task = await prisma.task.findUniqueOrThrow({
     where: {
@@ -185,7 +185,8 @@ export async function findSimilarTaskIds(taskId: string): Promise<string[]> {
     }
   });
 
-  const similarTasks = await findSimilarTasks(task);
+  if (!task) throw new Error('Cannot find task');
 
-  return similarTasks.map(({ id }) => id);
+  const similarTasks = await findSimilarTasksImpl(task, limit);
+  return similarTasks;
 }

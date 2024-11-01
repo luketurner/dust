@@ -6,6 +6,10 @@ import { EMBEDDING_VERSION, LLM_SERVER } from '@/serverConfig';
 
 export type TaskWithTags = Task & { tags: Tag[] };
 
+export interface TaskWithDistance {
+  task: Task;
+  distance: number;
+}
 
 export interface PickTaskOptions {
   limit: number
@@ -53,7 +57,7 @@ export async function calculateEmbedding(task: Task): Promise<void> {
   `;
 }
 
-export async function findSimilarTasks(task: Task, limit: number = 5): Promise<Task[]> {
+export async function findSimilarTasks(task: Task, limit: number = 3): Promise<TaskWithDistance[]> {
   const embedding = await prisma.taskEmbedding.findUnique({
     where: {
       taskId_version: {
@@ -67,8 +71,8 @@ export async function findSimilarTasks(task: Task, limit: number = 5): Promise<T
   });
   if (!embedding) return [];
 
-  const similarTasks = await prisma.$queryRaw<Task[]>`
-    SELECT t FROM "TaskEmbedding" AS te
+  const similarTasks = await prisma.$queryRaw<(Task & { distance: string })[]>`
+    SELECT t.*, te.vector <-> (SELECT vector FROM "TaskEmbedding" WHERE "taskId" = ${task.id}) as distance FROM "TaskEmbedding" AS te
     JOIN "Task" AS t ON (t.id = te."taskId")
     WHERE
       te."taskId" != ${task.id}
@@ -77,5 +81,5 @@ export async function findSimilarTasks(task: Task, limit: number = 5): Promise<T
     ORDER BY te.vector <-> (SELECT vector FROM "TaskEmbedding" WHERE "taskId" = ${task.id})
     LIMIT ${limit};
   `;
-  return similarTasks;
+  return similarTasks.map(({ distance, ...task }) => ({ task, distance: Number(distance) }));
 }
