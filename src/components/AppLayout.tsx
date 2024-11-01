@@ -7,6 +7,7 @@ import AppFooter from "./AppFooter";
 import { ToastContainer, ToastQueue } from "@react-spectrum/toast";
 import { User } from "@prisma/client";
 import { setUserTimezone } from "@/actions/user";
+import { UserProvider } from "@/hooks/user";
 
 export interface AppLayoutProps {
   breadcrumbs?: { key: string, url: string, label: string }[];
@@ -27,21 +28,24 @@ export default function AppLayout({ children, breadcrumbs, user, onAddTask }: Ap
   }
 
   return (
-    <Provider minHeight={isEmbedded ? '0' : '100vh'} theme={defaultTheme}>
-      <ToastContainer />
-      <Grid areas={['header', 'content', 'footer']}
-            rows={['fit-content', '1fr', 'fit-content']}
-            maxWidth="900px"
-            marginX="auto"
-            gap='single-line-height'
-            UNSAFE_className="p-2"
-      >
-        <AppHeader user={user} breadcrumbs={breadcrumbs} onAddTask={onAddTask} />
-        <Content gridArea="content">
-          {children}
-        </Content>
-        <AppFooter />
-      </Grid>
-    </Provider>
+    <UserProvider user={user}>
+      <Provider minHeight={isEmbedded ? '0' : '100vh'} theme={defaultTheme}>
+        <ToastContainer />
+        <Grid areas={['header', 'content', 'footer']}
+              rows={['fit-content', '1fr', 'fit-content']}
+              maxWidth="900px"
+              marginX="auto"
+              gap='single-line-height'
+              UNSAFE_className="p-2"
+        >
+          <AppHeader user={user} breadcrumbs={breadcrumbs} onAddTask={onAddTask} />
+          <Content gridArea="content">
+            {children}
+          </Content>
+          <AppFooter />
+        </Grid>
+      </Provider>
+    </UserProvider>
+
   )
 }
