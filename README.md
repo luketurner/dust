@@ -131,3 +131,13 @@ quotes:
 ```
 
 And will produce SQL INSERT statements, one for each quote, in `local/quotes.sql`.
+
+## AI Features and Notes
+
+I've been experimenting with adding some optional AI features to Dust.
+
+> **IMPORTANT:** Currently, it's not possible for users to opt into AI features without deploying their own Dust instance.
+
+AI features:
+
+- Calculate embeddings for tasks and use them to find similar ones

@@ -4,7 +4,7 @@ import AppLayout from "@/components/AppLayout";
 import ImportantIcon from "@/components/ImportantIcon";
 import SomedayIcon from "@/components/SomedayIcon";
 import UrgentIcon from "@/components/UrgentIcon";
-import { Link } from "@adobe/react-spectrum";
+import { Content, Heading, InlineAlert, Link } from "@adobe/react-spectrum";
 import { User } from "@prisma/client";
 import NextLink from "next/link";
 
@@ -123,6 +123,34 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
           As a final note, this Git export functionality is entirely independent from Dust&apos;s usage of Github as an OAuth identity provider.
           The Git export is not Github-specific and will work with any Git server that supports SSH authentication.
         </p>
+
+        <h3>AI Features</h3>
+
+        <InlineAlert variant="negative">
+          <Heading>Warning - Not Available</Heading>
+          <Content>
+            Dust&apos;s AI features are currently in an experimental stage and cannot be enabled by regular users. If you want to take advantage of
+            the AI-based functionality, you&apos;ll need to run your own Dust instance.
+          </Content>
+        </InlineAlert>
+
+        <p>
+          Dust has some experimental features that depend on a Large Language Model (LLM) AI. Dust language models are hosted alongside the app for
+          privacy and control reasons -- your data is not sent to any third-party APIs.
+        </p>
+
+        <p>
+          Current AI feature list:
+        </p>
+
+        <ol>
+          <li>Displaying "Similar tasks" (as determined by the distance between the tasks&apos; embeddings).</li>
+        </ol>
+
+        <p>
+          You can manage AI features in your Settings. To enable AI features for your user, contact your Dust instance administrator.
+        </p>
+
       </main>
     </AppLayout>
   );
