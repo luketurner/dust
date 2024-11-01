@@ -144,7 +144,7 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
         </p>
 
         <ol>
-          <li>Displaying "Similar tasks" (as determined by the distance between the tasks&apos; embeddings).</li>
+          <li>Displaying &ldquo;Similar tasks&rdquo; (as determined by the distance between the tasks&apos; embeddings).</li>
         </ol>
 
         <p>
