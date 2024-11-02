@@ -1,8 +1,9 @@
 import 'server-only';
-import { Tag, Task, TaskEmbedding } from "@prisma/client";
+import { Tag, Task } from "@prisma/client";
 import shuffle from "lodash.shuffle";
 import { prisma } from '@/db/client';
-import { EMBEDDING_VERSION, LLM_SERVER } from '@/serverConfig';
+import { getModelConfigServer } from './aiProfile';
+import { ModelName } from '@/config';
 
 export type TaskWithTags = Task & { tags: Tag[] };
 
@@ -31,14 +32,14 @@ export function pickTasks(tasks: Task[], rules: PickTaskOptions): Task[] {
   return sortedTasks.slice(0, rules.limit);
 }
 
-export async function calculateEmbedding(task: Task): Promise<void> {
+export async function calculateEmbedding(task: Task, model: ModelName): Promise<void> {
   console.log(`Calculating embedding for task ${task.id} (user ${task.userId})`);
-  if (!LLM_SERVER) {
-    console.warn('Could not calculate embedding; LLM_SERVER not set.')
-    return;
-  }
 
-  const embeddingVector = (await (await fetch(new URL('/embedding', LLM_SERVER), {
+  const config = await getModelConfigServer(model);
+
+  if (!config?.url) throw new Error('Model not set up');
+
+  const embeddingVector = (await (await fetch(new URL('/embedding', config.url), {
     method: 'POST',
     body: JSON.stringify({
       content: task.name
@@ -52,17 +53,17 @@ export async function calculateEmbedding(task: Task): Promise<void> {
 
   await prisma.$executeRaw`
     INSERT INTO "TaskEmbedding" ("taskId", version, vector)
-    VALUES (${task.id}, ${EMBEDDING_VERSION}, ${stringifiedVector}::vector)
+    VALUES (${task.id}, ${model}, ${stringifiedVector}::vector)
     ON CONFLICT ("taskId", version) DO UPDATE SET vector = ${stringifiedVector}::vector
   `;
 }
 
-export async function findSimilarTasks(task: Task, limit: number = 3): Promise<TaskWithDistance[]> {
+export async function findSimilarTasks(task: Task, model: ModelName, limit: number = 3): Promise<TaskWithDistance[]> {
   const embedding = await prisma.taskEmbedding.findUnique({
     where: {
       taskId_version: {
         taskId: task.id,
-        version: EMBEDDING_VERSION
+        version: model
       }
     },
     select: {
@@ -76,7 +77,7 @@ export async function findSimilarTasks(task: Task, limit: number = 3): Promise<T
     JOIN "Task" AS t ON (t.id = te."taskId")
     WHERE
       te."taskId" != ${task.id}
-      AND te.version = ${EMBEDDING_VERSION}
+      AND te.version = ${model}
       AND t."userId" = ${task.userId}
     ORDER BY te.vector <-> (SELECT vector FROM "TaskEmbedding" WHERE "taskId" = ${task.id})
     LIMIT ${limit};
