@@ -47,6 +47,8 @@ model User {
   image         String?
   timezone      String?
   useAI         Boolean   @default(false)
+  selectedAIProfileId String?
+  aiProfiles    AIProfile[]
   accounts      Account[]
   sessions      Session[]
   tasks         Task[]
@@ -54,6 +56,13 @@ model User {
   projects      Project[]
   gitExportConfigs GitExportConfig[]
   gitExportAttempts GitExportAttempt[]
+}
+
+model AIProfile {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  embeddingModel String
 }
 
 model VerificationToken {
