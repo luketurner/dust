@@ -1,4 +1,3 @@
-import 'server-only';
 import { User } from "@prisma/client";
 import { DEFAULT_EMBEDDING_MODEL, ModelName } from '@/config';
 

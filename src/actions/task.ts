@@ -5,7 +5,7 @@ import { Task, Tag, TaskEmbedding } from "@prisma/client";
 import { getServerUserOrThrow } from "@/models/auth"
 import { MAX_ACTIVE_TASKS } from "@/config";
 import { calculateEmbedding, findSimilarTasks as findSimilarTasksImpl, TaskWithDistance } from "@/models/task";
-import { getAIConfig } from "@/models/user";
+import { getAIConfig } from "@/models/userClient";
 
 /**
  * (Server Action) Deletes the task, permanently and forever. Cannot be undone.
