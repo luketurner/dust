@@ -19,3 +19,5 @@ export const MODELS = {
 export type ModelName = keyof typeof MODELS;
 
 export const DEFAULT_EMBEDDING_MODEL: ModelName = 'phi-2.Q2_K';
+
+export function getModelConfig(name: ModelName) { return MODELS[name]; }

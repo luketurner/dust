@@ -2,8 +2,8 @@ import 'server-only';
 import { Tag, Task } from "@prisma/client";
 import shuffle from "lodash.shuffle";
 import { prisma } from '@/db/client';
-import { getModelConfigServer } from './aiProfile';
 import { ModelName } from '@/config';
+import { getModelConfigServer } from '@/serverConfig';
 
 export type TaskWithTags = Task & { tags: Tag[] };
 
