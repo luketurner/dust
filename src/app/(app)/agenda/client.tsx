@@ -119,7 +119,7 @@ async function effectReducer(action: AgendaPageClientAction) {
       ToastQueue.positive('Task created.')
       break;
     case 'server-error':
-      ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
+      ToastQueue.negative('Error: ' + ((action.error as Error)?.message ?? 'Unknown error'));
       break;
   }
 }

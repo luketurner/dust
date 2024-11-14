@@ -176,7 +176,7 @@ export default function ManagePageClient({ tasks: initialTasks, tags: initialTag
         if (!taskMatchesFilter(action.task)) ToastQueue.info('Task was created but is not visible with your current filters.')
         break;
       case 'server-error':
-        ToastQueue.negative('Error: ' + (action.error as Error)?.message ?? 'Unknown error');
+        ToastQueue.negative('Error: ' + ((action.error as Error)?.message ?? 'Unknown error'));
         break;
     }
   }
