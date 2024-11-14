@@ -1,9 +1,9 @@
 'use client';
 
 import AppLayout from "@/components/AppLayout";
-import ImportantIcon from "@/components/ImportantIcon";
-import SomedayIcon from "@/components/SomedayIcon";
-import UrgentIcon from "@/components/UrgentIcon";
+import ImportantIcon from "@/components/icons/ImportantIcon";
+import SomedayIcon from "@/components/icons/SomedayIcon";
+import UrgentIcon from "@/components/icons/UrgentIcon";
 import { Content, Heading, InlineAlert, Link } from "@adobe/react-spectrum";
 import { User } from "@prisma/client";
 import NextLink from "next/link";

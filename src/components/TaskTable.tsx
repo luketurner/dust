@@ -1,9 +1,9 @@
 import { TaskWithTags } from "@/models/task";
 import { ActionMenu, Cell, Checkbox, Column, Item, Row, TableBody, TableHeader, TableView, View } from "@adobe/react-spectrum";
 import { DateTime } from "luxon";
-import ImportantIcon from "./ImportantIcon";
-import SomedayIcon from "./SomedayIcon";
-import UrgentIcon from "./UrgentIcon";
+import ImportantIcon from "./icons/ImportantIcon";
+import SomedayIcon from "./icons/SomedayIcon";
+import UrgentIcon from "./icons/UrgentIcon";
 import { Key, useCallback } from "react";
 
 export interface TaskTableProps {

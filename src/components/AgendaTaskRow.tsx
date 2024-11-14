@@ -4,9 +4,9 @@ import { ActionMenu, Flex, Grid, Item, ToggleButton, View } from "@adobe/react-s
 import { Key, useCallback } from "react";
 import CheckmarkCircleOutline from "@spectrum-icons/workflow/CheckmarkCircleOutline";
 import { useIsEmbedded } from "@/hooks/isEmbedded";
-import ImportantIcon from "./ImportantIcon";
-import UrgentIcon from "./UrgentIcon";
-import SomedayIcon from "./SomedayIcon";
+import ImportantIcon from "./icons/ImportantIcon";
+import UrgentIcon from "./icons/UrgentIcon";
+import SomedayIcon from "./icons/SomedayIcon";
 import { TaskWithTags } from "@/models/task";
 
 export interface AgendaTaskRowProps {
