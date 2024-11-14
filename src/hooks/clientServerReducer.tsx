@@ -21,6 +21,13 @@ export interface EffectErrorAction {
   error: unknown
 }
 
+/**
+ * Hook for defining a "client-server reducer".
+ * This works similar to `useReducer` except that it accepts three
+ * reducer functions. The first is a true reducer that updates the state
+ * using Immer. The second and third aren't technically reducers,
+ * but are used to handle side effects and server actions respectively.
+ */
 export function useClientServerReducer<S, A extends Action>(
   stateReducer: ImmerReducer<S, A | ServerErrorAction | EffectErrorAction>,
   effectReducer: EffectReducer<A | ServerErrorAction | EffectErrorAction>,

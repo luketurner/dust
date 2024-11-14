@@ -4,6 +4,9 @@ import { getServerUserOrThrow } from "@/models/auth";
 import { prisma } from "@/db/client";
 import { Tag } from "@prisma/client";
 
+/**
+ * (Server Action) Deletes a tag by ID.
+ */
 export async function deleteTag(id: string): Promise<void> {
   const { user } = await getServerUserOrThrow();
   await prisma.tag.delete({
@@ -14,6 +17,9 @@ export async function deleteTag(id: string): Promise<void> {
   });
 }
 
+/**
+ * (Server Action) Updates a given tag.
+ */
 export async function updateTag(id: string, data: {
   name?: string
 }): Promise<void> {
@@ -29,6 +35,9 @@ export async function updateTag(id: string, data: {
   });
 }
 
+/**
+ * (Server Action) Creates a new tag.
+ */
 export async function createTag(data: {
   name?: string;
 }): Promise<Tag> {

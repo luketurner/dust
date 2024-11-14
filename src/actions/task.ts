@@ -123,6 +123,9 @@ export async function createTask(data: {
   return { ...newTask };
 }
 
+/**
+ * (Server Action) Removes one or more tags from a given task.
+ */
 export async function removeTags(taskId: string, tagIds: string[]) {
   const { user } = await getServerUserOrThrow();
   
@@ -161,6 +164,10 @@ export async function removeTags(taskId: string, tagIds: string[]) {
   return { deletedTagIds };
 }
 
+/**
+ * (Server Action) Recalculates all of the user's tasks' embeddings using the current
+ * enabled AI profile.
+ */
 export async function recalculateEmbeddings(): Promise<void> {
   const { user } = await getServerUserOrThrow();
   const { embeddingModel } = getAIConfig(user);
@@ -176,6 +183,9 @@ export async function recalculateEmbeddings(): Promise<void> {
   }
 }
 
+/**
+ * (Server Action) Returns a list of tasks that are similar to the given taskId.
+ */
 export async function findSimilarTasks(taskId: string, limit: number = 3): Promise<TaskWithDistance[]> {
   const { user } = await getServerUserOrThrow();
   const { embeddingModel } = getAIConfig(user);

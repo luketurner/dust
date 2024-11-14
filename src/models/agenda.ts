@@ -8,7 +8,9 @@ export type AgendaTaskWithTags = (AgendaTask & { task: TaskWithTags })
 
 export type AgendaWithIncludes = (Agenda & { agendaTasks: AgendaTaskWithTags[] })
 
-
+/**
+ * Picks num tasks and adds them to the agenda.
+ */
 export async function addTasksToAgenda(agenda: Agenda, num?: number) {
   const allTasks = await prisma.task.findMany({
     where: {
@@ -39,6 +41,10 @@ export async function addTasksToAgenda(agenda: Agenda, num?: number) {
 
 }
 
+/**
+ * Returns the agenda for the user at the given date. If there isn't an existing
+ * agenda, a new one will be created.
+ */
 export async function upsertAgendaServer(userId: string, date: string) {
   // try finding agenda first to avoid task lookup if it's not needed
   const existingAgenda = await findAgendaServer(userId, date);
@@ -96,6 +102,9 @@ export async function upsertAgendaServer(userId: string, date: string) {
   });
 }
 
+/**
+ * Returns the agenda for the user at given date, if there is one.
+ */
 export async function findAgendaServer(userId: string, date: string | Date) {
   const dbDate = (typeof date === 'string' ? DateTime.fromFormat(date, 'yyyy-MM-dd') : DateTime.fromJSDate(date)).toISO();
   return await prisma.agenda.findUnique({

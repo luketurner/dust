@@ -18,6 +18,10 @@ export interface PickTaskOptions {
 
 export type PickTaskScore = -1 | 0 | 1 | 2 | 3;
 
+/**
+ * Picks some tasks according to a semi-intelligent "score",
+ * which is calculated based on the task's important, urgent, and someday properties.
+ */
 export function pickTasks(tasks: Task[], rules: PickTaskOptions): Task[] {
   const scores: Record<PickTaskScore, Task[]> = { [-1]: [], [0]: [], [1]: [], [2]: [], [3]: [] };
   for (const task of tasks) {
@@ -32,6 +36,10 @@ export function pickTasks(tasks: Task[], rules: PickTaskOptions): Task[] {
   return sortedTasks.slice(0, rules.limit);
 }
 
+/**
+ * Sends data about the task to an LLM to calculate embeddings, and saves
+ * the embedding into the DB.
+ */
 export async function calculateEmbedding(task: Task, model: ModelName): Promise<void> {
   console.log(`Calculating embedding for task ${task.id} (user ${task.userId})`);
 
@@ -58,6 +66,10 @@ export async function calculateEmbedding(task: Task, model: ModelName): Promise<
   `;
 }
 
+/**
+ * Returns a list of tasks "similar" to the given task based on the distance between their
+ * embedding vectors.
+ */
 export async function findSimilarTasks(task: Task, model: ModelName, limit: number = 3): Promise<TaskWithDistance[]> {
   const embedding = await prisma.taskEmbedding.findUnique({
     where: {

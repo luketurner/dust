@@ -15,6 +15,9 @@ export type ClientGitExportConfigWithAttempts = ClientGitExportConfig & { export
 
 const exec = promisify(execCb)
 
+/**
+ * Generates a public/private key pair for use with Git SSH authentication
+ */
 export async function generateDeployKeys(): Promise<Pick<GitExportConfig, 'sshPrivateKey' | 'sshPublicKey'>> {
   const tmpDir = await mkdtemp(join(tmpdir(), `generate-deploy-keys-`));
   const privateKeyFilename = join(tmpDir, 'id_rsa');
@@ -28,6 +31,9 @@ export async function generateDeployKeys(): Promise<Pick<GitExportConfig, 'sshPr
   }
 }
 
+/**
+ * Returns the fields of the Git config that can be exposed to the client.
+ */
 export function gitConfigForClient(serverConfig: GitExportConfig): ClientGitExportConfig {
   const clientConfig: ClientGitExportConfig = {
     ...serverConfig,
@@ -40,6 +46,9 @@ export function gitConfigForClient(serverConfig: GitExportConfig): ClientGitExpo
 }
 
 
+/**
+ * Exports all tasks to Git (across all users)
+ */
 export async function exportAll() {
   const configs = await prisma.gitExportConfig.findMany({});
 
@@ -48,6 +57,9 @@ export async function exportAll() {
   }
 }
 
+/**
+ * Exports a single user's tasks to Github based on given export config.
+ */
 export async function exportConfig(config: GitExportConfig): Promise<GitExportAttempt> {
 
   const recentAttempts = await prisma.gitExportAttempt.count({

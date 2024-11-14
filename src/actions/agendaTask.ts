@@ -5,6 +5,9 @@ import { getServerUserOrThrow } from "@/models/auth";
 import { prisma } from "@/db/client";
 
 
+/**
+ * (Server Action) Updates one or more properties on an AgendaTask.
+ */
 export async function updateAgendaTask(agendaId: string, taskId: string, data: {
   deferred?: boolean
 }) {
@@ -25,6 +28,9 @@ export async function updateAgendaTask(agendaId: string, taskId: string, data: {
   });
 }
 
+/**
+ * (Server Action) Adds some tasks to an agenda.
+ */
 export async function addAgendaTasks(agendaId: string, num: number = 1) {
   const { user } = await getServerUserOrThrow();
   const agenda = await prisma.agenda.findUniqueOrThrow({
