@@ -63,6 +63,7 @@ function demoUser() {
     image: null,
     timezone: 'Etc/UTC',
     useAI: false,
+    aiConfig: null,
   };
 }
 
