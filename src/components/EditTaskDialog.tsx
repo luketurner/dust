@@ -91,7 +91,7 @@ function EditTaskDialogInner({ task, onClose, onSave, allTags, isCreate }: EditT
           </Flex>
           <TextArea label="Description" value={data.description} onChange={handleDescriptionChange} />
         </Form>
-          {user?.useAI && <Well>
+          {user?.useAI && task && <Well>
             <Heading UNSAFE_className="text-lg" level={2}>
               {similarTasks === null && <ProgressCircle size="S" aria-label="Loading…" isIndeterminate />}
               {' '}Similar tasks
