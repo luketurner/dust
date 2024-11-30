@@ -2,7 +2,7 @@
 
 import { createGitExportConfig, removeGitExportConfig, saveAndTestGitExportConfig, updateGitExportConfig } from "@/actions/gitExportConfig";
 import { recalculateEmbeddings } from "@/actions/task";
-import { setUserAiConfig } from "@/actions/user";
+import { deleteUserData, setUserAiConfig } from "@/actions/user";
 import AppLayout from "@/components/AppLayout";
 import GitConfigEditor from "@/components/GitConfigEditor";
 import GitExportAttemptsTable from "@/components/GitExportAttemptsTable";
@@ -10,7 +10,7 @@ import { MODELS } from "@/config";
 import { EffectErrorAction, ServerErrorAction, useClientServerReducer } from "@/hooks/clientServerReducer";
 import { ClientGitExportConfig, ClientGitExportConfigWithAttempts } from "@/models/gitExportConfig";
 import { AIConfig, getAIConfig } from "@/models/userClient";
-import { ActionButton, Button, Form, Heading, Item, Picker, Switch, TabList, TabPanels, Tabs, View } from "@adobe/react-spectrum";
+import { ActionButton, AlertDialog, Button, Content, DialogTrigger, Flex, Form, Heading, InlineAlert, Item, Picker, Switch, TabList, TabPanels, Tabs, View } from "@adobe/react-spectrum";
 import { GitExportAttempt, User } from "@prisma/client";
 import { ToastQueue } from "@react-spectrum/toast";
 import { useCallback } from "react";
@@ -73,7 +73,11 @@ interface UpdateAIConfigAction {
   aiConfig: AIConfig;
 }
 
-export type SettingsPageAction = EffectErrorAction | ServerErrorAction | AddGitConfigAction | AddGitConfigFinishedAction | UpdateGitConfigAction | RemoveGitConfigAction | TestGitConfigAction | TestGitConfigFinishedAction | UpdateAIConfigAction;
+interface DeleteUserDataAction {
+  type: 'delete-user-data';
+}
+
+export type SettingsPageAction = EffectErrorAction | ServerErrorAction | AddGitConfigAction | AddGitConfigFinishedAction | UpdateGitConfigAction | RemoveGitConfigAction | TestGitConfigAction | TestGitConfigFinishedAction | UpdateAIConfigAction | DeleteUserDataAction;
 
 function stateReducer(state: SettingsPageState, action: SettingsPageAction) {
   switch (action.type) {
@@ -151,6 +155,9 @@ async function serverReducer(action: SettingsPageAction): Promise<SettingsPageAc
     case 'update-ai-config':
       await setUserAiConfig(action.aiConfig);
       break;
+    case 'delete-user-data':
+      await deleteUserData();
+      break;
   }
 }
 
@@ -183,6 +190,10 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
 
   const handleEmbeddingModelChanged = useCallback(async (modelName: any) => {
     dispatch({ type: 'update-ai-config', aiConfig: { embeddingModel: modelName } })
+  }, [dispatch]);
+
+  const handleDeleteUserData = useCallback(async () => {
+    dispatch({ type: 'delete-user-data' })
   }, [dispatch]);
 
   return (
@@ -227,7 +238,26 @@ export default function SettingsPageClient({ user, gitExportConfigs }: SettingsP
           </TabPanels>
         </Tabs>
       ) : undefined}
+      <Heading level={1} UNSAFE_className="text-xl" marginY="single-line-height">Danger Zone</Heading>
+      <InlineAlert variant="negative">
+        <Heading>Delete my account</Heading>
+        <Flex direction="column">
+          <p>This will permanently delete your user and all associated data, including tasks, Git configs, etc. Proceed with extreme caution!</p>
+          
+          <DialogTrigger>
+            <Button variant="negative" marginTop="size-200" alignSelf="end">DELETE MY DATA</Button>
+            <AlertDialog
+              title="Delete user data"
+              variant="destructive"
+              primaryActionLabel="Delete my account"
+              cancelLabel="Cancel"
+              onPrimaryAction={handleDeleteUserData}>
+              This will permanently delete your user and all associated data, including tasks, Git configs, etc. Are you sure?
+            </AlertDialog>
+          </DialogTrigger>
+        </Flex>
 
+      </InlineAlert>
     </AppLayout>
   );
 }

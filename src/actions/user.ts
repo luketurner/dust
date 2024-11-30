@@ -25,3 +25,14 @@ export async function setUserAiConfig(aiConfig: AIConfig): Promise<void> {
     data: { aiConfig: aiConfig as Record<string, any> }
   });
 }
+
+/**
+ * (Server Action) Permanently and irrevocably deletes a user's data.
+ */
+export async function deleteUserData(): Promise<void> {
+  const { user } = await getServerUserOrThrow();
+  // Note -- because we have cascading deletion on foreign keys everywhere,
+  // just deleting the user is enough to also delete tasks, agendas, accounts, etc.
+  console.log(`Deleting user: ${user.id}`);
+  await prisma.user.delete({ where: { id: user.id }});
+}
