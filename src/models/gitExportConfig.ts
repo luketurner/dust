@@ -101,7 +101,7 @@ export async function exportConfig(config: GitExportConfig): Promise<GitExportAt
         finishedAt: new Date(),
       }
     })
-    console.error('exportConfig error', e, failedAttempt);
+    console.error('exportConfig error', failedAttempt.configId);
     return failedAttempt;
   }
 }
