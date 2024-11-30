@@ -51,8 +51,10 @@ model User {
   accounts      Account[]
   sessions      Session[]
   tasks         Task[]
+  tags          Tag[]
   agendas       Agenda[]
   projects      Project[]
+  quotes        Quote[]
   gitExportConfigs GitExportConfig[]
   gitExportAttempts GitExportAttempt[]
 }
@@ -120,6 +122,7 @@ model AgendaTask {
 model Tag {
   id           String @id @default(cuid())
   userId       String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name         String
   tasks        Task[]
 
@@ -156,6 +159,7 @@ model Day {
 model Quote {
   id            String @id @default(cuid())
   userId        String?
+  user          User? @relation(fields: [userId], references: [id], onDelete: Cascade)
   content       String
   author        String
   source        String?
