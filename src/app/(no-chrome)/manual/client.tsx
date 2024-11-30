@@ -87,7 +87,6 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
         <h2>Settings</h2>
 
         <p>The <em>Settings</em> page is where you configure general, user-level options for your Dust account.</p>
-        <p>Currently, the only real &quot;setting&quot; is Git export configuration.</p>
 
         <h3>Git export config</h3>
 
@@ -150,6 +149,22 @@ export default function ManualPageClient({ user }: ManualPageClientProps) {
         <p>
           You can manage AI features in your Settings. To enable AI features for your user, contact your Dust instance administrator.
         </p>
+
+        <h3>Delete User Data</h3>
+
+        <p>
+          You can delete all your user data from the Settings page. This permanently and irrevocably deletes your user and all data associated with it, including:
+        </p>
+
+        <ul>
+          <li>Account information</li>
+          <li>Tasks</li>
+          <li>Tags</li>
+          <li>Daily agendas</li>
+          <li>Git export configs</li>
+          <li>Logs of previous git export attempts</li>
+          <li>etc.</li>
+        </ul>
 
       </main>
     </AppLayout>
