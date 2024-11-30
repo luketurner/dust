@@ -3,6 +3,7 @@
 import { prisma } from "@/db/client";
 import { getServerUserOrThrow } from "@/models/auth";
 import { AIConfig } from "@/models/userClient";
+import { redirect } from "next/navigation"
 
 /**
  * (Server Action) Updates the currently-logged-in user's timezone.
@@ -35,4 +36,5 @@ export async function deleteUserData(): Promise<void> {
   // just deleting the user is enough to also delete tasks, agendas, accounts, etc.
   console.log(`Deleting user: ${user.id}`);
   await prisma.user.delete({ where: { id: user.id }});
+  redirect('/');
 }
