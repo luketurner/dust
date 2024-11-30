@@ -36,11 +36,7 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
+    "node_modules",
+    "jobs"
+  ]
 }

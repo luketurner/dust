@@ -19,7 +19,15 @@ FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y build-essential openssl pkg-config python-is-python3
+    apt-get install -y build-essential openssl pkg-config python-is-python3 unzip ca-certificates curl
+
+# Install Bun
+# Used for running the Git export job on the backend
+RUN curl -fsSLO "https://github.com/oven-sh/bun/releases/latest/download/bun-linux-x64-baseline.zip" \
+ && unzip "bun-linux-x64-baseline.zip" \
+ && chmod +x "bun-linux-x64-baseline/bun" \
+ && mv "bun-linux-x64-baseline/bun" "/usr/local/bin/bun" \
+ && rm -rf bun-linux-x64-baseline*
 
 # Install node modules
 COPY --link package-lock.json package.json ./
@@ -42,7 +50,6 @@ RUN npm run build
 # Remove development dependencies
 RUN npm prune --omit=dev
 
-
 # Final stage for app image
 FROM base
 
@@ -53,6 +60,7 @@ RUN apt-get update -qq && \
 
 # Install Supercronic
 # Latest releases available at https://github.com/aptible/supercronic/releases
+# TODO -- do this in the build image instead, like we did with bun
 ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.26/supercronic-linux-amd64 \
     SUPERCRONIC=supercronic-linux-amd64 \
     SUPERCRONIC_SHA1SUM=7a79496cf8ad899b99a719355d4db27422396735
@@ -65,6 +73,7 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" \
 
 # Copy built application
 COPY --from=build /app /app
+COPY --from=build /usr/local/bin/bun /usr/local/bin/bun
 
 COPY crontab crontab
 
